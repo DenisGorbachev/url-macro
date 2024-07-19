@@ -69,7 +69,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "url_macro"
+name = "url-macro"
 version = "0.1.0"
 dependencies = [
  "url",
