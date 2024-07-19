@@ -4,8 +4,8 @@
 
 # Compile-time URL validation
 
-[![Build](https://github.com/DenisGorbachev/url_macro/actions/workflows/ci.yml/badge.svg)](https://github.com/DenisGorbachev/url_macro)
-[![Documentation](https://docs.rs/url_macro/badge.svg)](https://docs.rs/url_macro)
+[![Build](https://github.com/DenisGorbachev/url-macro/actions/workflows/ci.yml/badge.svg)](https://github.com/DenisGorbachev/url-macro)
+[![Documentation](https://docs.rs/url-macro/badge.svg)](https://docs.rs/url-macro)
 
 ## Overview
 
@@ -24,7 +24,7 @@ let invalid_url = url!("foo");
 ## Installation
 
 ```shell
-cargo add url_macro url
+cargo add url-macro url
 ```
 
 **Important:** add the `url` crate too.

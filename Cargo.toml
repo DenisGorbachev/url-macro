@@ -1,5 +1,5 @@
 [package]
-name = "url_macro"
+name = "url-macro"
 version = "0.1.0"
 edition = "2021"
 description = "A compile-time URL validation macro. Parses and checks URLs at compile-time, converting valid URLs into `url::Url` objects. Provides early error detection for malformed URLs."
