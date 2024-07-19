@@ -3,6 +3,73 @@ use std::convert::identity;
 
 use url::Url;
 
+/// A compile-time URL validation macro.
+///
+/// This macro takes a string literal representing a URL and validates it at compile-time.
+/// If the URL is valid, it generates the code to create a `url::Url` object.
+/// If the URL is invalid, it produces a compile-time error with a descriptive message.
+///
+/// # Usage
+///
+/// ```rust
+/// use url_macro::url;
+///
+/// let valid_url = url!("https://www.example.com");
+/// let another_valid_url = url!("http://localhost:8080/path?query=value");
+///
+/// // The following would cause a compile-time error:
+/// // let invalid_url = url!("not a valid url");
+/// ```
+///
+/// # Features
+///
+/// - Validates URLs at compile-time, preventing runtime errors from malformed URLs.
+/// - Provides early error detection in the development process.
+/// - Automatically converts valid URL strings into `url::Url` objects.
+/// - Preserves the original span information for precise error reporting.
+///
+/// # Limitations
+///
+/// - The macro only accepts string literals. Variables or expressions that evaluate to strings
+///   at runtime cannot be used with this macro.
+///
+/// # Dependencies
+///
+/// This macro relies on the `url` crate for URL parsing and validation. Ensure that your
+/// project includes this dependency.
+///
+/// # Performance
+///
+/// Since the URL validation occurs at compile-time, there is no runtime performance cost
+/// associated with using this macro beyond the cost of creating a `url::Url` object.
+///
+/// # Examples
+///
+/// Basic usage:
+/// ```rust
+/// use url_macro::url;
+///
+/// let github_url = url!("https://github.com");
+/// assert_eq!(github_url.scheme(), "https");
+/// assert_eq!(github_url.host_str(), Some("github.com"));
+///
+/// let complex_url = url!("https://user:pass@example.com:8080/path/to/resource?query=value#fragment");
+/// assert_eq!(complex_url.username(), "user");
+/// assert_eq!(complex_url.path(), "/path/to/resource");
+/// ```
+///
+/// Compile-time error example:
+///
+/// ```compile_fail
+/// use url_macro::url;
+///
+/// let invalid_url = url!("ftp://invalid url with spaces");
+/// // This will produce a compile-time error
+/// ```
+///
+/// # See Also
+///
+/// - The [`url`](https://docs.rs/url) crate documentation for more information on URL parsing and manipulation.
 #[proc_macro]
 pub fn url(input: TokenStream) -> TokenStream {
     url_result(input).unwrap_or_else(identity)
