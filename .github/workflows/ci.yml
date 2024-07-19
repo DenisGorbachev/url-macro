@@ -1,0 +1,43 @@
+name: CI
+on: [push, pull_request]
+
+env:
+  RUSTFLAGS: -Dwarnings
+  RUST_BACKTRACE: 1
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rust:
+          - stable
+          - beta
+          - nightly
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: clippy, rustfmt
+      - run: cargo install cargo-hack --locked
+      - uses: taiki-e/install-action@nextest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/Iron # 20
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.45.x
+      - uses: Swatinem/rust-cache@v2.7.3
+      - run: npm install --global lefthook@1.6.9 remark-cli@12.0.1
+      - name: Install yj
+        run: |
+          curl -L https://github.com/sclevine/yj/releases/download/v5.1.0/yj-linux-amd64 -o yj
+          chmod +x yj
+          sudo mv yj /usr/local/bin/
+      - run: lefthook run --force pre-commit
+      - run: cargo hack test --feature-powerset
