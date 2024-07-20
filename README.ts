@@ -76,7 +76,7 @@ cargo add ${name} url
 
 ## Gratitude
 
-Like the project? [Say thanks!](${repo.url}) ❤️
+Like the project? [Say thanks!](${repo.url}/discussions) ❤️
 
 ## License
 
