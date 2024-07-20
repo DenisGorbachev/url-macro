@@ -31,7 +31,7 @@ cargo add url-macro url
 
 ## Gratitude
 
-Like the project? [Say thanks!](https://github.com/DenisGorbachev/url-macro/discussions) ❤️
+Like the project? [Say thanks!](https://github.com/DenisGorbachev/url-macro/discussions/new?category=gratitude) ❤️
 
 ## License
 
