@@ -1,3 +1,5 @@
+//! This crate provides a [url!] macro for compile-time URL validation.
+
 use proc_macro::{Delimiter, Group, Ident, LexError, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 use std::convert::identity;
 
