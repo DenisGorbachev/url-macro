@@ -29,6 +29,10 @@ cargo add url-macro url
 
 **Important:** add the `url` crate too.
 
+## Gratitude
+
+Like the project? [Say thanks!](https://github.com/DenisGorbachev/url-macro) ❤️
+
 ## License
 
 [Apache License 2.0](LICENSE-APACHE) or [MIT License](LICENSE-MIT) at your option.

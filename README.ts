@@ -74,6 +74,10 @@ cargo add ${name} url
 
 **Important:** add the \`url\` crate too.
 
+## Gratitude
+
+Like the project? [Say thanks!](${repo.url}) ❤️
+
 ## License
 
 [Apache License 2.0](LICENSE-APACHE) or [MIT License](LICENSE-MIT) at your option.
