@@ -1,4 +1,17 @@
-//! This crate provides a [url!] macro for compile-time URL validation.
+//! This crate provides a [url!](crate::url) macro for compile-time URL validation.
+//!
+//! # Examples
+//!
+//! ```
+//! # use url_macro::url;
+//! // This compiles correctly
+//! let valid = url!("https://www.rust-lang.org/");
+//! ```
+//!
+//! ```compile_fail
+//! // This triggers a compiler error
+//! let invalid = url!("foo");
+//! ```
 
 use proc_macro::{Delimiter, Group, Ident, LexError, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 use std::convert::identity;

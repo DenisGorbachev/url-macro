@@ -6,6 +6,8 @@ npm install --global \
   remark-validate-links@8.0.0 \
   remark-lint-no-dead-urls@1.1.0
 
+cargo install --git https://github.com/DenisGorbachev/cargo-doc2readme --branch dev
+
 # Install yj
 curl -L https://github.com/sclevine/yj/releases/download/v5.1.0/yj-linux-amd64 -o /tmp/yj
 chmod +x /tmp/yj

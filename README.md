@@ -7,19 +7,23 @@
 [![Build](https://github.com/DenisGorbachev/url-macro/actions/workflows/ci.yml/badge.svg)](https://github.com/DenisGorbachev/url-macro)
 [![Documentation](https://docs.rs/url-macro/badge.svg)](https://docs.rs/url-macro)
 
-## Overview
-
-A compile-time URL validation macro. Parses and checks URLs at compile-time, converting valid URLs into `url::Url` objects. Provides early error detection for malformed URLs.
+This crate provides a [url!][__link0] macro for compile-time URL validation.
 
 ## Examples
 
 ```rust
-let google = url!("https://www.google.com/");
-
-let invalid_url = url!("foo");
-                  ^^^^^
-                  Triggers a compiler error
+// This compiles correctly
+let valid = url!("https://www.rust-lang.org/");
 ```
+
+```rust
+// This triggers a compiler error
+let invalid = url!("foo");
+```
+
+   [__cargo_doc2readme_dependencies_info]: ggGkYW0BYXSEGyMws-dKI-LpG9swkVXG-rikGwSuJGhB0NVbG974QPrPJF6XYXKEG4AA8JRKwJB9G9olxhSTKUcIG1sf0boPKowfG1HA4Nxt7NpkYWSBg2l1cmwtbWFjcm9lMC4xLjVpdXJsX21hY3Jv
+ [__link0]: https://docs.rs/url-macro/latest/url_macro/?search=url
+
 
 ## Installation
 
