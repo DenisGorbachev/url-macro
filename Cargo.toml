@@ -1,7 +1,7 @@
 [package]
 name = "url-macro"
 description = "A compile-time URL validation macro. Parses and checks URLs at compile-time, converting valid URLs into `url::Url` objects. Provides early error detection for malformed URLs."
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 license = "Apache-2.0 OR MIT"
 homepage = "https://github.com/DenisGorbachev/url-macro"
