@@ -15,12 +15,12 @@ const CargoTomlSchema = z.object({
         title: z.string().min(1),
         tagline: z.string(),
         summary: z.string(),
-      })
-    })
-  })
+      }),
+    }),
+  }),
 })
 
-type CargoToml = z.infer<typeof CargoTomlSchema>;
+type CargoToml = z.infer<typeof CargoTomlSchema>
 
 const CargoMetadataSchema = z.object({
   packages: z.array(z.object({
@@ -29,28 +29,26 @@ const CargoMetadataSchema = z.object({
       name: z.string(),
     })),
   })),
-});
+})
 
-type CargoMetadata = z.infer<typeof CargoMetadataSchema>;
+type CargoMetadata = z.infer<typeof CargoMetadataSchema>
 
 const RepoSchema = z.object({
   url: z.string().url(),
 })
 
-type Repo = z.infer<typeof RepoSchema>;
+type Repo = z.infer<typeof RepoSchema>
 
-const $ = zx.$({
-  cwd: import.meta.dirname
-})
-const parse = <T>(schema: ZodSchema<T>, input: { toString: () => string }) => schema.parse(JSON.parse(input.toString()))
+const $ = zx.$({ cwd: import.meta.dirname })
+const parse = <T>(schema: ZodSchema<T>, input: zx.ProcessOutput) => schema.parse(JSON.parse(input.stdout))
 
 const theCargoToml: CargoToml = parse(CargoTomlSchema, await $`yj -t < Cargo.toml`)
+const { package: { name, metadata: { details: { title } } } } = theCargoToml
 const theCargoMetadata: CargoMetadata = parse(CargoMetadataSchema, await $`cargo metadata --format-version 1`)
-const { package: {name,  metadata: {details: {title}}} } = theCargoToml
-const thePackageMetadata = theCargoMetadata.packages.find(p => p.name == name)
-assert(thePackageMetadata, "Could not find package metadata");
+const thePackageMetadata = theCargoMetadata.packages.find((p) => p.name == name)
+assert(thePackageMetadata, "Could not find package metadata")
 const target = thePackageMetadata.targets[0]
-assert(target, "Could not find package first target");
+assert(target, "Could not find package first target")
 const doc = await $`cargo doc2readme --template README.jl --target-name ${target.name} --out -`
 const repo: Repo = parse(RepoSchema, await $`gh repo view --json url`)
 
