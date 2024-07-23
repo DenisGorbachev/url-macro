@@ -9,6 +9,7 @@ npm install --global \
   @commitlint/config-conventional@19.2.2
 
 cargo install --git https://github.com/DenisGorbachev/cargo-doc2readme --branch dev
+cargo install cargo-machete
 
 # Install yj
 curl -L https://github.com/sclevine/yj/releases/download/v5.1.0/yj-linux-amd64 -o /tmp/yj
