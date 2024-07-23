@@ -21,3 +21,5 @@ pre-commit:
       run: cargo test --doc
     lint-commit:
       run: commitlint --last
+    lint-deps:
+      run: cargo machete --with-metadata
