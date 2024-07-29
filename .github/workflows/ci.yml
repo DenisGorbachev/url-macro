@@ -27,21 +27,20 @@ jobs:
           toolchain: ${{ matrix.rust }}
           components: clippy, rustfmt
       -
-        run: cargo install cargo-hack --locked
-      -
         uses: taiki-e/install-action@nextest
       -
         uses: actions/setup-node@v4
         with:
           node-version: lts/Iron # 20
+          cache: 'npm'
       -
         uses: denoland/setup-deno@v1
         with:
           deno-version: v1.45.x
       -
-        uses: Swatinem/rust-cache@v2.7.3
-      -
         run: ./install.sh
+      -
+        uses: Swatinem/rust-cache@v2.7.3
       -
         run: lefthook run --force pre-commit
       -

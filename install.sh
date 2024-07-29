@@ -11,6 +11,7 @@ npm install --global \
 
 cargo install --git https://github.com/DenisGorbachev/cargo-doc2readme --branch dev
 cargo install cargo-machete
+cargo install cargo-hack --locked
 
 # Install yj
 curl -L https://github.com/sclevine/yj/releases/download/v5.1.0/yj-linux-amd64 -o /tmp/yj
