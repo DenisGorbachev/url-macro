@@ -1,8 +1,4 @@
 assert_lefthook_installed: true
-commit-msg:
-  commands:
-    "lint commit message":
-      run: commitlint --edit "$1"
 pre-commit:
   parallel: true
   commands:
@@ -25,3 +21,7 @@ pre-commit:
       run: cargo test --doc
     lint-deps:
       run: cargo machete --with-metadata
+commit-msg:
+  commands:
+    "lint commit message":
+      run: commitlint --edit "$1"
