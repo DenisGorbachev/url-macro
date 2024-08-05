@@ -1,9 +1,9 @@
 #!/usr/bin/env -S deno run --allow-read --allow-run=bash,git,cargo --allow-env --allow-sys
 
-import * as zx from 'npm:zx'
-import { z, ZodSchema } from 'https://deno.land/x/zod@v3.23.8/mod.ts'
-import { assertEquals } from 'https://jsr.io/@std/assert/1.0.0/equals.ts'
-import { assert } from 'https://jsr.io/@std/assert/1.0.0/assert.ts'
+import * as zx from "npm:zx"
+import { z, ZodSchema } from "https://deno.land/x/zod@v3.23.8/mod.ts"
+import { assertEquals } from "https://jsr.io/@std/assert/1.0.0/equals.ts"
+import { assert } from "https://jsr.io/@std/assert/1.0.0/assert.ts"
 
 const CargoTomlSchema = z.object({
   package: z.object({
@@ -80,7 +80,7 @@ cargo add ${name} url
 
 ## Gratitude
 
-Like the project? [Say thanks!](${repo.url}/discussions/new?category=gratitude) ❤️
+Like the project? [⭐ Star this repo](${repo.url}) on GitHub!
 
 ## License
 

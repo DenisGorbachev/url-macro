@@ -21,7 +21,7 @@ let valid = url!("https://www.rust-lang.org/");
 let invalid = url!("foo");
 ```
 
-   [__cargo_doc2readme_dependencies_info]: ggGkYW0BYXSEGyMws-dKI-LpG9swkVXG-rikGwSuJGhB0NVbG974QPrPJF6XYXKEG4AA8JRKwJB9G9olxhSTKUcIG1sf0boPKowfG1HA4Nxt7NpkYWSBg2l1cmwtbWFjcm9lMC4xLjZpdXJsX21hY3Jv
+   [__cargo_doc2readme_dependencies_info]: ggGkYW0BYXSEGyMws-dKI-LpG9swkVXG-rikGwSuJGhB0NVbG974QPrPJF6XYXKEG4AA8JRKwJB9G9olxhSTKUcIG1sf0boPKowfG1HA4Nxt7NpkYWSBg2l1cmwtbWFjcm9lMC4xLjdpdXJsX21hY3Jv
  [__link0]: https://docs.rs/url-macro/latest/url_macro/?search=url
 
 
@@ -35,7 +35,7 @@ cargo add url-macro url
 
 ## Gratitude
 
-Like the project? [Say thanks!](https://github.com/DenisGorbachev/url-macro/discussions/new?category=gratitude) ❤️
+Like the project? [⭐ Star this repo](https://github.com/DenisGorbachev/url-macro) on GitHub!
 
 ## License
 
