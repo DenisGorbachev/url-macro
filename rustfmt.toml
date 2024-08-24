@@ -2,3 +2,4 @@ max_width = 100500
 chain_width = 60
 array_width = 60
 struct_lit_width = 0
+merge_derives = false
