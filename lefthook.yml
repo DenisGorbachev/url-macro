@@ -19,6 +19,8 @@ pre-commit:
       run: remark --ignore-path .gitignore --quiet --frail --no-stdout .
     test-docs:
       run: cargo test --doc
+    sort-deps:
+      run: cargo sort
     lint-deps:
       run: cargo machete --with-metadata
 commit-msg:
