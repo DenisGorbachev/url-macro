@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.9](https://github.com/DenisGorbachev/url-macro/compare/v0.1.8...v0.1.9) - 2024-08-24
+
+### Other
+- sort deps
+- Merge branch 'main' of github.com:DenisGorbachev/url-macro
+- fix configs
+
 ## [0.1.8](https://github.com/DenisGorbachev/url-macro/compare/v0.1.7...v0.1.8) - 2024-08-05
 
 ### Other
