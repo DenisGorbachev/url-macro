@@ -47,6 +47,7 @@ use url::Url;
 ///
 /// - The macro only accepts string literals. Variables or expressions that evaluate to strings
 ///   at runtime cannot be used with this macro.
+/// - The macro doesn't work in `const` context.
 ///
 /// # Dependencies
 ///

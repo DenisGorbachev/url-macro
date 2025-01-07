@@ -1,0 +1,65 @@
+[tools]
+rust = "stable"
+node = "22.12.0"
+cargo-binstall = "1.10.15"
+"npm:lefthook" = "1.8.5"
+"npm:@commitlint/config-conventional" = "19.6.0"
+"npm:@commitlint/cli" = "19.6.0"
+"npm:@commitlint/types" = "19.5.0"
+"npm:remark-cli" = "12.0.1"
+"npm:remark-validate-links" = "8.0.0"
+"npm:remark-lint-no-dead-urls" = "1.1.0"
+"cargo:https://github.com/DenisGorbachev/cargo-doc2readme" = "branch:dev"
+"cargo:cargo-sort" = "1.0.9"
+"cargo:cargo-hack" = "0.6.33"
+"cargo:cargo-machete" = "0.7.0"
+"aqua:sclevine/yj" = "5.1.0"
+
+[tasks."build"]
+run = "cargo build"
+
+[tasks."fmt"]
+run = "cargo fmt --all"
+
+[tasks."lint:code"]
+run = "cargo clippy --all-targets --all-features -- -D warnings"
+
+[tasks."lint:docs"]
+run = "remark --ignore-path .gitignore --quiet --frail --no-stdout ."
+
+[tasks."lint:deps"]
+run = "cargo machete --with-metadata"
+
+[tasks."test:code"]
+run = "cargo nextest run"
+
+[tasks."test:docs"]
+run = "cargo test --doc"
+
+[tasks."sort:deps"]
+run = "cargo sort"
+
+[tasks."watch"]
+run = """
+#!/usr/bin/env bash
+set -euxo pipefail
+PWD=$(pwd)
+CMD_RAW="nextest run $*"
+CMD_NO_WHITESPACE="$(echo -e "${CMD_RAW}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+cargo watch --clear --watch "$PWD" --exec "$CMD_NO_WHITESPACE"
+"""
+
+[tasks."check"]
+run = "cargo check --all-targets"
+
+[tasks."fix"]
+run = "cargo fix --workspace --allow-dirty --allow-staged"
+
+[tasks."gen:readme"]
+run = """
+#!/usr/bin/env bash
+set -euxo pipefail
+./README.ts > README.md
+# run remark again because README.md has changed
+remark --ignore-path .gitignore --quiet --frail --no-stdout README.md
+"""
