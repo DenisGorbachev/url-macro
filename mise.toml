@@ -54,7 +54,7 @@ set -euo pipefail
 PWD=$(pwd)
 CMD_RAW="nextest run $*"
 CMD_NO_WHITESPACE="$(echo -e "${CMD_RAW}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
-cargo watch --clear --watch "$PWD" --exec "$CMD_NO_WHITESPACE"
+cargo watch --clear --watch "$PWD" --exec "$CMD_NO_WHITESPACE" "$@"
 """
 
 [tasks."check"]
