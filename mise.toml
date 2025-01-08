@@ -25,7 +25,7 @@ run = "cargo fmt --all"
 run = "cargo clippy --all-targets --all-features -- -D warnings"
 
 [tasks."lint:docs"]
-run = "remark --ignore-path .gitignore --quiet --frail --no-stdout ."
+run = "mise run lint:markdown ."
 
 [tasks."lint:deps"]
 run = "cargo machete --with-metadata"
@@ -42,7 +42,7 @@ run = "cargo sort"
 [tasks."watch"]
 run = """
 #!/usr/bin/env bash
-set -euxo pipefail
+set -euo pipefail
 PWD=$(pwd)
 CMD_RAW="nextest run $*"
 CMD_NO_WHITESPACE="$(echo -e "${CMD_RAW}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
@@ -58,8 +58,17 @@ run = "cargo fix --workspace --allow-dirty --allow-staged"
 [tasks."gen:readme"]
 run = """
 #!/usr/bin/env bash
-set -euxo pipefail
+set -euo pipefail
 ./README.ts > README.md
 # run remark again because README.md has changed
-remark --ignore-path .gitignore --quiet --frail --no-stdout README.md
+mise run lint:markdown README.md
+"""
+
+[tasks."lint:markdown"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+REMARK_VALIDATE_LINKS="$(mise where npm:remark-validate-links)/lib/node_modules/remark-validate-links/index.js"
+REMARK_LINT_NO_DEAD_URLS="$(mise where npm:remark-lint-no-dead-urls)/lib/node_modules/remark-lint-no-dead-urls/index.js"
+remark --ignore-path .gitignore --quiet --frail --no-stdout --use "$REMARK_VALIDATE_LINKS" --use "$REMARK_LINT_NO_DEAD_URLS" "$@"
 """
