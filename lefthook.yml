@@ -4,7 +4,7 @@ pre-commit:
   commands:
     gen:readme:
       run: |
-        set -euo pipefail
+        set -eu
         mise run gen:readme
         # run remark again because README.md has changed
         mise run remark README.md
