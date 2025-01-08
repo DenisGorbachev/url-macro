@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.10](https://github.com/DenisGorbachev/url-macro/compare/v0.1.9...v0.1.10) - 2025-01-08
+
+### Other
+
+- fix rust version
+- debug rust version
+- fix lefthook
+- debug rust version
+- fix tests
+- fix remark
+- update
+
 ## [0.1.9](https://github.com/DenisGorbachev/url-macro/compare/v0.1.8...v0.1.9) - 2024-08-24
 
 ### Other
