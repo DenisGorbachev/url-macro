@@ -31,7 +31,6 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           components: clippy, rustfmt
-      - run: rustc --version
       - uses: Swatinem/rust-cache@v2.7.3
       - run: lefthook run --force pre-commit
       - run: cargo hack test --feature-powerset
