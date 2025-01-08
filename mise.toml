@@ -21,11 +21,17 @@ run = "cargo build"
 [tasks."fmt"]
 run = "cargo fmt --all"
 
+[tasks."lint"]
+depends = ["lint:code", "lint:docs"]
+
+[tasks."test"]
+depends = ["test:code", "test:docs"]
+
 [tasks."lint:code"]
 run = "cargo clippy --all-targets --all-features -- -D warnings"
 
 [tasks."lint:docs"]
-run = "mise run lint:markdown ."
+run = "mise run remark ."
 
 [tasks."lint:deps"]
 run = "cargo machete --with-metadata"
@@ -56,15 +62,11 @@ run = "cargo check --all-targets"
 run = "cargo fix --workspace --allow-dirty --allow-staged"
 
 [tasks."gen:readme"]
-run = """
-#!/usr/bin/env bash
-set -euo pipefail
-./README.ts > README.md
-# run remark again because README.md has changed
-mise run lint:markdown README.md
-"""
+run = "./README.ts > README.md"
+sources = ["README.ts"]
+outputs = ["README.md"]
 
-[tasks."lint:markdown"]
+[tasks."remark"]
 run = """
 #!/usr/bin/env bash
 set -euo pipefail
