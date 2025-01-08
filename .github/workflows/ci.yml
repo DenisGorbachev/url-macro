@@ -24,16 +24,11 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           components: clippy, rustfmt
-      - uses: taiki-e/install-action@nextest
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/Iron # 20
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.45.x
+      - run: rustc --version
       - uses: jdx/mise-action@v2
         with:
           version: 2024.11.37
+      - run: rustc --version
       - uses: Swatinem/rust-cache@v2.7.3
       - run: lefthook run --force pre-commit
       - run: cargo hack test --feature-powerset

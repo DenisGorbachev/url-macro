@@ -1,6 +1,7 @@
 [tools]
 rust = "stable"
 node = "22.12.0"
+deno = "1.46.1"
 cargo-binstall = "1.10.15"
 "npm:lefthook" = "1.8.5"
 "npm:@commitlint/config-conventional" = "19.6.0"
@@ -13,6 +14,7 @@ cargo-binstall = "1.10.15"
 "cargo:cargo-sort" = "1.0.9"
 "cargo:cargo-hack" = "0.6.33"
 "cargo:cargo-machete" = "0.7.0"
+"cargo:cargo-nextest" = "0.9.72"
 "aqua:sclevine/yj" = "5.1.0"
 
 [tasks."build"]
