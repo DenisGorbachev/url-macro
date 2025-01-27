@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
         with:
-          version: 2024.11.37
+          version: 2025.1.14
       - name: Remove rust from mise
         run: |
           # a different rust version will be installed in the next step

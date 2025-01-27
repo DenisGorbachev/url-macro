@@ -1,3 +1,5 @@
+min_version = "2025.1.14"
+
 [tools]
 rust = "stable"
 node = "22.12.0"

@@ -21,7 +21,7 @@ let valid = url!("https://www.rust-lang.org/");
 let invalid = url!("foo");
 ```
 
-   [__cargo_doc2readme_dependencies_info]: ggGkYW0BYXSEGyMws-dKI-LpG9swkVXG-rikGwSuJGhB0NVbG974QPrPJF6XYXKEG4AA8JRKwJB9G9olxhSTKUcIG1sf0boPKowfG1HA4Nxt7NpkYWSBg2l1cmwtbWFjcm9lMC4xLjlpdXJsX21hY3Jv
+   [__cargo_doc2readme_dependencies_info]: ggGkYW0BYXSEGyMws-dKI-LpG9swkVXG-rikGwSuJGhB0NVbG974QPrPJF6XYXKEG4AA8JRKwJB9G9olxhSTKUcIG1sf0boPKowfG1HA4Nxt7NpkYWSBg2l1cmwtbWFjcm9mMC4xLjEwaXVybF9tYWNybw
  [__link0]: https://docs.rs/url-macro/latest/url_macro/?search=url
 
 
