@@ -2,6 +2,7 @@
   "version": "3",
   "packages": {
     "specifiers": {
+      "jsr:@std/assert@1.0.0": "jsr:@std/assert@1.0.0",
       "jsr:@std/internal@^1.0.1": "jsr:@std/internal@1.0.1",
       "npm:zx": "npm:zx@8.1.4"
     },

@@ -12,9 +12,7 @@ categories = ["development-tools::procedural-macro-helpers", "rust-patterns"]
 
 [package.metadata.details]
 title = "Compile-time URL validation"
-tagline = ""
-summary = ""
-announcement = ""
+peers = ["url"]
 
 [lib]
 proc-macro = true

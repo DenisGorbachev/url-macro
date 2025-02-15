@@ -1,14 +1,12 @@
-const severity = {
-  disable: 0,
-  warn: 1,
-  error: 2,
-}
+const disable = 0
+const warn = 1
+const error = 2
 
 export default {
   extends: ['@commitlint/config-conventional'],
   rules: {
     'type-enum': [
-      severity.error,
+      error,
       'always',
       [
         'build',
@@ -26,5 +24,6 @@ export default {
         'test',
       ],
     ],
+    'subject-case': [disable]
   },
 }
