@@ -1,6 +1,6 @@
 [package]
 name = "url-macro"
-version = "0.1.11"
+version = "0.1.12"
 edition = "2021"
 description = "A compile-time URL validation macro. Parses and checks URLs at compile-time, converting valid URLs into `url::Url` objects. Provides early error detection for malformed URLs."
 license = "Apache-2.0 OR MIT"
