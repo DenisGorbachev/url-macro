@@ -76,5 +76,5 @@ run = """
 set -euo pipefail
 REMARK_VALIDATE_LINKS="$(mise where npm:remark-validate-links)/lib/node_modules/remark-validate-links/index.js"
 REMARK_LINT_NO_DEAD_URLS="$(mise where npm:remark-lint-no-dead-urls)/lib/node_modules/remark-lint-no-dead-urls/index.js"
-remark --ignore-path .gitignore --quiet --frail --no-stdout --use "$REMARK_VALIDATE_LINKS" --use "$REMARK_LINT_NO_DEAD_URLS" "$@"
+remark --ignore-path .gitignore --ignore-pattern CHANGELOG.md --quiet --frail --no-stdout --use "$REMARK_VALIDATE_LINKS" --use "$REMARK_LINT_NO_DEAD_URLS" "$@"
 """
