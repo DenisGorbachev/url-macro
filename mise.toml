@@ -66,7 +66,7 @@ run = "cargo check --all-targets"
 run = "cargo fix --workspace --allow-dirty --allow-staged"
 
 [tasks."gen:readme"]
-run = "./README.ts > README.md"
+run = "./README.ts --output README.md"
 sources = ["README.ts"]
 outputs = ["README.md"]
 
