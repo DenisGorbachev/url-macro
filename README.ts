@@ -88,6 +88,14 @@ const $ = zx.$({ cwd: dirname })
 
 // deno-lint-ignore no-explicit-any
 const parse = <Output = any, Def extends ZodTypeDef = ZodTypeDef, Input = Output>(schema: ZodSchema<Output, Def, Input>, input: zx.ProcessOutput) => schema.parse(JSON.parse(input.stdout))
+const nail = (str: string) => {
+    const spacesAtStart = str.match(/^\n(\s+)/)
+    if (spacesAtStart?.[1]) {
+        return str.replace(new RegExp(`^[^\\S\r\n]{0,${spacesAtStart[1].length}}`, "gm"), "")
+    } else {
+        return str
+    }
+}
 
 const theCargoToml: CargoToml = parse(CargoTomlSchema, await $`yj -t < Cargo.toml`)
 const { package: { name, description, metadata: { details } } } = theCargoToml
@@ -105,9 +113,27 @@ const primaryTargets = [primaryTarget, primaryBinTarget]
 const secondaryTargets = thePackageMetadata.targets.filter((t) => !primaryTargets.includes(t))
 const secondaryBinTargets = secondaryTargets.filter((t) => t.kind.includes("bin"))
 const docsUrl = `https://docs.rs/${name}`
+const doc2ReadmeTemplate = `
+{{ readme }}
+
+{%- if links != "" %}
+  {{ links }}
+{%- endif -%}
+`.trimStart()
+const doc2readmeRender = async (target: string) => {
+    const templatePath = await Deno.makeTempFile({
+        prefix: "README",
+        suffix: "jl",
+    })
+    await Deno.writeTextFile(
+        templatePath,
+        doc2ReadmeTemplate,
+    )
+    return $`cargo doc2readme --template ${templatePath} --target-name ${target} --out -`
+}
 
 // launch multiple promises in parallel
-const doc2ReadmePromise = $`cargo doc2readme --template README.jl --target-name ${primaryTarget.name} --out -`
+const doc2ReadmePromise = doc2readmeRender(primaryTarget.name)
 const ghRepoPromise = $`gh repo view --json url`
 const docsUrlPromise = fetch(docsUrl, { method: "HEAD" })
 const helpPromise = primaryBinTarget ? $`cargo run --quiet --bin ${primaryBinTarget.name} -- --help` : undefined
@@ -186,9 +212,7 @@ ${titleSectionBody}
 ${body}`.trim()
 
 if (args.output) {
-    const encoder = new TextEncoder()
-    const bytes = encoder.encode(content + "\n")
-    await Deno.writeFile(args.output, bytes)
+    await Deno.writeTextFile(args.output, content + "\n")
 } else {
     console.info(content)
 }
