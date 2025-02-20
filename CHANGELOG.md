@@ -6,6 +6,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.13](https://github.com/DenisGorbachev/url-macro/compare/v0.1.12...v0.1.13) - 2025-02-20
+
+### Fixed
+
+- README
+- ci
+- mise run fix
+- README
+- README
+- README
+
+### Other
+
+- commitlint
+
 ## [0.1.12](https://github.com/DenisGorbachev/url-macro/compare/v0.1.11...v0.1.12) - 2025-02-16
 
 ### Other
