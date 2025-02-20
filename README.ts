@@ -24,6 +24,9 @@ const CargoTomlSchema = z.object({
                 title: z.string().min(1).optional(),
                 tagline: z.string().optional(),
                 summary: z.string().optional(),
+                readme: z.object({
+                   generate: z.boolean().default(true)
+                }).default({}),
                 peers: z.array(z.string()).default([]).describe("Packages that should be installed alongside this package"),
             }).default({}),
         }).default({}),
@@ -97,12 +100,21 @@ const nail = (str: string) => {
     }
 }
 
-const theCargoToml: CargoToml = parse(CargoTomlSchema, await $`yj -t < Cargo.toml`)
-const { package: { name, description, metadata: { details } } } = theCargoToml
-const title = details.title || description
-const peers = details.peers
+const cargoTomlPromise = $`yj -t < Cargo.toml`;
+const cargoMetadataPromise = $`cargo metadata --format-version 1`;
+const ghRepoPromise = $`gh repo view --json url`
+
+const theCargoToml: CargoToml = parse(CargoTomlSchema, await cargoTomlPromise)
+const theCargoMetadata: CargoMetadata = parse(CargoMetadataSchema, await cargoMetadataPromise)
+const { package: { name, description, metadata: { details: {title: titleExplicit, peers, readme: {generate}} } } } = theCargoToml
+
+// If README generation is manually disabled in the Cargo.toml, just exit successfully
+if (!generate) {
+    Deno.exit(0)
+}
+
+const title = titleExplicit || description
 const _libTargetName = toSnakeCase(name)
-const theCargoMetadata: CargoMetadata = parse(CargoMetadataSchema, await $`cargo metadata --format-version 1`)
 const thePackageMetadata = theCargoMetadata.packages.find((p) => p.name == name)
 assert(thePackageMetadata, "Could not find package metadata")
 const primaryTarget = thePackageMetadata.targets[0]
@@ -134,7 +146,6 @@ const doc2readmeRender = async (target: string) => {
 
 // launch multiple promises in parallel
 const doc2ReadmePromise = doc2readmeRender(primaryTarget.name)
-const ghRepoPromise = $`gh repo view --json url`
 const docsUrlPromise = fetch(docsUrl, { method: "HEAD" })
 const helpPromise = primaryBinTarget ? $`cargo run --quiet --bin ${primaryBinTarget.name} -- --help` : undefined
 
