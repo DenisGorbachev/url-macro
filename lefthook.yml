@@ -1,0 +1,30 @@
+assert_lefthook_installed: true
+pre-commit:
+  parallel: true
+  commands:
+    gen:readme:
+      run: |
+        set -eu
+        mise run gen:readme
+        # run remark again because README.md has changed
+        mise run remark README.md
+        # add README.md manually instead of using `stage_fixed` because it may not have been staged
+        git add README.md
+    fmt:
+      run: mise run fmt
+      stage_fixed: true
+    lint:code:
+      run: mise run lint:code
+    lint:docs:
+      run: mise run lint:docs
+    lint:deps:
+      run: mise run lint:deps
+    test:code:
+      run: mise run test:code --no-fail-fast
+    sort:deps:
+      run: mise run sort:deps
+      stage_fixed: true
+commit-msg:
+  commands:
+    commitlint:
+      run: mise exec -- commitlint --edit "$1"

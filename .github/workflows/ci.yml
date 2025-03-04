@@ -1,0 +1,40 @@
+name: CI
+on: [ push, pull_request ]
+
+env:
+  RUSTFLAGS: -Dwarnings
+  RUST_BACKTRACE: 1
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rust:
+          - stable
+          - beta
+          - nightly
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+        with:
+          version: 2025.1.14
+      - name: Remove rust from mise
+        run: |
+          # a different rust version will be installed in the next step
+          mise rm rust
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2.7.3
+      - run: lefthook run --force pre-commit
+      - run: cargo hack test --feature-powerset
+      - uses: wagoid/commitlint-github-action@v6
+        with:
+          failOnWarnings: true
+          failOnErrors: true

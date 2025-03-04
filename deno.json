@@ -1,0 +1,13 @@
+{
+  "fmt": {
+    "lineWidth": 100500,
+    "semiColons": false
+  },
+  "compilerOptions": {
+    "strict": true,
+    "noErrorTruncation": true,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true
+  }
+}
