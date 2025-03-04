@@ -2,7 +2,7 @@
 name = "rust-private-lib-template"
 version = "0.1.0"
 edition = "2021"
-description = "A template for creating Rust libs."
+description = "A template for creating Rust private libs."
 homepage = "https://github.com/DenisGorbachev/rust-private-lib-template"
 repository = "https://github.com/DenisGorbachev/rust-private-lib-template"
 readme = "README.md"
@@ -10,7 +10,7 @@ keywords = []
 categories = []
 
 [package.metadata.details]
-title = "Rust CLI app template"
+title = "Rust private lib template"
 tagline = ""
 summary = ""
 announcement = ""
