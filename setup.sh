@@ -31,7 +31,10 @@ tomli set -f "$cargo_toml" "package.homepage" "$repo_url" | sponge "$cargo_toml"
 
 rm "$dir/README.md"
 
+# rg exits with status code = 1 if it doesn't find any files, so we need to disable & re-enable "set -e"
+set +e
 rg --files-with-matches "$name_old_snake_case" "$dir" | xargs gsed -i "s/\b$name_old_snake_case\b/$name_new_snake_case/g"
+set -e
 
 (cd "$dir" && mise run build)
 
