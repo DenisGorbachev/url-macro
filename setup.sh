@@ -2,14 +2,15 @@
 
 set -xeuo pipefail
 
-dir="$(dirname "$(realpath "$0")")"
+path="$(realpath "${BASH_SOURCE[0]}")"
+dir="$(dirname "$path")"
 name_new="$(basename "$dir")"
 cargo_toml="$dir/Cargo.toml"
 #mise_toml="$dir/mise.toml"
 
 echo "This script assumes that your package name is equal to the directory name: $name_new"
 read -r -p "Is this correct? [Y/n] " answer
-if [[ ! "$answer" = "Y" ]]; then
+if [[ ! "$answer" = "Y" ]] || [[ "$answer" = "y" ]]; then
   echo "Aborting"
   exit 1
 fi
@@ -40,6 +41,5 @@ set -e
 
 (cd "$dir" && mise run test)
 
-(cd "$dir" && git add . && git commit -a -m "chore: update package details")
-
-rm "$dir/setup.sh"
+# remove setup.sh just before the final commit, in the same line
+(cd "$dir" && rm "$dir/setup.sh" && git add . && git commit -a -m "chore: update package details")
