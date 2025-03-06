@@ -31,6 +31,8 @@ tomli set -f "$cargo_toml" "package.repository" "$repo_url" | sponge "$cargo_tom
 tomli set -f "$cargo_toml" "package.homepage" "$repo_url" | sponge "$cargo_toml"
 
 rm "$dir/README.md"
+rm "$dir/LICENSE-APACHE"
+rm "$dir/LICENSE-MIT"
 
 # rg exits with status code = 1 if it doesn't find any files, so we need to disable & re-enable "set -e"
 set +e

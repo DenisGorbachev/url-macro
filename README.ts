@@ -19,6 +19,7 @@ const CargoTomlSchema = z.object({
         name: z.string().min(1),
         description: z.string().min(1),
         repository: z.string().url().min(1),
+        license: z.string().optional(),
         metadata: z.object({
             details: z.object({
                 title: z.string().min(1).optional(),
@@ -106,7 +107,7 @@ const ghRepoPromise = $`gh repo view --json url`
 
 const theCargoToml: CargoToml = parse(CargoTomlSchema, await cargoTomlPromise)
 const theCargoMetadata: CargoMetadata = parse(CargoMetadataSchema, await cargoMetadataPromise)
-const { package: { name, description, metadata: { details: {title: titleExplicit, peers, readme: {generate}} } } } = theCargoToml
+const { package: { name, description, license, metadata: { details: {title: titleExplicit, peers, readme: {generate}} } } } = theCargoToml
 
 // If README generation is manually disabled in the Cargo.toml, just exit successfully
 if (!generate) {
@@ -166,6 +167,17 @@ if (docsUrlIs200) {
 }
 const badgesStr = badges.map(({ name, image, url }) => `[![${name}](${image})](${url})`).join("\n")
 
+const licenseNameFileMap: Record<string, string> = {
+    "Apache-2.0": "LICENSE-APACHE",
+    "MIT": "LICENSE-MIT"
+}
+const getLicenseFile = (name: string) => {
+    const file = licenseNameFileMap[name];
+    if (file === undefined) throw new Error(`licenseNameFileMap is missing the following key: \`${name}\``)
+    return file
+}
+const licenseNames = license ? license.split("OR").map(name => name.trim()) : []
+
 const renderMarkdownList = (items: string[]) => items.map((bin) => `* ${bin}`).join("\n")
 const renderShellCode = (code: string) => `\`\`\`shell\n${code}\n\`\`\``
 
@@ -199,15 +211,23 @@ if (secondaryBinTargets.length) {
     pushSection(sections, "Additional binaries", renderMarkdownList(secondaryBinTargetsNames.map((bin) => `\`${bin}\``)))
 }
 pushSection(sections, "Gratitude", `Like the project? [⭐ Star this repo](${repo.url}) on GitHub!`)
-pushSection(
-    sections,
-    "License",
-    `
-[Apache License 2.0](LICENSE-APACHE) or [MIT License](LICENSE-MIT) at your option.
 
-Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this crate by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
+if (licenseNames.length) {
+    const licenseLinks = licenseNames.map(name => {
+        const file = getLicenseFile(name)
+        return `[${name}](${file})`
+    })
+    pushSection(
+      sections,
+      "License",
+      `
+${licenseLinks.join(" or ")}.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this crate by you, shall be licensed as above, without any additional terms or conditions.
 `.trim(),
-)
+    )
+}
+
 
 const body = renderNonEmptySections(sections)
 
