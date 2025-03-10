@@ -41,7 +41,7 @@ run = "mise run remark ."
 run = "cargo machete --with-metadata"
 
 [tasks."test:code"]
-run = "cargo nextest run"
+run = "cargo nextest run --all-features"
 
 [tasks."test:docs"]
 run = "cargo test --doc"
@@ -60,7 +60,7 @@ cargo watch --clear --watch "$PWD" --exec "$CMD_NO_WHITESPACE" "$@"
 """
 
 [tasks."check"]
-run = "cargo check --all-targets"
+run = "cargo check --all-targets --all-features"
 
 [tasks."fix"]
 env = { __CARGO_FIX_YOLO = 'yeah' }
