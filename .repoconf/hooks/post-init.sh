@@ -1,10 +1,11 @@
-#!/usr/bin/env bash
+#!/usr/bin/env -S usage bash
+#USAGE arg "<dir>"
+#USAGE flag "-n --name <name>" help="Package name (if this flag is not provided, then the package name is inferred from the directory name)"
 
 set -xeuo pipefail
 
-path="$(realpath "${BASH_SOURCE[0]}")"
-dir="$(dirname "$path")"
-name_new="$(basename "$dir")"
+dir=${usage_dir:?}
+name_new="${usage_name:-$(basename "$dir")}"
 cargo_toml="$dir/Cargo.toml"
 #mise_toml="$dir/mise.toml"
 
