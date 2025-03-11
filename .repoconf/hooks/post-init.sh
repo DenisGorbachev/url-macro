@@ -32,8 +32,7 @@ tomli set -f "$cargo_toml" "package.homepage" "$repo_url" | sponge "$cargo_toml"
 
 while IFS= read -r file; do
   rm "$dir/$file"
-done < "$dir/setup-files-to-remove"
-rm "$dir/setup-files-to-remove"
+done < "$dir/.repoconf/data/init-removed-files"
 
 # rg exits with status code = 1 if it doesn't find any files, so we need to disable & re-enable "set -e"
 set +e
@@ -44,5 +43,5 @@ set -e
 
 (cd "$dir" && mise run test)
 
-# remove setup.sh just before the final commit, in the same line
-(cd "$dir" && rm "$dir/setup.sh" && git add . && git commit -a -m "chore: update package details")
+# remove .repoconf just before the final commit, in the same line
+(cd "$dir" && rm -r "$dir/.repoconf" && git add . && git commit -a -m "chore: update package details")
