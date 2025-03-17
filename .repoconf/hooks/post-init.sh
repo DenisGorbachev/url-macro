@@ -4,7 +4,7 @@
 
 set -xeuo pipefail
 
-dir=${usage_dir:?}
+dir=$(realpath "${usage_dir:?}")
 name_new="${usage_name:-$(basename "$dir")}"
 cargo_toml="$dir/Cargo.toml"
 #mise_toml="$dir/mise.toml"
