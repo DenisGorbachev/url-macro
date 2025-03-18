@@ -10,7 +10,6 @@ keywords = []
 categories = []
 
 [package.metadata.details]
-title = "Rust pre-public library template"
 tagline = ""
 summary = ""
 announcement = ""
