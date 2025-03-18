@@ -5,18 +5,19 @@
 set -xeuo pipefail
 
 dir=$(realpath "${usage_dir:?}")
-name_new="${usage_name:-$(basename "$dir")}"
+name_new_default="${usage_name:-$(basename "$dir")}"
 cargo_toml="$dir/Cargo.toml"
 #mise_toml="$dir/mise.toml"
 
-echo "This script assumes that your package name is equal to the directory name: $name_new"
-read -r -p "Is this correct? [Y/n] " answer
-if [[ ! "$answer" = "Y" ]] || [[ "$answer" = "y" ]]; then
-  echo "Aborting"
-  exit 1
-fi
+read -r -p "Rust package name (default: $name_new_default): " name_new
+read -r -p "Rust package description: " description
 
-read -r -p "Package description: " description
+# Trim whitespace
+name_new=$(echo "$name_new" | xargs)
+
+if [[ -z $name_new ]]; then
+  name_new=$name_new_default
+fi
 
 (cd "$dir" && mise trust)
 (cd "$dir" && mise install)
