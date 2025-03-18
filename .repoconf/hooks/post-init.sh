@@ -13,10 +13,6 @@ read -r -p "Rust package name (default: $name_new_default): " name_new
 read -r -p "Rust package description: " description
 read -r -p "Rust package title (default: same as description): " title
 
-# Trim whitespace
-name_new=$(echo "$name_new" | xargs)
-title=$(echo "$title" | xargs)
-
 if [[ -z $name_new ]]; then
   name_new=$name_new_default
 fi
