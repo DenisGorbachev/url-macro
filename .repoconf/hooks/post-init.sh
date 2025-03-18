@@ -11,12 +11,18 @@ cargo_toml="$dir/Cargo.toml"
 
 read -r -p "Rust package name (default: $name_new_default): " name_new
 read -r -p "Rust package description: " description
+read -r -p "Rust package title (default: same as description): " title
 
 # Trim whitespace
 name_new=$(echo "$name_new" | xargs)
+title=$(echo "$title" | xargs)
 
 if [[ -z $name_new ]]; then
   name_new=$name_new_default
+fi
+
+if [[ -z $title ]]; then
+  title=$description
 fi
 
 (cd "$dir" && mise trust)
@@ -28,11 +34,11 @@ name_new_snake_case=$(ccase --to snake "$name_new")
 repo_url=$(cd "$dir" && gh repo view --json url | jq -r .url)
 
 tomli set -f "$cargo_toml" "package.name" "$name_new" | sponge "$cargo_toml"
-tomli delete -f "$cargo_toml" "package.metadata.details.title" | sponge "$cargo_toml"
-tomli delete -f "$cargo_toml" "package.metadata.details.readme.generate" | sponge "$cargo_toml"
 tomli set -f "$cargo_toml" "package.repository" "$repo_url" | sponge "$cargo_toml"
 tomli set -f "$cargo_toml" "package.homepage" "$repo_url" | sponge "$cargo_toml"
 tomli set -f "$cargo_toml" "package.description" "$description" | sponge "$cargo_toml"
+tomli set -f "$cargo_toml" "package.metadata.details.title" "$title" | sponge "$cargo_toml"
+tomli delete -f "$cargo_toml" "package.metadata.details.readme.generate" | sponge "$cargo_toml"
 
 while IFS= read -r file; do
   rm "$dir/$file"
