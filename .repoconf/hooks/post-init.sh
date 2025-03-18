@@ -34,7 +34,7 @@ tomli set -f "$cargo_toml" "package.repository" "$repo_url" | sponge "$cargo_tom
 tomli set -f "$cargo_toml" "package.homepage" "$repo_url" | sponge "$cargo_toml"
 tomli set -f "$cargo_toml" "package.description" "$description" | sponge "$cargo_toml"
 tomli set -f "$cargo_toml" "package.metadata.details.title" "$title" | sponge "$cargo_toml"
-tomli delete -f "$cargo_toml" "package.metadata.details.readme.generate" | sponge "$cargo_toml"
+tomli delete --if-exists -f "$cargo_toml" "package.metadata.details.readme.generate" | sponge "$cargo_toml"
 
 while IFS= read -r file; do
   rm "$dir/$file"
