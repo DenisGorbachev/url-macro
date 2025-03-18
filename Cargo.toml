@@ -1,10 +1,10 @@
 [package]
-name = "rust-pre-public-lib-template"
+name = "rust-public-lib-template"
 version = "0.1.0"
 edition = "2021"
-description = "A template for a pre-public Rust library"
-homepage = "https://github.com/DenisGorbachev/rust-pre-public-lib-template"
-repository = "https://github.com/DenisGorbachev/rust-pre-public-lib-template"
+description = "A template for a public Rust library"
+homepage = "https://github.com/DenisGorbachev/rust-public-lib-template"
+repository = "https://github.com/DenisGorbachev/rust-public-lib-template"
 readme = "README.md"
 keywords = []
 categories = []
@@ -13,7 +13,8 @@ categories = []
 tagline = ""
 summary = ""
 announcement = ""
-readme = { generate = false }
+readme = {}
+title = "A template for a public Rust library"
 
 [dependencies]
 derive-getters = { version = "0.5.0", features = ["auto_copy_getters"] }
@@ -27,3 +28,9 @@ subtype = { git = "https://github.com/DenisGorbachev/subtype" }
 
 [package.metadata.cargo-machete]
 ignored = ["derive_more", "derive-getters", "derive-new", "fmt-derive", "stub-macro", "standard-traits", "helpful", "subtype"]
+
+
+
+
+
+
