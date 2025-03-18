@@ -13,7 +13,7 @@ categories = []
 tagline = ""
 summary = ""
 announcement = ""
-readme = {}
+readme = { generate = false }
 title = "A template for a public Rust library"
 
 [dependencies]
@@ -28,9 +28,3 @@ subtype = { git = "https://github.com/DenisGorbachev/subtype" }
 
 [package.metadata.cargo-machete]
 ignored = ["derive_more", "derive-getters", "derive-new", "fmt-derive", "stub-macro", "standard-traits", "helpful", "subtype"]
-
-
-
-
-
-
