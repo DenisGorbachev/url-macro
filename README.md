@@ -1,12 +1,6 @@
-# Rust private lib template
+# Rust pre-public lib template
 
-[![Build](https://github.com/DenisGorbachev/rust-cli-app-template/actions/workflows/ci.yml/badge.svg)](https://github.com/DenisGorbachev/rust-private-lib-template)
-
-This is a template for a Rust private lib.
-
-**IMPORTANT**:
-
-* Run `setup.sh` after creating a repo using this template.
+[![Build](https://github.com/DenisGorbachev/rust-pre-public-lib-template/actions/workflows/ci.yml/badge.svg)](https://github.com/DenisGorbachev/rust-private-lib-template)
 
 ## Gratitude
 
