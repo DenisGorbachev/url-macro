@@ -68,8 +68,6 @@ run = "cargo clippy --fix --allow-dirty --allow-staged"
 
 [tasks."gen:readme"]
 run = "./README.ts --output README.md"
-sources = ["README.ts"]
-outputs = ["README.md"]
 
 [tasks."remark"]
 run = """
