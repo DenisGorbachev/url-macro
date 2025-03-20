@@ -1,16 +1,16 @@
 [package]
-name = "rust-private-lib-template"
+name = "rust-private-template"
 version = "0.1.0"
 edition = "2021"
-description = "A template for creating Rust private libs."
-homepage = "https://github.com/DenisGorbachev/rust-private-lib-template"
-repository = "https://github.com/DenisGorbachev/rust-private-lib-template"
+description = "A template for creating Rust private repositories."
+homepage = "https://github.com/DenisGorbachev/rust-private-template"
+repository = "https://github.com/DenisGorbachev/rust-private-template"
 readme = "README.md"
 keywords = []
 categories = []
 
 [package.metadata.details]
-title = "Rust private lib template"
+title = "Rust private template"
 tagline = ""
 summary = ""
 announcement = ""
