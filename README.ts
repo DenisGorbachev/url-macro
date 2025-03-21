@@ -90,8 +90,9 @@ if (!dirname) throw new Error("Cannot determine the current script dirname")
 
 const $ = zx.$({ cwd: dirname })
 
+const parseProcessOutput = (input: zx.ProcessOutput) => JSON.parse(input.stdout)
 // deno-lint-ignore no-explicit-any
-const parse = <Output = any, Def extends ZodTypeDef = ZodTypeDef, Input = Output>(schema: ZodSchema<Output, Def, Input>, input: zx.ProcessOutput) => schema.parse(JSON.parse(input.stdout))
+const parse = <Output = any, Def extends ZodTypeDef = ZodTypeDef, Input = Output>(schema: ZodSchema<Output, Def, Input>, input: zx.ProcessOutput) => schema.parse(parseProcessOutput(input))
 const nail = (str: string) => {
     const spacesAtStart = str.match(/^\n(\s+)/)
     if (spacesAtStart?.[1]) {
@@ -101,19 +102,23 @@ const nail = (str: string) => {
     }
 }
 
+// launch multiple promises in parallel
 const cargoTomlPromise = $`yj -t < Cargo.toml`;
 const cargoMetadataPromise = $`cargo metadata --format-version 1`;
 const ghRepoPromise = $`gh repo view --json url`
 
-const theCargoToml: CargoToml = parse(CargoTomlSchema, await cargoTomlPromise)
-const theCargoMetadata: CargoMetadata = parse(CargoMetadataSchema, await cargoMetadataPromise)
-const { package: { name, description, license, metadata: { details: {title: titleExplicit, peers, readme: {generate}} } } } = theCargoToml
+const theCargoTomlRaw = JSON.parse((await cargoTomlPromise).stdout)
+const theCargoMetadataRaw = JSON.parse((await cargoMetadataPromise).stdout)
 
 // If README generation is manually disabled in the Cargo.toml, just exit successfully
-if (!generate) {
+if (theCargoTomlRaw.package?.metadata?.details?.readme?.generate === false) {
     Deno.exit(0)
 }
 
+const theCargoToml = CargoTomlSchema.parse(theCargoTomlRaw)
+const theCargoMetadata = CargoMetadataSchema.parse(theCargoMetadataRaw)
+
+const { package: { name, description, license, metadata: { details: {title: titleExplicit, peers} } } } = theCargoToml
 const title = titleExplicit || description
 const _libTargetName = toSnakeCase(name)
 const thePackageMetadata = theCargoMetadata.packages.find((p) => p.name == name)
@@ -145,7 +150,6 @@ const doc2readmeRender = async (target: string) => {
     return $`cargo doc2readme --template ${templatePath} --target-name ${target} --out -`
 }
 
-// launch multiple promises in parallel
 const doc2ReadmePromise = doc2readmeRender(primaryTarget.name)
 const docsUrlPromise = fetch(docsUrl, { method: "HEAD" })
 const helpPromise = primaryBinTarget ? $`cargo run --quiet --bin ${primaryBinTarget.name} -- --help` : undefined
