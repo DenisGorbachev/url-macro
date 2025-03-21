@@ -49,6 +49,19 @@ run = "cargo test --doc"
 [tasks."sort:deps"]
 run = "cargo sort"
 
+[tasks."check"]
+run = "cargo check --all-targets --all-features"
+
+[tasks."fix"]
+depends = ["fix:code", "fix:docs"]
+
+[tasks."fix:code"]
+env = { __CARGO_FIX_YOLO = 'yeah' }
+run = "cargo clippy --fix --allow-dirty --allow-staged"
+
+[tasks."fix:deps"]
+run = "cargo machete --with-metadata --fix"
+
 [tasks."watch"]
 run = """
 #!/usr/bin/env bash
@@ -58,13 +71,6 @@ CMD_RAW="nextest run $*"
 CMD_NO_WHITESPACE="$(echo -e "${CMD_RAW}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
 cargo watch --clear --watch "$PWD" --exec "$CMD_NO_WHITESPACE" "$@"
 """
-
-[tasks."check"]
-run = "cargo check --all-targets --all-features"
-
-[tasks."fix"]
-env = { __CARGO_FIX_YOLO = 'yeah' }
-run = "cargo clippy --fix --allow-dirty --allow-staged"
 
 [tasks."gen:readme"]
 run = "./README.ts --output README.md"
