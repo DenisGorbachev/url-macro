@@ -10,11 +10,11 @@ keywords = []
 categories = []
 
 [package.metadata.details]
+title = "A template for a public Rust library"
 tagline = ""
 summary = ""
 announcement = ""
 readme = { generate = false }
-title = "A template for a public Rust library"
 
 [dependencies]
 derive-getters = { version = "0.5.0", features = ["auto_copy_getters"] }
