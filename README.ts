@@ -6,6 +6,7 @@ import { z, ZodSchema, ZodTypeDef } from "https://deno.land/x/zod@v3.23.8/mod.ts
 import { assert, assertEquals } from "jsr:@std/assert@1.0.0"
 import { toSnakeCase } from "jsr:@std/text@1.0.10"
 import { parseArgs } from "jsr:@std/cli@1.0.13"
+import { parse as parseToml } from "jsr:@std/toml@1.0.2"
 
 export const args = parseArgs(Deno.args, {
     string: ["output"],
@@ -94,7 +95,7 @@ const stub = <T>(message = "Implement me"): T => {
  */
 const normalizeGitRemoteUrl = (url: string) => {
     // Handle GitHub SSH format: git@github.com:username/repo.git
-    const sshMatch = url.match(/^git@github\.com:([^/]+)\/(.+?)(?:\.git)?$/)
+    const sshMatch = url.match(/^git@github\.com:([^/]+)\/([^/]+?)\.git$/)
     if (sshMatch) {
         const [, username, repo] = sshMatch
         return `https://github.com/${username}/${repo}`
@@ -121,23 +122,24 @@ const nail = (str: string) => {
     }
 }
 
-// launch multiple promises in parallel
-const cargoTomlPromise = $`yj -t < Cargo.toml`;
-const cargoMetadataPromise = $`cargo metadata --format-version 1`;
-const originUrlPromise = $`git remote get-url origin`
-
-const theCargoTomlRaw = JSON.parse((await cargoTomlPromise).stdout)
+const theCargoTomlText = await Deno.readTextFile(`${dirname}/Cargo.toml`);
+// deno-lint-ignore no-explicit-any
+const theCargoTomlRaw = parseToml(theCargoTomlText) as any
 
 // If README generation is manually disabled in the Cargo.toml, just exit successfully
 if (theCargoTomlRaw.package?.metadata?.details?.readme?.generate === false) {
     Deno.exit(0)
 }
 
+// launch multiple promises in parallel
+const cargoMetadataPromise = $`cargo metadata --format-version 1`;
+const originUrlPromise = $`git remote get-url origin`
+
 const theCargoMetadataRaw = JSON.parse((await cargoMetadataPromise).stdout)
 
 const theCargoToml = CargoTomlSchema.parse(theCargoTomlRaw)
 const theCargoMetadata = CargoMetadataSchema.parse(theCargoMetadataRaw)
-const theOriginUrl = normalizeGitRemoteUrl((await originUrlPromise).stdout);
+const theOriginUrl = normalizeGitRemoteUrl((await originUrlPromise).stdout.trim());
 
 assertEquals(theOriginUrl, theCargoToml.package.repository)
 
