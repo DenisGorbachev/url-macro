@@ -85,6 +85,25 @@ const stub = <T>(message = "Implement me"): T => {
     throw new Error(message)
 }
 
+/**
+ * Examples:
+ *
+ * `normalizeGitRemoteUrl("git@github.com:DenisGorbachev/rust-private-template.git") == "https://github.com/DenisGorbachev/rust-private-template"`
+ *
+ * @param url
+ */
+const normalizeGitRemoteUrl = (url: string) => {
+    // Handle GitHub SSH format: git@github.com:username/repo.git
+    const sshMatch = url.match(/^git@github\.com:([^/]+)\/(.+?)(?:\.git)?$/)
+    if (sshMatch) {
+        const [, username, repo] = sshMatch
+        return `https://github.com/${username}/${repo}`
+    }
+    
+    // Return original if not a GitHub SSH URL
+    return url
+}
+
 const dirname = import.meta.dirname
 if (!dirname) throw new Error("Cannot determine the current script dirname")
 
@@ -105,18 +124,22 @@ const nail = (str: string) => {
 // launch multiple promises in parallel
 const cargoTomlPromise = $`yj -t < Cargo.toml`;
 const cargoMetadataPromise = $`cargo metadata --format-version 1`;
-const ghRepoPromise = $`gh repo view --json url`
+const originUrlPromise = $`git remote get-url origin`
 
 const theCargoTomlRaw = JSON.parse((await cargoTomlPromise).stdout)
-const theCargoMetadataRaw = JSON.parse((await cargoMetadataPromise).stdout)
 
 // If README generation is manually disabled in the Cargo.toml, just exit successfully
 if (theCargoTomlRaw.package?.metadata?.details?.readme?.generate === false) {
     Deno.exit(0)
 }
 
+const theCargoMetadataRaw = JSON.parse((await cargoMetadataPromise).stdout)
+
 const theCargoToml = CargoTomlSchema.parse(theCargoTomlRaw)
 const theCargoMetadata = CargoMetadataSchema.parse(theCargoMetadataRaw)
+const theOriginUrl = normalizeGitRemoteUrl((await originUrlPromise).stdout);
+
+assertEquals(theOriginUrl, theCargoToml.package.repository)
 
 const { package: { name, description, license, metadata: { details: {title: titleExplicit, peers} } } } = theCargoToml
 const title = titleExplicit || description
@@ -157,14 +180,11 @@ const helpPromise = primaryBinTarget ? $`cargo run --quiet --bin ${primaryBinTar
 const doc = await doc2ReadmePromise
 const docStr = doc.stdout.trim()
 
-const repo: Repo = parse(RepoSchema, await ghRepoPromise)
-assertEquals(repo.url, theCargoToml.package.repository)
-
 const docsUrlHead = await docsUrlPromise
 const docsUrlIs200 = docsUrlHead.status === 200
 
 const badges: Badge[] = [
-    badge("Build", `${repo.url}/actions/workflows/ci.yml/badge.svg`, repo.url),
+    badge("Build", `${theCargoToml.package.repository}/actions/workflows/ci.yml/badge.svg`, theCargoToml.package.repository),
 ]
 if (docsUrlIs200) {
     badges.push(badge("Documentation", `https://docs.rs/${name}/badge.svg`, docsUrl))
@@ -214,7 +234,7 @@ if (secondaryBinTargets.length) {
     const secondaryBinTargetsNames = secondaryBinTargets.map((t) => t.name)
     pushSection(sections, "Additional binaries", renderMarkdownList(secondaryBinTargetsNames.map((bin) => `\`${bin}\``)))
 }
-pushSection(sections, "Gratitude", `Like the project? [⭐ Star this repo](${repo.url}) on GitHub!`)
+pushSection(sections, "Gratitude", `Like the project? [⭐ Star this repo](${theCargoToml.package.repository}) on GitHub!`)
 
 if (licenseNames.length) {
     const licenseLinks = licenseNames.map(name => {
