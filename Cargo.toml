@@ -28,4 +28,14 @@ stub-macro = { version = "0.1.3" }
 subtype = { git = "https://github.com/DenisGorbachev/subtype" }
 
 [package.metadata.cargo-machete]
-ignored = ["derive_more", "derive-getters", "derive-new", "fmt-derive", "stub-macro", "strum", "standard-traits", "helpful", "subtype"]
+ignored = [
+    "derive-getters",
+    "derive-new",
+    "derive_more",
+    "fmt-derive",
+    "helpful",
+    "standard-traits",
+    "strum",
+    "stub-macro",
+    "subtype"
+]
