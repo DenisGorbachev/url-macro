@@ -23,8 +23,19 @@ derive_more = { version = "2.0.1", features = ["full"] }
 fmt-derive = "0.1.2"
 helpful = { git = "https://github.com/DenisGorbachev/helpful" }
 standard-traits = { git = "https://github.com/DenisGorbachev/standard-traits" }
+strum = { version = "0.27.1", features = ["derive"] }
 stub-macro = { version = "0.1.3" }
 subtype = { git = "https://github.com/DenisGorbachev/subtype" }
 
 [package.metadata.cargo-machete]
-ignored = ["derive_more", "derive-getters", "derive-new", "fmt-derive", "stub-macro", "standard-traits", "helpful", "subtype"]
+ignored = [
+    "derive-getters",
+    "derive-new",
+    "derive_more",
+    "fmt-derive",
+    "helpful",
+    "standard-traits",
+    "strum",
+    "stub-macro",
+    "subtype"
+]
