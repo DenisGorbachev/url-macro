@@ -6,6 +6,7 @@ import { z, ZodSchema, ZodTypeDef } from "https://deno.land/x/zod@v3.23.8/mod.ts
 import { assert, assertEquals } from "jsr:@std/assert@1.0.0"
 import { toSnakeCase } from "jsr:@std/text@1.0.10"
 import { parseArgs } from "jsr:@std/cli@1.0.13"
+import { parse as parseToml } from "jsr:@std/toml@1.0.2"
 
 export const args = parseArgs(Deno.args, {
     string: ["output"],
@@ -19,6 +20,7 @@ const CargoTomlSchema = z.object({
         name: z.string().min(1),
         description: z.string().min(1),
         repository: z.string().url().min(1),
+        license: z.string().optional(),
         metadata: z.object({
             details: z.object({
                 title: z.string().min(1).optional(),
@@ -84,13 +86,33 @@ const stub = <T>(message = "Implement me"): T => {
     throw new Error(message)
 }
 
+/**
+ * Examples:
+ *
+ * `normalizeGitRemoteUrl("git@github.com:DenisGorbachev/rust-private-template.git") == "https://github.com/DenisGorbachev/rust-private-template"`
+ *
+ * @param url
+ */
+const normalizeGitRemoteUrl = (url: string) => {
+    // Handle GitHub SSH format: git@github.com:username/repo.git
+    const sshMatch = url.match(/^git@github\.com:([^/]+)\/([^/]+?)\.git$/)
+    if (sshMatch) {
+        const [, username, repo] = sshMatch
+        return `https://github.com/${username}/${repo}`
+    }
+    
+    // Return original if not a GitHub SSH URL
+    return url
+}
+
 const dirname = import.meta.dirname
 if (!dirname) throw new Error("Cannot determine the current script dirname")
 
 const $ = zx.$({ cwd: dirname })
 
+const parseProcessOutput = (input: zx.ProcessOutput) => JSON.parse(input.stdout)
 // deno-lint-ignore no-explicit-any
-const parse = <Output = any, Def extends ZodTypeDef = ZodTypeDef, Input = Output>(schema: ZodSchema<Output, Def, Input>, input: zx.ProcessOutput) => schema.parse(JSON.parse(input.stdout))
+const parse = <Output = any, Def extends ZodTypeDef = ZodTypeDef, Input = Output>(schema: ZodSchema<Output, Def, Input>, input: zx.ProcessOutput) => schema.parse(parseProcessOutput(input))
 const nail = (str: string) => {
     const spacesAtStart = str.match(/^\n(\s+)/)
     if (spacesAtStart?.[1]) {
@@ -100,19 +122,28 @@ const nail = (str: string) => {
     }
 }
 
-const cargoTomlPromise = $`yj -t < Cargo.toml`;
-const cargoMetadataPromise = $`cargo metadata --format-version 1`;
-const ghRepoPromise = $`gh repo view --json url`
-
-const theCargoToml: CargoToml = parse(CargoTomlSchema, await cargoTomlPromise)
-const theCargoMetadata: CargoMetadata = parse(CargoMetadataSchema, await cargoMetadataPromise)
-const { package: { name, description, metadata: { details: {title: titleExplicit, peers, readme: {generate}} } } } = theCargoToml
+const theCargoTomlText = await Deno.readTextFile(`${dirname}/Cargo.toml`);
+// deno-lint-ignore no-explicit-any
+const theCargoTomlRaw = parseToml(theCargoTomlText) as any
 
 // If README generation is manually disabled in the Cargo.toml, just exit successfully
-if (!generate) {
+if (theCargoTomlRaw.package?.metadata?.details?.readme?.generate === false) {
     Deno.exit(0)
 }
 
+// launch multiple promises in parallel
+const cargoMetadataPromise = $`cargo metadata --format-version 1`;
+const originUrlPromise = $`git remote get-url origin`
+
+const theCargoMetadataRaw = JSON.parse((await cargoMetadataPromise).stdout)
+
+const theCargoToml = CargoTomlSchema.parse(theCargoTomlRaw)
+const theCargoMetadata = CargoMetadataSchema.parse(theCargoMetadataRaw)
+const theOriginUrl = normalizeGitRemoteUrl((await originUrlPromise).stdout.trim());
+
+assertEquals(theOriginUrl, theCargoToml.package.repository)
+
+const { package: { name, description, license, metadata: { details: {title: titleExplicit, peers} } } } = theCargoToml
 const title = titleExplicit || description
 const _libTargetName = toSnakeCase(name)
 const thePackageMetadata = theCargoMetadata.packages.find((p) => p.name == name)
@@ -144,7 +175,6 @@ const doc2readmeRender = async (target: string) => {
     return $`cargo doc2readme --template ${templatePath} --target-name ${target} --out -`
 }
 
-// launch multiple promises in parallel
 const doc2ReadmePromise = doc2readmeRender(primaryTarget.name)
 const docsUrlPromise = fetch(docsUrl, { method: "HEAD" })
 const helpPromise = primaryBinTarget ? $`cargo run --quiet --bin ${primaryBinTarget.name} -- --help` : undefined
@@ -152,19 +182,27 @@ const helpPromise = primaryBinTarget ? $`cargo run --quiet --bin ${primaryBinTar
 const doc = await doc2ReadmePromise
 const docStr = doc.stdout.trim()
 
-const repo: Repo = parse(RepoSchema, await ghRepoPromise)
-assertEquals(repo.url, theCargoToml.package.repository)
-
 const docsUrlHead = await docsUrlPromise
 const docsUrlIs200 = docsUrlHead.status === 200
 
 const badges: Badge[] = [
-    badge("Build", `${repo.url}/actions/workflows/ci.yml/badge.svg`, repo.url),
+    badge("Build", `${theCargoToml.package.repository}/actions/workflows/ci.yml/badge.svg`, theCargoToml.package.repository),
 ]
 if (docsUrlIs200) {
     badges.push(badge("Documentation", `https://docs.rs/${name}/badge.svg`, docsUrl))
 }
 const badgesStr = badges.map(({ name, image, url }) => `[![${name}](${image})](${url})`).join("\n")
+
+const licenseNameFileMap: Record<string, string> = {
+    "Apache-2.0": "LICENSE-APACHE",
+    "MIT": "LICENSE-MIT"
+}
+const getLicenseFile = (name: string) => {
+    const file = licenseNameFileMap[name];
+    if (file === undefined) throw new Error(`licenseNameFileMap is missing the following key: \`${name}\``)
+    return file
+}
+const licenseNames = license ? license.split("OR").map(name => name.trim()) : []
 
 const renderMarkdownList = (items: string[]) => items.map((bin) => `* ${bin}`).join("\n")
 const renderShellCode = (code: string) => `\`\`\`shell\n${code}\n\`\`\``
@@ -198,16 +236,24 @@ if (secondaryBinTargets.length) {
     const secondaryBinTargetsNames = secondaryBinTargets.map((t) => t.name)
     pushSection(sections, "Additional binaries", renderMarkdownList(secondaryBinTargetsNames.map((bin) => `\`${bin}\``)))
 }
-pushSection(sections, "Gratitude", `Like the project? [⭐ Star this repo](${repo.url}) on GitHub!`)
-pushSection(
-    sections,
-    "License",
-    `
-[Apache License 2.0](LICENSE-APACHE) or [MIT License](LICENSE-MIT) at your option.
+pushSection(sections, "Gratitude", `Like the project? [⭐ Star this repo](${theCargoToml.package.repository}) on GitHub!`)
 
-Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this crate by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
+if (licenseNames.length) {
+    const licenseLinks = licenseNames.map(name => {
+        const file = getLicenseFile(name)
+        return `[${name}](${file})`
+    })
+    pushSection(
+      sections,
+      "License",
+      `
+${licenseLinks.join(" or ")}.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this crate by you, shall be licensed as above, without any additional terms or conditions.
 `.trim(),
-)
+    )
+}
+
 
 const body = renderNonEmptySections(sections)
 
