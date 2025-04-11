@@ -180,7 +180,7 @@ const doc2readmeRender = async (target: string) => {
 const doc2ReadmePromise = doc2readmeRender(primaryTarget.name)
 const docsUrlPromise = fetch(docsUrl, { method: "HEAD" })
 const helpPromise = primaryBinTarget ? $`cargo run --quiet --bin ${primaryBinTarget.name} -- --help` : undefined
-const ghRepoViewPromise = $`gh repo view --json url,visibility ${theOriginUrl}`
+const ghRepoViewPromise = $`gh repo view --json url,visibility ${theOriginUrl}`.nothrow().quiet()
 
 const doc = await doc2ReadmePromise
 const docStr = doc.stdout.trim()
@@ -190,16 +190,15 @@ const docsUrlIs200 = docsUrlHead.status === 200
 
 // Hack: await the promise instead of calling `then` because `then` has incorrect type in `zx`
 const theGitHubRepo = await (async () => {
-  try {
-    const output = await ghRepoViewPromise
+  const output = await ghRepoViewPromise
+  if (output.exitCode === 0) {
     return parse(GitHubRepoSchema, output)
-  } catch (e) {
-    console.error("ERROR:")
-    console.error(e)
-    if (e.message.includes('argument error: expected the "[HOST/]OWNER/REPO" format')) {
+  } else {
+    const text = output.text()
+    if (text.includes('argument error: expected the "[HOST/]OWNER/REPO" format')) {
       return null
     } else {
-      throw e
+      throw new Error("Failure in ghRepoViewPromise: \n" + text)
     }
   }
 })()
