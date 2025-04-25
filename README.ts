@@ -7,7 +7,7 @@ import { z, ZodSchema, ZodTypeDef } from "https://deno.land/x/zod@v3.23.8/mod.ts
 import { assert, assertEquals } from "jsr:@std/assert@1.0.0"
 import { toSnakeCase } from "jsr:@std/text@1.0.10"
 import { parseArgs } from "jsr:@std/cli@1.0.13"
-import { parse as parseToml } from "jsr:@std/toml@1.0.2"
+import { parse as parseToml } from "jsr:@std/toml@1.0.5"
 
 export const args = parseArgs(Deno.args, {
   string: ["output"],
