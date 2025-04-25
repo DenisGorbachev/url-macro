@@ -6,3 +6,4 @@ deno.json
 LICENSE*
 README.ts
 rustfmt.toml
+.repomixignore
