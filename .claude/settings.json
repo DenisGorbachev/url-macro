@@ -9,16 +9,16 @@
       "Bash(git log :*)",
       "Bash(cargo :*)",
       "Bash(mise run :*)",
-      "BatchTool",
-      "GlobTool",
-      "GrepTool",
       "LS",
-      "View",
       "Edit",
-      "Replace",
       "ReadNotebook",
       "NotebookEditCell",
-      "WebFetchTool"
+      "Batch",
+      "Glob",
+      "Grep",
+      "Read",
+      "Write",
+      "WebFetch"
     ]
   }
 }
