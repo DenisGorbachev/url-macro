@@ -52,7 +52,7 @@ run = "cargo sort"
 run = "cargo check --all-targets --all-features"
 
 [tasks."fix"]
-depends = ["fix:code", "fix:docs"]
+depends = ["fix:code", "fix:deps"]
 
 [tasks."fix:code"]
 env = { __CARGO_FIX_YOLO = 'yeah' }
