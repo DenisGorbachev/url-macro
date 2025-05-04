@@ -21,35 +21,41 @@ if [[ -z $title ]]; then
   title=$description
 fi
 
-(cd "$dir" && mise trust)
-(cd "$dir" && mise install)
+(
+  cd "$dir"
 
-name_old=$(taplo get -f "$cargo_toml" "package.name")
-name_old_snake_case=$(ccase --to snake "$name_old")
-name_new_snake_case=$(ccase --to snake "$name_new")
-repo_url=$(cd "$dir" && gh repo view --json url | jq -r .url)
+  files=("README.md" "LICENSE-APACHE" "LICENSE-MIT")
+  for file in "${files[@]}"; do
+    if [[ -f "$file" ]]; then
+      rm "$file"
+    fi
+  done
 
-tomli set -f "$cargo_toml" "package.name" "$name_new" | sponge "$cargo_toml"
-tomli set -f "$cargo_toml" "package.repository" "$repo_url" | sponge "$cargo_toml"
-tomli set -f "$cargo_toml" "package.homepage" "$repo_url" | sponge "$cargo_toml"
-tomli set -f "$cargo_toml" "package.description" "$description" | sponge "$cargo_toml"
-tomli set -f "$cargo_toml" "package.metadata.details.title" "$title" | sponge "$cargo_toml"
-tomli delete --if-exists -f "$cargo_toml" "package.metadata.details.readme.generate" | sponge "$cargo_toml"
+  mise trust
+  mise install
 
-while IFS= read -r file; do
-  rm "$dir/$file"
-done < "$dir/.repoconf/data/init-removed-files"
+  name_old=$(taplo get -f "$cargo_toml" "package.name")
+  name_old_snake_case=$(ccase --to snake "$name_old")
+  name_new_snake_case=$(ccase --to snake "$name_new")
+  repo_url=$(cd "$dir" && gh repo view --json url | jq -r .url)
 
-# rg exits with status code = 1 if it doesn't find any files, so we need to disable & re-enable "set -e"
-set +e
-rg --files-with-matches "$name_old_snake_case" "$dir" | xargs gsed -i "s/\b$name_old_snake_case\b/$name_new_snake_case/g"
-set -e
+  tomli set -f "$cargo_toml" "package.name" "$name_new" | sponge "$cargo_toml"
+  tomli set -f "$cargo_toml" "package.repository" "$repo_url" | sponge "$cargo_toml"
+  tomli set -f "$cargo_toml" "package.homepage" "$repo_url" | sponge "$cargo_toml"
+  tomli set -f "$cargo_toml" "package.description" "$description" | sponge "$cargo_toml"
+  tomli set -f "$cargo_toml" "package.metadata.details.title" "$title" | sponge "$cargo_toml"
+  tomli delete --if-exists -f "$cargo_toml" "package.metadata.details.readme.generate" | sponge "$cargo_toml"
 
-(cd "$dir" && mise exec "npm:lefthook" -- lefthook install)
+  # rg exits with status code = 1 if it doesn't find any files, so we need to disable & re-enable "set -e"
+  set +e
+  rg --files-with-matches "$name_old_snake_case" "$dir" | xargs gsed -i "s/\b$name_old_snake_case\b/$name_new_snake_case/g"
+  set -e
 
-(cd "$dir" && mise run build)
+  mise exec -- lefthook install
 
-(cd "$dir" && mise run test)
+  mise run build
+  mise run test
 
-# remove .repoconf just before the final commit, in the same line
-(cd "$dir" && rm -r "$dir/.repoconf" && git add . && git commit -a -m "chore: update package details")
+  git add .
+  git commit -a -m "chore: update package details"
+)

@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rg :*)",
+      "Bash(fd :*)",
+      "Bash(grep :*)",
+      "Bash(find :*)",
+      "Bash(git diff :*)",
+      "Bash(git log :*)",
+      "Bash(cargo :*)",
+      "Bash(mise run :*)",
+      "LS",
+      "Edit",
+      "ReadNotebook",
+      "NotebookEditCell",
+      "Batch",
+      "Glob",
+      "Grep",
+      "Read",
+      "Write",
+      "WebFetch"
+    ]
+  }
+}
