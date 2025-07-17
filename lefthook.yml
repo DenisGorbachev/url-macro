@@ -13,14 +13,10 @@ pre-commit:
     fmt:
       run: mise run fmt
       stage_fixed: true
-    lint:code:
-      run: mise run lint:code
-    lint:docs:
-      run: mise run lint:docs
-    lint:deps:
-      run: mise run lint:deps
-    test:code:
-      run: mise run test:code --no-fail-fast
+    lint:
+      run: mise run lint
+    test:
+      run: mise run test
     sort:deps:
       run: mise run sort:deps
       stage_fixed: true

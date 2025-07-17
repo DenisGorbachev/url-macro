@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Agent",
+      "Bash(rg :*)",
+      "Bash(fd :*)",
+      "Bash(grep :*)",
+      "Bash(find :*)",
+      "Bash(git diff :*)",
+      "Bash(git log :*)",
+      "Bash(cargo :*)",
+      "Bash(mise run :*)",
+      "Edit",
+      "MultiEdit",
+      "Glob",
+      "Grep",
+      "LS",
+      "NotebookRead",
+      "NotebookEdit",
+      "Read",
+      "Write",
+      "TodoRead",
+      "TodoWrite",
+      "WebFetch",
+      "WebSearch"
+    ]
+  }
+}
