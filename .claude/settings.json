@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "Agent",
       "Bash(rg :*)",
       "Bash(fd :*)",
       "Bash(grep :*)",
@@ -9,16 +10,19 @@
       "Bash(git log :*)",
       "Bash(cargo :*)",
       "Bash(mise run :*)",
-      "LS",
       "Edit",
-      "ReadNotebook",
-      "NotebookEditCell",
-      "Batch",
+      "MultiEdit",
       "Glob",
       "Grep",
+      "LS",
+      "NotebookRead",
+      "NotebookEdit",
       "Read",
       "Write",
-      "WebFetch"
+      "TodoRead",
+      "TodoWrite",
+      "WebFetch",
+      "WebSearch"
     ]
   }
 }
