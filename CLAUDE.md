@@ -104,6 +104,7 @@ Use `mise run ...` commands instead of regular `cargo` commands:
 ## Code style
 
 * The file names must match the names of the primary item in this file (for example: a file with `struct User` must be in `user.rs`)
+* Don't use `mod.rs`, use module files with submodules in the folder with the same name (for example: `user.rs` with submodules in `user` folder)
 * Put the trait implementations in the same file as the target struct (for example: put `impl TryFrom<...> for User` in the same file as `struct User`, which is `user.rs`)
 * Use destructuring assignment for tuple arguments, for example: `fn try_from((name, parent_key): (&str, GroupKey)) -> ...`
 * Add a local `use` statement for enums to minimize the code size. For example:
