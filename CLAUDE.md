@@ -128,3 +128,37 @@ Use `mise run ...` commands instead of regular `cargo` commands:
         }
     }
     ```
+* Simplify the callsite code by accepting `impl Into`. For example:
+  * Good:
+    ```rust
+    pub fn foo(input: impl Into<String>) {
+        let input = input.into();
+        // do something
+    }
+    ```
+  * Bad:
+    ```rust
+    /// This is bad because the callsite may have to call .into() when passing the input argument
+    pub fn foo(input: String) {}
+    ```
+* Provide additional flexibility for callsite by accepting `&impl AsRef` or `&mut impl AsMut` (e.g. both `PathBuf` and `Config` may implement `AsRef<Path>`). For example:
+  * Good:
+    ```rust
+    pub fn bar(input: &mut impl AsMut<String>) {
+        let input = input.as_mut();
+        // do something
+    }
+    
+    pub fn baz(input: &impl AsRef<str>) {
+        let input = input.as_ref();
+        // do something
+    }
+    ```
+  * Bad:
+    ```rust
+    /// This is bad because the callsite may have to call .as_mut() when passing the input argument
+    pub fn bar(input: &mut String) {}
+    
+    /// This is bad because the callsite may have to call .as_ref() when passing the input argument
+    pub fn baz(input: &str) {}
+    ```
