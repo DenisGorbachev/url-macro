@@ -8,6 +8,7 @@
       "Bash(grep :*)",
       "Bash(find :*)",
       "Bash(mv :*)",
+      "Bash(mkdir :*)",
       "Bash(head :*)",
       "Bash(tail :*)",
       "Bash(git diff :*)",
