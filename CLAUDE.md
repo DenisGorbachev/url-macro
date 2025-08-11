@@ -12,8 +12,9 @@
 
 Use `mise run ...` commands instead of regular `cargo` commands:
 
-* Run tests: `mise run test` (use this instead of `cargo test`)
-* Run specific test: `mise run test <test_file_path>` (use this instead of `cargo test`)
+* Run all code tests and doc tests: `mise run agent:test` (use this instead of `cargo test`)
+* Run all code tests only: `mise run agent:test:code` (use this instead of `cargo test`)
+* Run specific code test: `mise run agent:test:code <test_file_path>` (use this instead of `cargo test`)
 * Format code: `mise run fmt` (use this instead of `cargo fmt`)
 * Lint code: `mise run lint` (use this instead of `cargo clippy`)
 * Check types: `mise run check` (use this instead of `cargo check`)

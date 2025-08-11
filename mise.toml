@@ -1,7 +1,7 @@
 min_version = "2025.1.14"
 
 [tools]
-rust = "stable"
+rust = "1.89.0"
 node = "22.12.0"
 deno = "1.46.1"
 cargo-binstall = "1.10.15"
@@ -16,7 +16,7 @@ cargo-binstall = "1.10.15"
 "cargo:cargo-sort" = "1.0.9"
 "cargo:cargo-hack" = "0.6.33"
 "cargo:cargo-machete" = "0.7.0"
-"cargo:cargo-nextest" = "0.9.72"
+"cargo:cargo-nextest" = "0.9.102"
 
 [tasks."build"]
 run = "cargo build"
@@ -40,10 +40,10 @@ run = "mise run remark ."
 run = "cargo machete --with-metadata"
 
 [tasks."test:code"]
-run = "cargo nextest run --all-features"
+run = "cargo nextest run --all-features --no-tests warn"
 
 [tasks."test:docs"]
-run = "cargo test --doc"
+run = "cargo test --doc --all-features --no-fail-fast --quiet"
 
 [tasks."sort:deps"]
 run = "cargo sort"
@@ -85,3 +85,14 @@ remark --ignore-path .gitignore --ignore-pattern CHANGELOG.md --quiet --frail --
 
 [tasks."commitlint"]
 run = "commitlint --extends \"$(mise where npm:@commitlint/config-conventional)/lib/node_modules/@commitlint/config-conventional/lib/index.js\""
+
+[tasks."agent:on:stop"]
+depends = ["agent:test", "lint", "fmt", "sort:deps"]
+
+[tasks."agent:test"]
+depends = ["agent:test:code", "test:docs"]
+
+[tasks."agent:test:code"]
+# don't include `--fail-fast` because it's better to let the agent see all failures
+# reduce output to save tokens
+run = "mise run test:code -- --cargo-quiet --hide-progress-bar --status-level fail --final-status-level flaky"
