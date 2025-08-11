@@ -7,16 +7,7 @@
 * Read @CLAUDE.project.md
 * Don't create git commits
 * Use `fd` and `rg` instead of `find` and `grep`
-
-## Commands
-
-Use `mise run ...` commands instead of regular `cargo` commands:
-
-* Run tests: `mise run test` (use this instead of `cargo test`)
-* Run specific test: `mise run test <test_file_path>` (use this instead of `cargo test`)
-* Format code: `mise run fmt` (use this instead of `cargo fmt`)
-* Lint code: `mise run lint` (use this instead of `cargo clippy`)
-* Check types: `mise run check` (use this instead of `cargo check`)
+* Do not run `test`, `lint`, `clippy`, `fmt`, `check` commands (they will be run automatically after you finish your task)
 
 ## Error handling
 
