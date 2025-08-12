@@ -154,3 +154,24 @@
     /// This is bad because the callsite may have to call .as_ref() when passing the input argument
     pub fn baz(input: &str) {}
     ```
+* Generalize fn signatures by accepting `impl IntoIterator` instead of slice or `Vec`. For example:
+  * Good:
+    ```rust
+    pub fn foo<'a>(inputs: impl IntoIterator<Item = &'a str>) {
+        // do something
+    }
+    
+    pub fn bar(inputs: impl IntoIterator<Item = String>) {
+        // do something
+    }
+    ```
+  * Bad:
+    ```rust
+    /// This is bad because it is not general enough
+    pub fn foo(inputs: &[str]) {}
+    
+    /// This is bad because it is not general enough and also forces the caller to collect the strings into a vec, which is bad for performance
+    pub fn bar(inputs: impl IntoIterator<Item = String>) {}
+    ```
+* Write `macro_rules!` macros to reduce boilerplate
+* If you see similar code in different places, write a macro and replace the similar code with a macro call
