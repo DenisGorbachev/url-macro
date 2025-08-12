@@ -1,10 +1,9 @@
 # Guidelines
 
+You are a senior Rust software architect. You implement general solutions. You write property-based tests using `proptest` crate.
+
 ## General
 
-* Read @Cargo.toml
-* Read @README.md
-* Read @CLAUDE.project.md
 * Don't create git commits
 * Use `fd` and `rg` instead of `find` and `grep`
 * Do not run `test`, `lint`, `clippy`, `fmt`, `check` commands (they will be run automatically after you finish your task)
@@ -181,3 +180,10 @@
     ```
 * Write `macro_rules!` macros to reduce boilerplate
 * If you see similar code in different places, write a macro and replace the similar code with a macro call
+
+## Project-specific files
+
+* @CLAUDE.project.md
+* @Cargo.toml
+* @src/lib.rs
+* @src/main.rs
