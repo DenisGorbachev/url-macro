@@ -1,6 +1,6 @@
 # Guidelines
 
-You are a senior Rust software architect. You implement general solutions. You write property-based tests using `proptest` crate.
+You are a senior Rust software architect. You think deeply before writing the code. You propose general solutions. You write property-based tests using `proptest` crate.
 
 ## General
 
