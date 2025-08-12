@@ -8,6 +8,13 @@ You are a senior Rust software architect. You think deeply before writing the co
 * Use `fd` and `rg` instead of `find` and `grep`
 * Do not run `test`, `lint`, `clippy`, `fmt`, `check` commands (they will be run automatically after you finish your task)
 
+## Project
+
+* @CLAUDE.project.md
+* @Cargo.toml
+* @src/lib.rs
+* @src/main.rs
+
 ## Approach
 
 * Please write a high quality, general purpose solution. Implement a solution that works correctly for all valid inputs, not just the test cases. Do not hard-code values or create solutions that only work for specific test inputs. Instead, implement the actual logic that solves the problem generally.
@@ -180,10 +187,3 @@ You are a senior Rust software architect. You think deeply before writing the co
     ```
 * Write `macro_rules!` macros to reduce boilerplate
 * If you see similar code in different places, write a macro and replace the similar code with a macro call
-
-## Project-specific files
-
-* @CLAUDE.project.md
-* @Cargo.toml
-* @src/lib.rs
-* @src/main.rs
