@@ -2,6 +2,7 @@
 name = "rust-pre-public-lib-template"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.85.0"
 description = "A template for creating Rust pre-public libs."
 homepage = "https://github.com/DenisGorbachev/rust-pre-public-lib-template"
 repository = "https://github.com/DenisGorbachev/rust-pre-public-lib-template"
