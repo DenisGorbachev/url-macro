@@ -1,7 +1,7 @@
 [package]
 name = "rust-private-template"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 description = "A template for creating Rust private repositories."
 homepage = "https://github.com/DenisGorbachev/rust-private-template"
 repository = "https://github.com/DenisGorbachev/rust-private-template"
