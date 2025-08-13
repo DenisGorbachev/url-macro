@@ -2,6 +2,7 @@
 name = "rust-public-lib-template"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.85.0"
 description = "A template for a public Rust library"
 license = "Apache-2.0 OR MIT"
 homepage = "https://github.com/DenisGorbachev/rust-public-lib-template"
