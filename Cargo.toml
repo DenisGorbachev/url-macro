@@ -2,6 +2,7 @@
 name = "rust-private-template"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.85.0"
 description = "A template for creating Rust private repositories."
 homepage = "https://github.com/DenisGorbachev/rust-private-template"
 repository = "https://github.com/DenisGorbachev/rust-private-template"
