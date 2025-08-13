@@ -5,6 +5,8 @@ pre-commit:
     fmt:
       run: mise run fmt
       stage_fixed: true
+      # `files` is needed for `stage_fixed` (by default, `stage_fixed` uses `{staged_files}`, but fmt may modify files which haven't been staged)
+      files: git diff --name-only
     lint:
       run: mise run lint
     test:
