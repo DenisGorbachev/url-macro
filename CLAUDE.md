@@ -187,3 +187,7 @@ You are a senior Rust software architect. You think deeply before writing the co
     ```
 * Write `macro_rules!` macros to reduce boilerplate
 * If you see similar code in different places, write a macro and replace the similar code with a macro call
+
+## API handlers
+
+* Don't return a `success` field, instead use the HTTP status to indicate success or failure
