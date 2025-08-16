@@ -29,9 +29,8 @@ jobs:
           mise rm rust
       - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: ${{ matrix.rust }}
           components: clippy, rustfmt
-      - uses: Swatinem/rust-cache@v2.7.3
+      - uses: Swatinem/rust-cache@v2.8.0
       - run: lefthook run --force pre-commit
       - run: cargo hack test --feature-powerset
       - uses: wagoid/commitlint-github-action@v6
