@@ -187,3 +187,63 @@ You are a senior Rust software architect. You think deeply before writing the co
     ```
 * Write `macro_rules!` macros to reduce boilerplate
 * If you see similar code in different places, write a macro and replace the similar code with a macro call
+
+## Axum API handlers
+
+* Use the HTTP status to indicate success or failure, don't return a `success` field
+* Return serializable types, not `serde_json::json!`, for example:
+  * Good:
+    ```rust
+    #[derive(Serialize)]
+    pub struct CurrentUserView {
+        pub username: Username,
+    }
+  
+    impl From<&AuthenticatedUser> for CurrentUserView {
+        fn from(user: &AuthenticatedUser) -> Self {
+            Self {
+                username: user.username.clone(),
+            }
+        }
+    }
+  
+    #[derive(Serialize)]
+    #[serde(tag = "type")]
+    pub enum GetCurrentUserResponse {
+        Unauthenticated,
+        Authenticated(CurrentUserView),
+    }
+  
+    impl From<&AuthenticatedUser> for GetCurrentUserResponse {
+        fn from(user: &AuthenticatedUser) -> Self {
+            Self::Authenticated(CurrentUserView::from(user))
+        }
+    }
+    
+    pub async fn get_current_user(auth_session: AuthSession<AuthBackend>) -> impl IntoResponse {
+        match auth_session.user {
+            Some(user) => (StatusCode::OK, Json(GetCurrentUserResponse::from(&user))),
+            None => (StatusCode::OK, Json(GetCurrentUserResponse::Unauthenticated)),
+        }
+    }
+    ```
+  * Bad:
+    ```rust
+    pub async fn get_current_user(auth_session: AuthSession<AuthBackend>) -> impl IntoResponse {
+        match auth_session.user {
+            Some(user) => (
+                StatusCode::OK,
+                Json(serde_json::json!({
+                    "authenticated": true,
+                    "username": user.username.to_string()
+                })),
+            ),
+            None => (
+                StatusCode::OK,
+                Json(serde_json::json!({
+                    "authenticated": false
+                })),
+            ),
+        }
+    }
+    ```
