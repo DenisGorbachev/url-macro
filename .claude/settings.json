@@ -5,6 +5,8 @@
       "Agent",
       "Bash(rg :*)",
       "Bash(fd :*)",
+      "Bash(jq :*)",
+      "Bash(echo :*)",
       "Bash(grep :*)",
       "Bash(find :*)",
       "Bash(mv :*)",
