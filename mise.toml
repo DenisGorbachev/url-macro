@@ -17,6 +17,7 @@ cargo-binstall = "1.10.15"
 "cargo:cargo-hack" = "0.6.33"
 "cargo:cargo-machete" = "0.7.0"
 "cargo:cargo-nextest" = "0.9.102"
+"cargo:cargo-expand" = "1.0.114"
 
 [tasks."build"]
 run = "cargo build"
