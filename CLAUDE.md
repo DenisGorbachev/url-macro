@@ -25,8 +25,10 @@ You are a senior Rust software architect. You write high-quality, production-rea
 
 * Implement proper error handling using error types that implement `Error`
 * Never use plain strings for error messages
+* Never use `unwrap` or `expect` in production code, only use `unwrap` or `expect` in tests
 * Ensure that each function has its own error type
 * Ensure that each function argument that is passed by value is returned in the error
+* Ensure that each function argument that is passed by reference is not returned in the error (because the caller retains ownership of that argument)
 * If the function has arguments passed by value, then the error type of this function must be a struct
 * If the function has arguments passed by value and also calls other functions, then the error type of this function must include a field `reason`, whose type is an enum that holds the variants for errors of each call of other function, and the count of variants must be at least the count of calls (may contain variants for native errors that may be created within the function itself)
 * In the function that returns an error, use `make_err!` macro to generate a function-local definition of an `err!` macro that captures the arguments by value in the newly created error; this way, you only need to call `err!` with a reason variant
@@ -45,7 +47,6 @@ You are a senior Rust software architect. You write high-quality, production-rea
 * The function error type name must match the function name. If the function is within an `impl` block, then the error type name must match a concatenation of `impl` name and `fn` name. Examples:
   * Good: `pub fn foo() -> Result<(), FooError>` (in a freestanding function, the error name matches the function name)
   * Good: `impl User { pub fn foo() -> Result<(), UserFooError> }` (in an associated function, the error name matches the struct name plus the function name)
-* Never use `unwrap` or `expect` in production code, only use `unwrap` or `expect` in tests
 * For error enums, the variant names must match the variant inner type name, but without the "Error". For example:
   * Good:
     ```rust
