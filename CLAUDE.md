@@ -15,6 +15,11 @@ You are a senior Rust software architect. You write high-quality, production-rea
 * @src/lib.rs
 * @src/main.rs
 
+## Tools
+
+* When using bash, write the arguments in single quotes instead of double quotes
+* When using bash, don't use subshells
+
 ## Approach
 
 * Please write a high quality, general purpose solution. Implement a solution that works correctly for all valid inputs, not just the test cases. Do not hard-code values or create solutions that only work for specific test inputs. Instead, implement the actual logic that solves the problem generally.
