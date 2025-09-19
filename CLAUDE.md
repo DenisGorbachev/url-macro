@@ -26,66 +26,6 @@ You are a senior Rust software architect. You write high-quality, production-rea
 * Focus on understanding the problem requirements and implementing the correct algorithm. Tests are there to verify correctness, not to define the solution. Provide a principled implementation that follows best practices and software design principles.
 * If the task is unreasonable or infeasible, or if any of the tests are incorrect, please tell me. The solution should be robust, maintainable, and extendable.
 
-## Error handling
-
-* Implement proper error handling using error types that implement `Error`
-* Never use plain strings for error messages
-* Never use `unwrap` or `expect` in production code, only use `unwrap` or `expect` in tests
-* Ensure that each function has its own error type
-* Ensure that each function argument that is passed by value is returned in the error
-* Ensure that each function argument that is passed by reference is not returned in the error (because the caller retains ownership of that argument)
-* If the function has arguments passed by value, then the error type of this function must be a struct
-* If the function has arguments passed by value and also calls other functions, then the error type of this function must include a field `reason`, whose type is an enum that holds the variants for errors of each call of other function, and the count of variants must be at least the count of calls (may contain variants for native errors that may be created within the function itself)
-* If the error struct contains a `reason` field, then it must be the first field (`make_err!` macro assumes that `reason` is the first field)
-* In the function that returns an error, use `make_err!` macro to generate a function-local definition of an `err!` macro that captures the arguments by value in the newly created error; this way, you only need to call `err!` with a reason variant
-* Add the error types to the `errors` folder
-* Ensure that error types derive `Error`, `From`, `Into` from `derive_more` crate (`use derive_more::{Error, From, Into}`)
-* Ensure that error types derive `Display` from `fmt_derive` crate (`use fmt_derive::Display`)
-* Ensure that error structs derive `new` from `derive_new` crate (`use derive_new::new`)
-* Ensure that error types names end with "Error"
-* Ensure that error types are attached to the `errors` module, which itself is attached to the file with the functions that use these error types
-* If each field of the error struct implements `Copy`, then the error struct must implement `Copy` too
-* If each variant of the error enum implements `Copy`, then the error enum must implement `Copy` too
-* The error structs must not contain a `message` field (they must be provided automatically by the `Display` derive)
-* All fields of the error structs must be `pub`
-* If a function calls other functions, the caller function must return an error which is an enum with variants for each call
-* If a function calls two other functions that return the same error type but have different semantics, then a caller error enum must contain variants for both calls (the variants must have different names but same inner error types)
-* If a function calls a single other function, the caller function must still return its own error that wraps the callee error
-* The function error type name must match the function name. If the function is within an `impl` block, then the error type name must match a concatenation of `impl` name and `fn` name. Examples:
-  * Good: `pub fn foo() -> Result<(), FooError>` (in a freestanding function, the error name matches the function name)
-  * Good: `impl User { pub fn foo() -> Result<(), UserFooError> }` (in an associated function, the error name matches the struct name plus the function name)
-* For error enums, the variant names must match the variant inner type name, but without the "Error". For example:
-  * Good:
-    ```rust
-    #[derive(Error, Display, From, Eq, PartialEq, Hash, Clone, Debug)]
-    pub enum GroupsInsertStrError {
-        NameTryFromString(<Name as TryFrom<String>>::Error),
-        GroupInsert(GroupInsertError),
-    }
-    ```
-* If the error struct or error enum variant has only one field, then `derive_more::Error` will try to use it as a source. If this field is actually another error, then you don't need to do anything. But if this field is not an error, but a value that provides additional information, then you need to attach `#[error(not(source))]` to the key field to prevent it from being treated as error source. For example:
-  * Good (notice that `BrandKey` is not an error, so it has `#[error(not(source))]`, but `ProductsInsertErrorReason` is an error, so it doesn't have `#[error(not(source))]`):
-    ```rust
-    use derive_more::{Error, From};
-    
-    #[derive(Error, Display, From, Eq, PartialEq, Clone, Debug)]
-    pub enum DbInsertProductErrorReason {
-      BrandNotFound(#[error(not(source))] BrandKey),
-      ProductsInsert(ProductsInsertErrorReason),
-    }
-    ```
-* Use `?` instead of `map_err` to automatically convert the callee error to caller error (note that the caller error must implement `From<CalleeError>` and this impl can be derived automatically via `derive_more::From`)
-* Use `.into()` instead of full enum variant name to automatically convert an error that is created within the function to returned error. For example:
-  * Good:
-    ```rust
-    return Err(GroupNotFoundError::new(key).into());
-    ```
-  * Bad (uses a full variant name; can be made more concise):
-    ```rust
-    return Err(GroupsSetParentKeyError::GroupNotFound(GroupNotFoundError::new(key)));
-    ```
-* If the compiler emits a warning: "the `Err`-variant returned from this function is very large", then it's necessary to wrap some fields of the error in a `Box`
-
 ## Struct derives
 
 * If the struct derives `Getters`, then each field whose type implements `Copy` must have a `#[getter(copy)]` annotation. For example:
