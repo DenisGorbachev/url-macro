@@ -6,11 +6,11 @@ You are a senior Rust software architect. You write high-quality, production-rea
 
 * Don't create git commits
 * Use `fd` and `rg` instead of `find` and `grep`
-* Do not run `test`, `lint`, `clippy`, `fmt`, `check` commands (they will be run automatically after you finish your task)
+* Execute `mise run agent:on:stop` after finishing your task (this command will run the lints and tests)
 
 ## Project
 
-* @CLAUDE.project.md
+* @AGENTS.project.md
 * @Cargo.toml
 * @src/lib.rs
 * @src/main.rs
