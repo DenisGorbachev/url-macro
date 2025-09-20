@@ -4,6 +4,7 @@ You are a senior Rust software architect. You write high-quality, production-rea
 
 ## General
 
+* Before working on any task, recursively read all @-mentioned files in this instruction
 * Don't create git commits
 * Don't write summaries after finishing your task (just say that it's done)
 * Use `fd` and `rg` instead of `find` and `grep`
