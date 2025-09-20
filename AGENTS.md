@@ -16,16 +16,27 @@ You are a senior Rust software architect. You write high-quality, production-rea
 * @src/lib.rs
 * @src/main.rs
 
-## Tools
-
-* When using bash, write the arguments in single quotes instead of double quotes
-* When using bash, don't use subshells
-
 ## Approach
 
 * Please write a high quality, general purpose solution. Implement a solution that works correctly for all valid inputs, not just the test cases. Do not hard-code values or create solutions that only work for specific test inputs. Instead, implement the actual logic that solves the problem generally.
 * Focus on understanding the problem requirements and implementing the correct algorithm. Tests are there to verify correctness, not to define the solution. Provide a principled implementation that follows best practices and software design principles.
 * If the task is unreasonable or infeasible, or if any of the tests are incorrect, please tell me. The solution should be robust, maintainable, and extendable.
+
+## Modules
+
+* When creating a new module, declare it with a `mod` statement followed by `pub use` glob statement. The parent module must re-export all items from the child modules. This allows to `use` the items right from the crate root, without intermediate module path. For example:
+  ```rust
+  mod my_module_name;
+  pub use my_module_name::*;
+  ```
+* When importing items that are defined in the current crate, use direct import from crate root. For example:
+  ```rust
+  use crate::MyItemName;
+  ```
+
+## Error handling
+
+* Never convert a `Result` into an `Option`, always propagate the error up the call stack
 
 ## Struct derives
 
@@ -42,7 +53,9 @@ You are a senior Rust software architect. You write high-quality, production-rea
 
 ## Visibility
 
-* If a struct has a `new` method that returns a `Result`, then this is a private struct
+* By default, every type and function should be `pub`
+* Instead of `pub(crate)`, write `pub`
+* If a struct has a `new` method that returns a `Result`, then this is a private struct, so it must not be `pub`
 * Every field of a private struct must be private (not `pub`) to enforce validation
 * A private struct must always implement `TryFrom` instead of `From` (must never implement `From`) to enforce validation
 * A private struct that has `#[derive(Deserialize)]` must always use `#[serde(try_from = ...)]` to enforce validation during deserialization
@@ -53,12 +66,17 @@ You are a senior Rust software architect. You write high-quality, production-rea
 
 * The macro calls that begin with `subtype` (for example, `subtype!` and `subtype_string!`) expand to newtypes
 
+## Enums
+
+* When writing code related to enums, bring the variants in scope with `use Enum::*;` statement at the top of the file or function (prefer "at the top of the file" for data enums, prefer "at the top of the function" for error enums).
+
 ## Code style
 
 * The file names must match the names of the primary item in this file (for example: a file with `struct User` must be in `user.rs`)
 * Don't use `mod.rs`, use module files with submodules in the folder with the same name (for example: `user.rs` with submodules in `user` folder)
 * Put the trait implementations in the same file as the target struct (for example: put `impl TryFrom<...> for User` in the same file as `struct User`, which is `user.rs`)
 * Use destructuring assignment for tuple arguments, for example: `fn try_from((name, parent_key): (&str, GroupKey)) -> ...`
+* Prefer writing associated functions instead of standalone functions
 * Add a local `use` statement for enums to minimize the code size. For example:
   * Good:
     ```rust
