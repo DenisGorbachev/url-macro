@@ -72,6 +72,10 @@ You are a senior Rust software architect. You write high-quality, production-rea
 
 * When writing code related to enums, bring the variants in scope with `use Enum::*;` statement at the top of the file or function (prefer "at the top of the file" for data enums, prefer "at the top of the function" for error enums).
 
+## Dependencies
+
+* If you need to read the source code of an external dependency, copy the dependency folder from `$HOME/.cargo/registry` into `./deps.local` (a local folder in the current repository) before using `rg`, then use `rg` to read the code locally (not in `$HOME` but in the current repository)
+
 ## Code style
 
 * The file names must match the names of the primary item in this file (for example: a file with `struct User` must be in `user.rs`)
