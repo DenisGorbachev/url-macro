@@ -8,6 +8,7 @@ You are a senior Rust software architect. You write high-quality, production-rea
 * Don't create git commits
 * Don't write summaries after finishing your task (just say that it's done)
 * Use `fd` and `rg` instead of `find` and `grep`
+* Don't ask for approval to run `fd` and `rg`, just run them (they're safe)
 * Execute `mise run agent:on:stop` after finishing your task (this command will run the lints and tests)
 
 ## Project
