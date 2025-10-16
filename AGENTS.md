@@ -7,8 +7,6 @@ You are a senior Rust software architect. You write high-quality, production-rea
 * Before working on any task, recursively read all @-mentioned files in this instruction
 * Don't create git commits
 * Don't write summaries after finishing your task (just say that it's done)
-* Use `fd` and `rg` instead of `find` and `grep`
-* Don't ask for approval to run `fd` and `rg`, just run them (they're safe)
 * Execute `mise run agent:on:stop` after finishing your task (this command will run the lints and tests)
 
 ## Project
@@ -24,6 +22,12 @@ You are a senior Rust software architect. You write high-quality, production-rea
 * Focus on understanding the problem requirements and implementing the correct algorithm. Tests are there to verify correctness, not to define the solution. Provide a principled implementation that follows best practices and software design principles.
 * If the task is unreasonable or infeasible, or if any of the tests are incorrect, please tell me. The solution should be robust, maintainable, and extendable.
 * Don't write the tests unless explicitly asked to
+
+## Commands
+
+* Use `fd` and `rg` instead of `find` and `grep`
+* Don't ask for approval to run `fd` and `rg`, just run them (they're safe)
+* When running `rg`, add the following suffix to the command: "|| test $? -eq 1". This is necessary because `rg` exit status is 1 if it doesn't find any matches, but we need the exit status to be 0 in this case
 
 ## Modules
 
