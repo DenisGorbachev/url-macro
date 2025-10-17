@@ -58,7 +58,7 @@ depends = ["fix:code", "fix:deps"]
 
 [tasks."fix:code"]
 env = { __CARGO_FIX_YOLO = 'yeah' }
-run = "cargo clippy --fix --allow-dirty --allow-staged"
+run = "cargo clippy --all-targets --all-features --fix --allow-dirty --allow-staged"
 
 [tasks."fix:deps"]
 run = "cargo machete --with-metadata --fix"
