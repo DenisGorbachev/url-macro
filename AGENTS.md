@@ -27,7 +27,6 @@ You are a senior Rust software architect. You write high-quality, production-rea
 
 * Use `fd` and `rg` instead of `find` and `grep`
 * Don't ask for approval to run `fd` and `rg`, just run them (they're safe)
-* When running `rg`, add the following suffix to the command: "|| test $? -eq 1". This is necessary because `rg` exit status is 1 if it doesn't find any matches, but we need the exit status to be 0 in this case
 
 ## Modules
 
