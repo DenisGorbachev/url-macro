@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/rvben/rumdl/main/rumdl.schema.json
+
+# rumdl respects .gitignore by default
+
+[global]
+# List of rules to disable (uncomment and modify as needed)
+disable = ["MD013", "MD041", "MD031", "MD009"]
+
+# List of rules to enable exclusively (if provided, only these rules will run)
+# enable = ["MD001", "MD003", "MD004"]
+
+# List of file/directory patterns to exclude from linting
+exclude = [
+    ".git",
+    ".github",
+    "node_modules",
+    "vendor",
+    "dist",
+    "build",
+    "target",
+    "doc/dev",
+    "CHANGELOG.md",
+]
+
+# Markdown flavor/dialect
+# TODO: Switch to "gfm" when rumdl implements it
+flavor = "standard"
+
+# Rule-specific configurations (uncomment and modify as needed)
+
+# [MD003]
+# style = "atx"  # Heading style (atx, atx_closed, setext)
+
+# [MD004]
+# style = "asterisk"  # Unordered list style (asterisk, plus, dash, consistent)
+
+# [MD007]
+# indent = 4  # Unordered list indentation
+
+# [MD013]
+# line_length = 100  # Line length
+# code_blocks = false  # Exclude code blocks from line length check
+# tables = false  # Exclude tables from line length check
+# headings = true  # Include headings in line length check
+
+# [MD044]
+# names = ["rumdl", "Markdown", "GitHub"]  # Proper names that should be capitalized correctly
+# code-blocks = false  # Check code blocks for proper names (default: false, skips code blocks)
