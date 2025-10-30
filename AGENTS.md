@@ -6,6 +6,7 @@ You are a senior Rust software architect. You write high-quality, production-rea
 
 * Before working on any task, recursively read all @-mentioned files in this instruction
 * Don't create git commits
+* Don't edit the files in the top-level `tasks` directory
 * Don't write summaries after finishing your task (just say that it's done)
 * Execute `mise run agent:on:stop` after finishing your task (this command will run the lints and tests)
 
