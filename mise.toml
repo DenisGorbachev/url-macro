@@ -77,6 +77,12 @@ run = "./README.ts --output README.md"
 [tasks."commitlint"]
 run = "commitlint --extends \"$(mise where npm:@commitlint/config-conventional)/lib/node_modules/@commitlint/config-conventional/lib/index.js\""
 
+[tasks."fixlint"]
+run = """
+mise run fix
+mise run lint
+"""
+
 [tasks."repomix"]
 usage = """
 arg "<file>"
