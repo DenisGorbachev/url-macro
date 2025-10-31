@@ -1,4 +1,4 @@
-min_version = "2025.1.14"
+min_version = "2025.10.11"
 
 [tools]
 rust = "1.89.0"
