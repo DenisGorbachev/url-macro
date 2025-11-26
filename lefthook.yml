@@ -6,10 +6,13 @@ pre-commit:
       run: |
         set -eu
         mise run gen:readme
-        # run rumdl because README.md has changed
-        rumdl fmt README.md
-        # add README.md manually instead of using `stage_fixed` because it may not have been staged
-        git add README.md
+        # README.md may not be created if `mise run gen:readme` is a stub
+        if [ -f README.md ]; then
+          # run rumdl because README.md has changed
+          rumdl fmt README.md
+          # add README.md manually instead of using `stage_fixed` because it may not have been staged
+          git add README.md
+        fi
     fmt:
       run: mise run fmt
       stage_fixed: true
