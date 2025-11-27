@@ -27,7 +27,6 @@ You are a senior Rust software architect. You write high-quality, production-rea
 ## Commands
 
 * Use `fd` and `rg` instead of `find` and `grep`
-* Don't ask for approval to run `fd` and `rg`, just run them (they're safe)
 
 ## Modules
 
@@ -68,6 +67,10 @@ You are a senior Rust software architect. You write high-quality, production-rea
 * A private struct that has `#[derive(Deserialize)]` must always use `#[serde(try_from = ...)]` to enforce validation during deserialization
 * A private struct should not implement `Default` in most cases (very rarely it may implement `Default` only if the default value is a valid value)
 * The code must always call the `new` method to enforce validation
+
+## Setters
+
+* Use setters that take `&mut self` instead of setters that take `self` and return `Self` (because passing a `foo: &mut Foo` is better than passing `foo: Foo` and returning `Foo` through the call stack)
 
 ## Newtypes
 
