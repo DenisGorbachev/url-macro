@@ -52,11 +52,14 @@ run = "cargo sort"
 run = "cargo check --all-targets --all-features"
 
 [tasks."fix"]
-depends = ["fix:code", "fix:deps"]
+depends = ["fix:code", "fix:docs", "fix:deps"]
 
 [tasks."fix:code"]
 env = { __CARGO_FIX_YOLO = 'yeah' }
 run = "cargo clippy --all-targets --all-features --fix --allow-dirty --allow-staged"
+
+[tasks."fix:docs"]
+run = "rumdl check --fix"
 
 [tasks."fix:deps"]
 run = "cargo machete --with-metadata --fix"
