@@ -21,14 +21,8 @@ cargo-binstall = "1.10.15"
 [tasks."build"]
 run = "cargo build"
 
-[tasks."fmt"]
-run = "cargo fmt --all"
-
 [tasks."lint"]
 depends = ["lint:code", "lint:docs", "lint:deps"]
-
-[tasks."test"]
-depends = ["test:code", "test:docs"]
 
 [tasks."lint:code"]
 run = "cargo clippy --all-targets --all-features -- -D warnings"
@@ -39,30 +33,49 @@ run = "rumdl check"
 [tasks."lint:deps"]
 run = "cargo machete --with-metadata"
 
+[tasks."test"]
+depends = ["test:code", "test:docs"]
+
 [tasks."test:code"]
 run = "cargo nextest run --all-features --no-tests warn"
 
 [tasks."test:docs"]
 run = "cargo test --doc --all-features --no-fail-fast --quiet"
 
-[tasks."sort:deps"]
-run = "cargo sort"
-
-[tasks."check"]
-run = "cargo check --all-targets --all-features"
-
 [tasks."fix"]
+# run the tasks in parallel because they modify different files
 depends = ["fix:code", "fix:docs", "fix:deps"]
 
 [tasks."fix:code"]
+# run the tasks sequentially because they modify the same files
+run = """
+mise run fix:code:warnings
+mise run fix:code:style
+"""
+
+[tasks."fix:code:warnings"]
 env = { __CARGO_FIX_YOLO = 'yeah' }
 run = "cargo clippy --all-targets --all-features --fix --allow-dirty --allow-staged"
 
+[tasks."fix:code:style"]
+run = "cargo fmt --all"
+
 [tasks."fix:docs"]
-run = "rumdl check --fix"
+# use `rumdl fmt` instead of `rumdl check --fix` because `rumdl fmt` exits with 0 after fixing the errors
+run = "rumdl fmt"
 
 [tasks."fix:deps"]
+# run the tasks sequentially because they modify the same files
+run = """
+mise run fix:deps:usage
+mise run fix:deps:order
+"""
+
+[tasks."fix:deps:usage"]
 run = "cargo machete --with-metadata --fix"
+
+[tasks."fix:deps:order"]
+run = "cargo sort"
 
 [tasks."watch"]
 run = """
@@ -79,12 +92,6 @@ run = "./README.ts --output README.md"
 
 [tasks."commitlint"]
 run = "commitlint --extends \"$(mise where npm:@commitlint/config-conventional)/lib/node_modules/@commitlint/config-conventional/lib/index.js\""
-
-[tasks."fixlint"]
-run = """
-mise run fix
-mise run lint
-"""
 
 [tasks."repomix"]
 usage = """
@@ -109,7 +116,7 @@ repomix \
 """
 
 [tasks."agent:on:stop"]
-depends = ["agent:test", "lint", "fmt", "sort:deps"]
+depends = ["fix", "agent:test"]
 
 [tasks."agent:test"]
 depends = ["agent:test:code", "test:docs"]
