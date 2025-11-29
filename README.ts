@@ -158,10 +158,12 @@ const primaryTargets = [primaryTarget, primaryBinTarget]
 const secondaryTargets = thePackageMetadata.targets.filter((t) => !primaryTargets.includes(t))
 const secondaryBinTargets = secondaryTargets.filter((t) => t.kind.includes("bin"))
 const docsUrl = `https://docs.rs/${name}`
+// NOTE: "<!-- markdownlint-disable-next-line MD053 -->" is needed to disable the warning about unused link: [__cargo_doc2readme_dependencies_info]
 const doc2ReadmeTemplate = `
 {{ readme }}
 
 {%- if links != "" %}
+  <!-- markdownlint-disable-next-line MD053 -->
   {{ links }}
 {%- endif -%}
 `.trimStart()
