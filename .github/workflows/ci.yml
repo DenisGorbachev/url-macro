@@ -2,7 +2,9 @@ name: CI
 on: [ push, pull_request ]
 
 env:
-  RUSTFLAGS: -Dwarnings
+  RUSTFLAGS: >-
+    -Dwarnings
+    -Clink-arg=-fuse-ld=mold
   RUST_BACKTRACE: 1
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -20,6 +22,8 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+      # mold is a workaround for regression in Rust 1.93 beta
+      - uses: rui314/setup-mold@v1
       - uses: jdx/mise-action@v2
         with:
           version: 2025.10.11
