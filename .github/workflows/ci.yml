@@ -20,7 +20,7 @@ jobs:
         run: |
           # a different rust version will be installed in the next step
           mise rm rust
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
         with:
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2.8.0
