@@ -22,6 +22,7 @@ jobs:
           mise rm rust
       - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: stable
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2.8.0
       - run: lefthook run --force pre-commit
