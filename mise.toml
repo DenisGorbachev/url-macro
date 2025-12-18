@@ -54,8 +54,12 @@ mise run fix:code:style
 """
 
 [tasks."fix:code:warnings"]
+# second pass is needed because "cargo clippy --fix" exits with 0 even if some warnings remain
 env = { __CARGO_FIX_YOLO = 'yeah' }
-run = "cargo clippy --all-targets --all-features --fix --allow-dirty --allow-staged"
+run = """
+cargo clippy --all-targets --all-features --fix --allow-dirty --allow-staged
+cargo clippy --all-targets --all-features -- -D warnings
+"""
 
 [tasks."fix:code:style"]
 run = "cargo fmt --all"
