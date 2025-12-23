@@ -221,7 +221,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rust-private-template"
+name = "rust-private-lib-template"
 version = "0.1.0"
 dependencies = [
  "derive-getters",
