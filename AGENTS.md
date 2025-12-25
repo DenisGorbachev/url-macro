@@ -86,6 +86,37 @@ You are a senior Rust software architect. You write high-quality, production-rea
 * Don't use `mod.rs`, use module files with submodules in the folder with the same name (for example: `user.rs` with submodules in `user` folder)
 * Put the trait implementations in the same file as the target struct (for example: put `impl TryFrom<...> for User` in the same file as `struct User`, which is `user.rs`)
 * Use destructuring assignment for tuple arguments, for example: `fn try_from((name, parent_key): (&str, GroupKey)) -> ...`
+* Use iterators instead of for loops. For example:
+  * Good:
+    ```rust
+    use error_handling::{handle_iter, ErrVec};
+    use thiserror::Error;
+
+    // Good: iterator pipeline with fallible mapping + correct error handling
+    pub fn parse_numbers(inputs: impl IntoIterator<Item = impl AsRef<str>>) -> Result<Vec<u64>, ParseNumbersError> {
+        use ParseNumbersError::*;
+        let iter = inputs.into_iter().map(|s| s.as_ref().trim().parse::<u64>());
+        Ok(handle_iter!(iter, InvalidInput))
+    }
+  
+    #[derive(Error, Debug)]
+    pub enum ParseNumbersError {
+        #[error("failed to parse {len} numbers", len = source.len())]
+        InvalidInput { source: ErrVec },
+    }
+    ```
+  * Bad:
+    ```rust
+    // Bad: manual loop + mutable accumulator
+    pub fn parse_numbers(inputs: impl IntoIterator<Item = impl AsRef<str>>) -> Result<Vec<u64>, std::num::ParseIntError> {
+        let mut out = Vec::new();
+        for s in inputs {
+            let n = s.as_ref().trim().parse::<u64>()?;
+            out.push(n);
+        }
+        Ok(out)
+    }
+    ```
 * Prefer writing associated functions instead of standalone functions
 * Add a local `use` statement for enums to minimize the code size. For example:
   * Good:
