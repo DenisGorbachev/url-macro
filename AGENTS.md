@@ -255,3 +255,10 @@ You are a senior Rust software architect. You write high-quality, production-rea
         }
     }
     ```
+
+## Sandbox
+
+You are running in a sandbox with limited network access.
+
+* See the list of allowed domains in /etc/dnsmasq.d/allowed_domains.conf
+* If you need to read the data from other domains, use the web search tool (this tool is executed outside of sandbox)
