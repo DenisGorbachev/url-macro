@@ -26,6 +26,8 @@ exclude = [
 # TODO: Switch to "gfm" when rumdl implements it
 flavor = "standard"
 
+cache-dir = ".cache/rumdl"
+
 # Rule-specific configurations (uncomment and modify as needed)
 
 # [MD003]
