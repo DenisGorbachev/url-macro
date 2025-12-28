@@ -7,7 +7,7 @@
 [![Documentation](https://docs.rs/url-macro/badge.svg)](https://docs.rs/url-macro)
 
 <!-- crate documentation start -->
-This crate provides a [url!](https://docs.rs/url-macro/0.2.0/url_macro/macro.url.html) macro for compile-time URL validation.
+This crate provides a [url!](https://docs.rs/url-macro/latest/url_macro/macro.url.html) macro for compile-time URL validation.
 
 ## Examples
 
