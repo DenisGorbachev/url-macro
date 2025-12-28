@@ -1,4 +1,4 @@
-min_version = "2025.1.14"
+min_version = "2025.10.11"
 
 [tools]
 rust = "1.89.0"
@@ -9,35 +9,32 @@ cargo-binstall = "1.10.15"
 "npm:@commitlint/config-conventional" = "19.6.0"
 "npm:@commitlint/cli" = "19.6.0"
 "npm:@commitlint/types" = "19.5.0"
-"npm:remark-cli" = "12.0.1"
-"npm:remark-validate-links" = "8.0.0"
-"npm:remark-lint-no-dead-urls" = "1.1.0"
-"cargo:https://github.com/DenisGorbachev/cargo-doc2readme" = "branch:dev"
+"npm:repomix" = "1.5.0"
+"cargo:https://github.com/DenisGorbachev/cargo-insert-docs" = { version = "branch:main", crate = "cargo-insert-docs" }
 "cargo:cargo-sort" = "1.0.9"
 "cargo:cargo-hack" = "0.6.33"
 "cargo:cargo-machete" = "0.7.0"
 "cargo:cargo-nextest" = "0.9.102"
+"cargo:cargo-expand" = "1.0.114"
+"cargo:rumdl" = "0.0.185"
 
 [tasks."build"]
 run = "cargo build"
 
-[tasks."fmt"]
-run = "cargo fmt --all"
-
 [tasks."lint"]
 depends = ["lint:code", "lint:docs", "lint:deps"]
-
-[tasks."test"]
-depends = ["test:code", "test:docs"]
 
 [tasks."lint:code"]
 run = "cargo clippy --all-targets --all-features -- -D warnings"
 
 [tasks."lint:docs"]
-run = "mise run remark ."
+run = "rumdl check"
 
 [tasks."lint:deps"]
 run = "cargo machete --with-metadata"
+
+[tasks."test"]
+depends = ["test:code", "test:docs"]
 
 [tasks."test:code"]
 run = "cargo nextest run --all-features --no-tests warn"
@@ -45,21 +42,44 @@ run = "cargo nextest run --all-features --no-tests warn"
 [tasks."test:docs"]
 run = "cargo test --doc --all-features --no-fail-fast --quiet"
 
-[tasks."sort:deps"]
-run = "cargo sort"
-
-[tasks."check"]
-run = "cargo check --all-targets --all-features"
-
 [tasks."fix"]
-depends = ["fix:code", "fix:deps"]
+# run the tasks in parallel because they modify different files
+depends = ["fix:code", "fix:docs", "fix:deps"]
 
 [tasks."fix:code"]
+# run the tasks sequentially because they modify the same files
+run = """
+mise run fix:code:warnings
+mise run fix:code:style
+"""
+
+[tasks."fix:code:warnings"]
+# second pass is needed because "cargo clippy --fix" exits with 0 even if some warnings remain
 env = { __CARGO_FIX_YOLO = 'yeah' }
-run = "cargo clippy --fix --allow-dirty --allow-staged"
+run = """
+cargo clippy --all-targets --all-features --fix --allow-dirty --allow-staged
+cargo clippy --all-targets --all-features -- -D warnings
+"""
+
+[tasks."fix:code:style"]
+run = "cargo fmt --all"
+
+[tasks."fix:docs"]
+# use `rumdl fmt` instead of `rumdl check --fix` because `rumdl fmt` exits with 0 after fixing the errors
+run = "rumdl fmt"
 
 [tasks."fix:deps"]
+# run the tasks sequentially because they modify the same files
+run = """
+mise run fix:deps:usage
+mise run fix:deps:order
+"""
+
+[tasks."fix:deps:usage"]
 run = "cargo machete --with-metadata --fix"
+
+[tasks."fix:deps:order"]
+run = "cargo sort"
 
 [tasks."watch"]
 run = """
@@ -74,20 +94,33 @@ cargo watch --clear --watch "$PWD" --exec "$CMD_NO_WHITESPACE" "$@"
 [tasks."gen:readme"]
 run = "./README.ts --output README.md"
 
-[tasks."remark"]
-run = """
-#!/usr/bin/env bash
-set -euo pipefail
-REMARK_VALIDATE_LINKS="$(mise where npm:remark-validate-links)/lib/node_modules/remark-validate-links/index.js"
-REMARK_LINT_NO_DEAD_URLS="$(mise where npm:remark-lint-no-dead-urls)/lib/node_modules/remark-lint-no-dead-urls/index.js"
-remark --ignore-path .gitignore --ignore-pattern CHANGELOG.md --quiet --frail --no-stdout --use "$REMARK_VALIDATE_LINKS" --use "$REMARK_LINT_NO_DEAD_URLS" "$@"
-"""
-
 [tasks."commitlint"]
 run = "commitlint --extends \"$(mise where npm:@commitlint/config-conventional)/lib/node_modules/@commitlint/config-conventional/lib/index.js\""
 
+[tasks."repomix"]
+usage = """
+arg "<file>"
+arg "[rest]" var=#true
+"""
+run = """
+#!/usr/bin/env bash
+set -xeuo pipefail
+dir=$MISE_PROJECT_ROOT
+file=$usage_file
+header=$(taplo get -f "$dir/Cargo.toml" "package.description")
+repomix \
+    --include src,tests,examples \
+    --no-file-summary \
+    --no-directory-structure \
+    --header-text "$header" \
+    --output "$file" \
+    {{arg(name="rest")}} \
+    "$@" \
+    $dir
+"""
+
 [tasks."agent:on:stop"]
-depends = ["agent:test", "lint", "fmt", "sort:deps"]
+depends = ["fix", "agent:test"]
 
 [tasks."agent:test"]
 depends = ["agent:test:code", "test:docs"]

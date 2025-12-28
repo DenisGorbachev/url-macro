@@ -44,7 +44,6 @@ fi
   tomli set -f "$cargo_toml" "package.homepage" "$repo_url" | sponge "$cargo_toml"
   tomli set -f "$cargo_toml" "package.description" "$description" | sponge "$cargo_toml"
   tomli set -f "$cargo_toml" "package.metadata.details.title" "$title" | sponge "$cargo_toml"
-  tomli delete --if-exists -f "$cargo_toml" "package.metadata.details.readme.generate" | sponge "$cargo_toml"
 
   # rg exits with status code = 1 if it doesn't find any files, so we need to disable & re-enable "set -e"
   set +e

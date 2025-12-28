@@ -2,12 +2,12 @@
 
 // NOTE: Pin the versions of the packages because the script runs without a lock file
 import * as zx from "npm:zx@8.3.2"
-import { ProcessPromise, Shell } from "npm:zx@8.3.2"
-import { z, ZodSchema, ZodTypeDef } from "https://deno.land/x/zod@v3.23.8/mod.ts"
-import { assert, assertEquals } from "jsr:@std/assert@1.0.0"
-import { toSnakeCase } from "jsr:@std/text@1.0.10"
-import { parseArgs } from "jsr:@std/cli@1.0.13"
-import { parse as parseToml } from "jsr:@std/toml@1.0.5"
+import {ProcessPromise, Shell} from "npm:zx@8.3.2"
+import {z, ZodSchema, ZodTypeDef} from "https://deno.land/x/zod@v3.23.8/mod.ts"
+import {assert, assertEquals} from "jsr:@std/assert@1.0.0"
+import {toSnakeCase} from "jsr:@std/text@1.0.10"
+import {parseArgs} from "jsr:@std/cli@1.0.13"
+import {parse as parseToml} from "jsr:@std/toml@1.0.5"
 
 export const args = parseArgs(Deno.args, {
   string: ["output"],
@@ -29,6 +29,7 @@ const CargoTomlSchema = z.object({
         summary: z.string().optional(),
         readme: z.object({
           generate: z.boolean().default(true),
+          ignore_bins: z.array(z.string()).default([]),
         }).default({}),
         peers: z.array(z.string()).default([]).describe("Packages that should be installed alongside this package"),
       }).default({}),
@@ -66,7 +67,7 @@ const BadgeSchema = z.object({
 
 type Badge = z.infer<typeof BadgeSchema>
 
-const badge = (name: string, image: string, url: string): Badge => BadgeSchema.parse({ name, url, image })
+const badge = (name: string, image: string, url: string): Badge => BadgeSchema.parse({name, url, image})
 
 const SectionSchema = z.object({
   title: z.string().min(1),
@@ -75,12 +76,12 @@ const SectionSchema = z.object({
 
 type Section = z.infer<typeof SectionSchema>
 
-const section = (title: string, body: string): Section => SectionSchema.parse({ title, body })
+const section = (title: string, body: string): Section => SectionSchema.parse({title, body})
 
 const pushSection = (sections: Section[], title: string, body: string) => sections.push(section(title, body))
 
 // Nested sections not supported
-const renderSection = ({ title, body }: Section) => `## ${title}\n\n${body}`
+const renderSection = ({title, body}: Section) => `## ${title}\n\n${body}`
 
 const renderNonEmptySections = (sections: Section[]) => sections.filter((s) => s.body).map(renderSection).join("\n\n")
 
@@ -110,7 +111,7 @@ const normalizeGitRemoteUrl = (url: string) => {
 const dirname = import.meta.dirname
 if (!dirname) throw new Error("Cannot determine the current script dirname")
 
-const $: Shell<false, ProcessPromise> = zx.$({ cwd: dirname })
+const $: Shell<false, ProcessPromise> = zx.$({cwd: dirname})
 
 const parseProcessOutput = (input: zx.ProcessOutput) => JSON.parse(input.stdout)
 // deno-lint-ignore no-explicit-any
@@ -145,50 +146,37 @@ const theOriginUrl = normalizeGitRemoteUrl((await originUrlPromise).stdout.trim(
 
 assertEquals(theOriginUrl, theCargoToml.package.repository)
 
-const { package: { name, description, license, metadata: { details: { title: titleExplicit, peers } } } } = theCargoToml
+const {package: {name, description, license, metadata: {details: {title: titleExplicit, peers, readme: {ignore_bins}}}}} = theCargoToml
 const title = titleExplicit || description
 const _libTargetName = toSnakeCase(name)
 const thePackageMetadata = theCargoMetadata.packages.find((p) => p.name == name)
 assert(thePackageMetadata, "Could not find package metadata")
 const primaryTarget = thePackageMetadata.targets[0]
 assert(primaryTarget, "Could not find package primary target")
-const primaryBinTarget = thePackageMetadata.targets.find((t) => t.name == name && t.kind.includes("bin"))
+const ignoredBinNames = new Set(ignore_bins)
+const isIgnoredBin = (target: CargoMetadata["packages"][number]["targets"][number]) => target.kind.includes("bin") && ignoredBinNames.has(target.name)
+const primaryBinTarget = thePackageMetadata.targets.find((t) => !isIgnoredBin(t) && t.name == name && t.kind.includes("bin"))
 // NOTE: primaryTarget may be equal to primaryBinTarget
-const primaryTargets = [primaryTarget, primaryBinTarget]
-const secondaryTargets = thePackageMetadata.targets.filter((t) => !primaryTargets.includes(t))
+const primaryTargets = [primaryTarget, primaryBinTarget].filter((target) => target !== undefined)
+const secondaryTargets = thePackageMetadata.targets.filter((t) => !primaryTargets.includes(t) && !isIgnoredBin(t))
 const secondaryBinTargets = secondaryTargets.filter((t) => t.kind.includes("bin"))
 const docsUrl = `https://docs.rs/${name}`
-const doc2ReadmeTemplate = `
-{{ readme }}
-
-{%- if links != "" %}
-  {{ links }}
-{%- endif -%}
-`.trimStart()
-const doc2readmeRender = async (target: string) => {
-  const templatePath = await Deno.makeTempFile({
-    prefix: "README",
-    suffix: "jl",
-  })
-  await Deno.writeTextFile(
-    templatePath,
-    doc2ReadmeTemplate,
-  )
-  return $`cargo doc2readme --template ${templatePath} --target-name ${target} --out -`
-}
-
-const doc2ReadmePromise = doc2readmeRender(primaryTarget.name)
-const docsUrlPromise = fetch(docsUrl, { method: "HEAD" })
+const crateDocsPlaceholder = `
+<!-- crate documentation start -->
+<!-- crate documentation end -->
+`.trim()
+const docsUrlPromise = fetch(docsUrl, {method: "HEAD"})
 const helpPromise = primaryBinTarget ? $`cargo run --quiet --bin ${primaryBinTarget.name} -- --help` : undefined
 const ghRepoViewPromise = $`gh repo view --json url,visibility ${theOriginUrl}`.nothrow().quiet()
-
-const doc = await doc2ReadmePromise
-const docStr = doc.stdout.trim()
 
 const docsUrlHead = await docsUrlPromise
 const docsUrlIs200 = docsUrlHead.status === 200
 
 // Hack: await the promise instead of calling `then` because `then` has incorrect type in `zx`
+const insertCrateDocsIntoReadme = async (readmePath: string) => {
+  await $`cargo insert-docs crate-into-readme --allow-dirty --readme-path ${readmePath}`
+}
+
 const theGitHubRepo = await (async () => {
   const output = await ghRepoViewPromise
   if (output.exitCode === 0) {
@@ -212,7 +200,7 @@ if (isPublicGitHubRepo) {
 if (docsUrlIs200) {
   badges.push(badge("Documentation", `https://docs.rs/${name}/badge.svg`, docsUrl))
 }
-const badgesStr = badges.map(({ name, image, url }) => `[![${name}](${image})](${url})`).join("\n")
+const badgesStr = badges.map(({name, image, url}) => `[![${name}](${image})](${url})`).join("\n")
 
 const licenseNameFileMap: Record<string, string> = {
   "Apache-2.0": "LICENSE-APACHE",
@@ -230,7 +218,7 @@ const renderShellCode = (code: string) => `\`\`\`shell\n${code}\n\`\`\``
 
 const titleSectionBodyParts = [
   badgesStr,
-  docStr,
+  crateDocsPlaceholder,
 ].filter((s) => s.length)
 const titleSectionBody = titleSectionBodyParts.join("\n\n")
 
@@ -277,21 +265,27 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
   )
 }
 
-const body = renderNonEmptySections(sections)
-
-const content = `
+const header = `
 <!-- DO NOT EDIT -->
 <!-- This file is automatically generated by README.ts. -->
 <!-- Edit README.ts if you want to make changes. -->
+`.trim()
+const body = renderNonEmptySections(sections)
 
-# ${title}
-
-${titleSectionBody}
-
-${body}`.trim()
+const contentArray = [header, `# ${title}`, titleSectionBody, body]
+const content = contentArray.filter(s => s.length > 0).join("\n\n");
 
 if (args.output) {
   await Deno.writeTextFile(args.output, content + "\n")
+  await insertCrateDocsIntoReadme(args.output)
 } else {
-  console.info(content)
+  const tempReadmePath = await Deno.makeTempFile({
+    prefix: "README",
+    suffix: ".md",
+  })
+  await Deno.writeTextFile(tempReadmePath, content + "\n")
+  await insertCrateDocsIntoReadme(tempReadmePath)
+  const readme = await Deno.readTextFile(tempReadmePath)
+  await Deno.remove(tempReadmePath)
+  console.info(readme.trimEnd())
 }

@@ -5,6 +5,8 @@
       "Agent",
       "Bash(rg :*)",
       "Bash(fd :*)",
+      "Bash(jq :*)",
+      "Bash(echo :*)",
       "Bash(grep :*)",
       "Bash(find :*)",
       "Bash(mv :*)",
@@ -36,7 +38,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if ! mise run agent:on:stop 1>&2; then exit 2; fi"
+            "command": "if ! mise run --quiet agent:on:stop 1>&2; then exit 2; fi"
           }
         ]
       }

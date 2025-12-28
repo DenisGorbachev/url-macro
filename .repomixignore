@@ -4,6 +4,7 @@ README.ts
 commitlint.config.mjs
 deno.json
 LICENSE*
+AGENTS*
 README.ts
 rustfmt.toml
 .repomixignore

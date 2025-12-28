@@ -2,6 +2,7 @@
 name = "url-macro"
 version = "0.2.0"
 edition = "2021"
+rust-version = "1.85.0"
 description = "A compile-time URL validation macro. Parses and checks URLs at compile-time, converting valid URLs into `url::Url` objects. Provides early error detection for malformed URLs."
 license = "Apache-2.0 OR MIT"
 homepage = "https://github.com/DenisGorbachev/url-macro"
@@ -9,6 +10,20 @@ repository = "https://github.com/DenisGorbachev/url-macro"
 readme = "README.md"
 keywords = ["url", "utils"]
 categories = ["development-tools::procedural-macro-helpers", "rust-patterns"]
+exclude = [
+    ".*",
+    "*.local.*",
+    "README.ts",
+    "AGENTS*.md",
+    "CLAUDE*.md",
+    "deno.json",
+    "commitlint.config.mjs",
+    "lefthook.yml",
+    "mise.toml",
+    "rumdl.toml",
+    "rustfmt.toml",
+    "yolobox"
+]
 
 [package.metadata.details]
 title = "Compile-time URL validation"

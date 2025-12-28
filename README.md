@@ -6,7 +6,8 @@
 
 [![Documentation](https://docs.rs/url-macro/badge.svg)](https://docs.rs/url-macro)
 
-This crate provides a [url!][__link0] macro for compile-time URL validation.
+<!-- crate documentation start -->
+This crate provides a [url!](https://docs.rs/url-macro/0.2.0/url_macro/macro.url.html) macro for compile-time URL validation.
 
 ## Examples
 
@@ -20,8 +21,7 @@ let valid = url!("https://www.rust-lang.org/");
 let invalid = url!("foo");
 ```
 
-   [__cargo_doc2readme_dependencies_info]: ggGkYW0BYXSEGyMws-dKI-LpG9swkVXG-rikGwSuJGhB0NVbG974QPrPJF6XYXKEG4AA8JRKwJB9G9olxhSTKUcIG1sf0boPKowfG1HA4Nxt7NpkYWSBg2l1cmwtbWFjcm9lMC4yLjBpdXJsX21hY3Jv
- [__link0]: https://docs.rs/url-macro/latest/url_macro/?search=url
+<!-- crate documentation end -->
 
 ## Installation
 
