@@ -20,7 +20,8 @@ exclude = [
     "lefthook.yml",
     "mise.toml",
     "rumdl.toml",
-    "rustfmt.toml"
+    "rustfmt.toml",
+    "yolobox"
 ]
 
 [package.metadata.details]
