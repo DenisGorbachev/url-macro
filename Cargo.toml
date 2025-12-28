@@ -9,6 +9,19 @@ repository = "https://github.com/DenisGorbachev/rust-pre-public-lib-template"
 readme = "README.md"
 keywords = []
 categories = []
+exclude = [
+    ".*",
+    "*.local.*",
+    "README.ts",
+    "AGENTS*.md",
+    "CLAUDE*.md",
+    "deno.json",
+    "commitlint.config.mjs",
+    "lefthook.yml",
+    "mise.toml",
+    "rumdl.toml",
+    "rustfmt.toml"
+]
 
 [package.metadata.details]
 title = "Rust pre-public lib template"
