@@ -10,6 +10,19 @@ repository = "https://github.com/DenisGorbachev/rust-public-lib-template"
 readme = "README.md"
 keywords = []
 categories = []
+exclude = [
+    ".*",
+    "*.local.*",
+    "README.ts",
+    "AGENTS*.md",
+    "CLAUDE*.md",
+    "deno.json",
+    "commitlint.config.mjs",
+    "lefthook.yml",
+    "mise.toml",
+    "rumdl.toml",
+    "rustfmt.toml"
+]
 
 [package.metadata.details]
 title = "A template for a public Rust library"
