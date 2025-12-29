@@ -1,6 +1,6 @@
 //! This crate provides a [url!](crate::url) macro for compile-time URL validation.
 //!
-//! # Examples
+//! ## Examples
 //!
 //! ```
 //! # use url_macro::url;
