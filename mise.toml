@@ -10,7 +10,7 @@ cargo-binstall = "1.10.15"
 "npm:@commitlint/cli" = "19.6.0"
 "npm:@commitlint/types" = "19.5.0"
 "npm:repomix" = "1.5.0"
-"cargo:https://github.com/DenisGorbachev/cargo-insert-docs" = { version = "branch:main", crate = "cargo-insert-docs" }
+"cargo:cargo-insert-docs" = "1.2.0"
 "cargo:cargo-sort" = "1.0.9"
 "cargo:cargo-hack" = "0.6.33"
 "cargo:cargo-machete" = "0.7.0"
