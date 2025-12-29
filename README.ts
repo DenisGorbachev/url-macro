@@ -171,7 +171,7 @@ const docsUrlIs200 = docsUrlHead.status === 200
 
 // Hack: await the promise instead of calling `then` because `then` has incorrect type in `zx`
 const insertCrateDocsIntoReadme = async (readmePath: string) => {
-  await $`cargo insert-docs crate-into-readme --allow-dirty --link-to-latest --readme-path ${readmePath}`
+  await $`cargo insert-docs crate-into-readme --allow-dirty --link-to-latest --shrink-headings 0 --readme-path ${readmePath}`
 }
 
 const theGitHubRepo = await (async () => {
