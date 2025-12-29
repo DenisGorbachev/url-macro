@@ -13,6 +13,8 @@ categories = []
 exclude = [
     ".*",
     "*.local.*",
+    "doc/dev",
+    "specs",
     "README.ts",
     "AGENTS*.md",
     "CLAUDE*.md",
