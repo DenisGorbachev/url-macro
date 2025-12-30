@@ -4,6 +4,7 @@
 
 # Compile-time URL validation
 
+[![Build](https://github.com/DenisGorbachev/url-macro/actions/workflows/ci.yml/badge.svg)](https://github.com/DenisGorbachev/url-macro)
 [![Documentation](https://docs.rs/url-macro/badge.svg)](https://docs.rs/url-macro)
 
 <!-- crate documentation start -->
