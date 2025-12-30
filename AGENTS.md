@@ -13,6 +13,7 @@ You are a senior Rust software architect. You write high-quality, production-rea
 ## Project
 
 * @AGENTS.project.md
+* @doc/dev/error-handling.md
 * @Cargo.toml
 * @src/lib.rs
 * @src/main.rs
@@ -40,12 +41,25 @@ You are a senior Rust software architect. You write high-quality, production-rea
   use crate::MyItemName;
   ```
 
+## Types
+
+* Always use the most specific types
+  * Use types from existing crates
+    * Use types from `url` crate instead of `String` for URL-related values
+    * Use types from `time` crate instead of `String` for datetime-related values
+    * Use types from `phonenumber` crate instead of `String` for phone-related values
+    * Use types from `email_address` crate instead of `String` for email-related values
+  * Search for other existing crates if you need specific types
+  * If you can't find existing crates, define newtypes using macros from `subtype` crate
+
 ## Error handling
 
 * Never convert a `Result` into an `Option`, always propagate the error up the call stack
 
 ## Struct derives
 
+* Derive `new` from `derive_new` crate for types that need `fn new`
+* Derive `Serialize` and `Deserialize` from `serde` crate for types that need serialization / deserialization
 * If the struct derives `Getters`, then each field whose type implements `Copy` must have a `#[getter(copy)]` annotation. For example:
   * Good (note that `username` doesn't have `#[getter(copy)]` because its type is `String` which doesn't implement `Copy`, but `age` has `#[getter(copy)]`, because its type is `u64` which implements `Copy`):
     ```rust
@@ -195,66 +209,6 @@ You are a senior Rust software architect. You write high-quality, production-rea
     ```
 * Write `macro_rules!` macros to reduce boilerplate
 * If you see similar code in different places, write a macro and replace the similar code with a macro call
-
-## Axum API handlers
-
-* Use the HTTP status to indicate success or failure, don't return a `success` field
-* Return serializable types, not `serde_json::json!`, for example:
-  * Good:
-    ```rust
-    #[derive(Serialize)]
-    pub struct CurrentUserView {
-        pub username: Username,
-    }
-  
-    impl From<&AuthenticatedUser> for CurrentUserView {
-        fn from(user: &AuthenticatedUser) -> Self {
-            Self {
-                username: user.username.clone(),
-            }
-        }
-    }
-  
-    #[derive(Serialize)]
-    #[serde(tag = "type")]
-    pub enum GetCurrentUserResponse {
-        Unauthenticated,
-        Authenticated(CurrentUserView),
-    }
-  
-    impl From<&AuthenticatedUser> for GetCurrentUserResponse {
-        fn from(user: &AuthenticatedUser) -> Self {
-            Self::Authenticated(CurrentUserView::from(user))
-        }
-    }
-    
-    pub async fn get_current_user(auth_session: AuthSession<AuthBackend>) -> impl IntoResponse {
-        match auth_session.user {
-            Some(user) => (StatusCode::OK, Json(GetCurrentUserResponse::from(&user))),
-            None => (StatusCode::OK, Json(GetCurrentUserResponse::Unauthenticated)),
-        }
-    }
-    ```
-  * Bad:
-    ```rust
-    pub async fn get_current_user(auth_session: AuthSession<AuthBackend>) -> impl IntoResponse {
-        match auth_session.user {
-            Some(user) => (
-                StatusCode::OK,
-                Json(serde_json::json!({
-                    "authenticated": true,
-                    "username": user.username.to_string()
-                })),
-            ),
-            None => (
-                StatusCode::OK,
-                Json(serde_json::json!({
-                    "authenticated": false
-                })),
-            ),
-        }
-    }
-    ```
 
 ## Sandbox
 
