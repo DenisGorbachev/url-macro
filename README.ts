@@ -185,7 +185,7 @@ const isPublicGitHubRepo = await isPublicGitHubRepoPromise
 
 const badges: Badge[] = []
 if (isPublicGitHubRepo) {
-  badge("Build", `${theCargoToml.package.repository}/actions/workflows/ci.yml/badge.svg`, theCargoToml.package.repository)
+  badges.push(badge("Build", `${theCargoToml.package.repository}/actions/workflows/ci.yml/badge.svg`, theCargoToml.package.repository))
 }
 if (docsUrlIs200) {
   badges.push(badge("Documentation", `https://docs.rs/${name}/badge.svg`, docsUrl))
