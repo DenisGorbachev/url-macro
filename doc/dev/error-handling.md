@@ -298,81 +298,6 @@ pub fn get_root_source(error: &dyn Error) -> &dyn Error {
 }
 ````
 
-## File: src/types/debug_as_display.rs
-````rust
-use core::fmt::{Debug, Display, Formatter};
-
-/// A wrapper that renders `Debug` using the inner type's `Display` implementation.
-/// This wrapper is needed for types that have an easy-to-understand `Display` impl but hard-to-understand `Debug` impl.
-#[derive(Ord, PartialOrd, Eq, PartialEq, Copy, Clone)]
-pub struct DebugAsDisplay<T: Display>(
-    /// Inner value rendered with `Display` for both `Debug` and `Display`.
-    pub T,
-);
-
-impl<T: Display> Debug for DebugAsDisplay<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        Display::fmt(&self.0, f)
-    }
-}
-
-impl<T: Display> Display for DebugAsDisplay<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        Display::fmt(&self.0, f)
-    }
-}
-
-impl<T: Display> From<T> for DebugAsDisplay<T> {
-    fn from(value: T) -> Self {
-        Self(value)
-    }
-}
-````
-
-## File: src/types/display_as_debug.rs
-````rust
-use core::fmt::{Debug, Display, Formatter};
-
-/// A wrapper that renders `Display` using the inner type's `Debug` implementation.
-#[derive(Ord, PartialOrd, Eq, PartialEq, Copy, Clone, Debug)]
-pub struct DisplayAsDebug<T: Debug>(
-    /// Inner value rendered with `Debug` for `Display`.
-    pub T,
-);
-
-impl<T: Debug> Display for DisplayAsDebug<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        Debug::fmt(&self.0, f)
-    }
-}
-
-impl<T: Debug> From<T> for DisplayAsDebug<T> {
-    fn from(value: T) -> Self {
-        Self(value)
-    }
-}
-````
-
-## File: src/functions.rs
-````rust
-mod get_root_error;
-mod partition_result;
-
-pub use get_root_error::*;
-pub use partition_result::*;
-
-cfg_if::cfg_if! {
-    if #[cfg(feature = "std")] {
-        mod writeln_error;
-        mod write_to_named_temp_file;
-        mod exit_result;
-        pub use writeln_error::*;
-        pub use write_to_named_temp_file::*;
-        pub use exit_result::*;
-    }
-}
-````
-
 ## File: src/functions/writeln_error.rs
 ````rust
 use crate::{ErrVec, Prefixer, write_to_named_temp_file};
@@ -522,6 +447,81 @@ mod tests {
                 name: name.into(),
             }
         }
+    }
+}
+````
+
+## File: src/types/debug_as_display.rs
+````rust
+use core::fmt::{Debug, Display, Formatter};
+
+/// A wrapper that renders `Debug` using the inner type's `Display` implementation.
+/// This wrapper is needed for types that have an easy-to-understand `Display` impl but hard-to-understand `Debug` impl.
+#[derive(Ord, PartialOrd, Eq, PartialEq, Copy, Clone)]
+pub struct DebugAsDisplay<T: Display>(
+    /// Inner value rendered with `Display` for both `Debug` and `Display`.
+    pub T,
+);
+
+impl<T: Display> Debug for DebugAsDisplay<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        Display::fmt(&self.0, f)
+    }
+}
+
+impl<T: Display> Display for DebugAsDisplay<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        Display::fmt(&self.0, f)
+    }
+}
+
+impl<T: Display> From<T> for DebugAsDisplay<T> {
+    fn from(value: T) -> Self {
+        Self(value)
+    }
+}
+````
+
+## File: src/types/display_as_debug.rs
+````rust
+use core::fmt::{Debug, Display, Formatter};
+
+/// A wrapper that renders `Display` using the inner type's `Debug` implementation.
+#[derive(Ord, PartialOrd, Eq, PartialEq, Copy, Clone, Debug)]
+pub struct DisplayAsDebug<T: Debug>(
+    /// Inner value rendered with `Debug` for `Display`.
+    pub T,
+);
+
+impl<T: Debug> Display for DisplayAsDebug<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        Debug::fmt(&self.0, f)
+    }
+}
+
+impl<T: Debug> From<T> for DisplayAsDebug<T> {
+    fn from(value: T) -> Self {
+        Self(value)
+    }
+}
+````
+
+## File: src/functions.rs
+````rust
+mod get_root_error;
+mod partition_result;
+
+pub use get_root_error::*;
+pub use partition_result::*;
+
+cfg_if::cfg_if! {
+    if #[cfg(feature = "std")] {
+        mod writeln_error;
+        mod write_to_named_temp_file;
+        mod exit_result;
+        pub use writeln_error::*;
+        pub use write_to_named_temp_file::*;
+        pub use exit_result::*;
     }
 }
 ````
@@ -1057,9 +1057,9 @@ mod tests {
 //!
 //! #[derive(Error, Debug)]
 //! enum ParseConfigError {
-//!     #[error("failed to read file to string: '{}'", path.display())]
+//!     #[error("failed to read file to string: '{path}'")]
 //!     ReadToStringFailed { path: PathBuf, source: std::io::Error },
-//!     #[error("failed to parse the file contents into config: '{}'", path.display())]
+//!     #[error("failed to parse the file contents into config: '{path}'")]
 //!     DeserializeFailed { path: PathBuf, contents: String, source: serde_json::Error }
 //! }
 //! # }
