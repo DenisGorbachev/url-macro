@@ -44,7 +44,7 @@ run = "cargo test --doc --all-features --no-fail-fast --quiet"
 
 [tasks."fix"]
 # run the tasks in parallel because they modify different files
-depends = ["fix:code", "fix:docs", "fix:deps"]
+depends = ["fix:code", "fix:docs", "fix:deps", "fix:agents"]
 
 [tasks."fix:code"]
 # run the tasks sequentially because they modify the same files
@@ -81,6 +81,17 @@ run = "cargo machete --with-metadata --fix"
 [tasks."fix:deps:order"]
 run = "cargo sort"
 
+[tasks."fix:agents"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+mise run gen:agents
+if [ -f AGENTS.md ]; then
+  # add AGENTS.md manually because it may not have been staged
+  git add AGENTS.md
+fi
+"""
+
 [tasks."watch"]
 run = """
 #!/usr/bin/env bash
@@ -92,7 +103,10 @@ cargo watch --clear --watch "$PWD" --exec "$CMD_NO_WHITESPACE" "$@"
 """
 
 [tasks."gen:readme"]
-run = "./README.ts --output README.md"
+run = "chmod 0644 README.md && ./README.ts --output README.md"
+
+[tasks."gen:agents"]
+run = "chmod 0644 AGENTS.md && ./AGENTS.ts --output AGENTS.md"
 
 [tasks."commitlint"]
 run = "commitlint --extends \"$(mise where npm:@commitlint/config-conventional)/lib/node_modules/@commitlint/config-conventional/lib/index.js\""

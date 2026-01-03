@@ -29,14 +29,16 @@
     * Good: `#[error("user '{name}' not found")]`
     * Bad: `#[error("user {name} not found")]`
 
-# Files
+## Files
 
 ## File: src/drafts.rs
+
 ````rust
 pub mod err_vec_display;
 ````
 
 ## File: src/functions/exit_result.rs
+
 ````rust
 use crate::eprintln_error;
 use std::error::Error;
@@ -55,6 +57,7 @@ pub fn exit_result<E: Error + 'static>(result: Result<(), E>) -> ExitCode {
 ````
 
 ## File: src/functions/partition_result.rs
+
 ````rust
 use alloc::vec::Vec;
 
@@ -88,6 +91,7 @@ pub fn partition_result<T, E>(results: impl IntoIterator<Item = Result<T, E>>) -
 ````
 
 ## File: src/functions/write_to_named_temp_file.rs
+
 ````rust
 use crate::{handle, map_err};
 use std::fs::File;
@@ -123,6 +127,7 @@ pub enum WriteErrorDebugToTempFileError {
 ````
 
 ## File: src/types/err_vec.rs
+
 ````rust
 use std::error::Error;
 use std::fmt::{Display, Formatter};
@@ -177,6 +182,7 @@ impl<E: Error + 'static> From<Vec<E>> for ErrVec {
 ````
 
 ## File: src/types/item_error.rs
+
 ````rust
 use thiserror::Error;
 
@@ -192,6 +198,7 @@ pub struct ItemError<T, E> {
 ````
 
 ## File: src/types/path_buf_display.rs
+
 ````rust
 use crate::DisplayAsDebug;
 use std::path::PathBuf;
@@ -201,6 +208,7 @@ pub type PathBufDisplay = DisplayAsDebug<PathBuf>;
 ````
 
 ## File: src/types/prefixer.rs
+
 ````rust
 use std::fmt;
 use std::io::{self, Write};
@@ -285,6 +293,7 @@ impl<'w> Write for Prefixer<'w> {
 ````
 
 ## File: src/functions/get_root_error.rs
+
 ````rust
 use core::error::Error;
 
@@ -298,82 +307,8 @@ pub fn get_root_source(error: &dyn Error) -> &dyn Error {
 }
 ````
 
-## File: src/types/debug_as_display.rs
-````rust
-use core::fmt::{Debug, Display, Formatter};
-
-/// A wrapper that renders `Debug` using the inner type's `Display` implementation.
-/// This wrapper is needed for types that have an easy-to-understand `Display` impl but hard-to-understand `Debug` impl.
-#[derive(Ord, PartialOrd, Eq, PartialEq, Copy, Clone)]
-pub struct DebugAsDisplay<T: Display>(
-    /// Inner value rendered with `Display` for both `Debug` and `Display`.
-    pub T,
-);
-
-impl<T: Display> Debug for DebugAsDisplay<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        Display::fmt(&self.0, f)
-    }
-}
-
-impl<T: Display> Display for DebugAsDisplay<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        Display::fmt(&self.0, f)
-    }
-}
-
-impl<T: Display> From<T> for DebugAsDisplay<T> {
-    fn from(value: T) -> Self {
-        Self(value)
-    }
-}
-````
-
-## File: src/types/display_as_debug.rs
-````rust
-use core::fmt::{Debug, Display, Formatter};
-
-/// A wrapper that renders `Display` using the inner type's `Debug` implementation.
-#[derive(Ord, PartialOrd, Eq, PartialEq, Copy, Clone, Debug)]
-pub struct DisplayAsDebug<T: Debug>(
-    /// Inner value rendered with `Debug` for `Display`.
-    pub T,
-);
-
-impl<T: Debug> Display for DisplayAsDebug<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        Debug::fmt(&self.0, f)
-    }
-}
-
-impl<T: Debug> From<T> for DisplayAsDebug<T> {
-    fn from(value: T) -> Self {
-        Self(value)
-    }
-}
-````
-
-## File: src/functions.rs
-````rust
-mod get_root_error;
-mod partition_result;
-
-pub use get_root_error::*;
-pub use partition_result::*;
-
-cfg_if::cfg_if! {
-    if #[cfg(feature = "std")] {
-        mod writeln_error;
-        mod write_to_named_temp_file;
-        mod exit_result;
-        pub use writeln_error::*;
-        pub use write_to_named_temp_file::*;
-        pub use exit_result::*;
-    }
-}
-````
-
 ## File: src/functions/writeln_error.rs
+
 ````rust
 use crate::{ErrVec, Prefixer, write_to_named_temp_file};
 use std::error::Error;
@@ -526,7 +461,86 @@ mod tests {
 }
 ````
 
+## File: src/types/debug_as_display.rs
+
+````rust
+use core::fmt::{Debug, Display, Formatter};
+
+/// A wrapper that renders `Debug` using the inner type's `Display` implementation.
+/// This wrapper is needed for types that have an easy-to-understand `Display` impl but hard-to-understand `Debug` impl.
+#[derive(Ord, PartialOrd, Eq, PartialEq, Copy, Clone)]
+pub struct DebugAsDisplay<T: Display>(
+    /// Inner value rendered with `Display` for both `Debug` and `Display`.
+    pub T,
+);
+
+impl<T: Display> Debug for DebugAsDisplay<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        Display::fmt(&self.0, f)
+    }
+}
+
+impl<T: Display> Display for DebugAsDisplay<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        Display::fmt(&self.0, f)
+    }
+}
+
+impl<T: Display> From<T> for DebugAsDisplay<T> {
+    fn from(value: T) -> Self {
+        Self(value)
+    }
+}
+````
+
+## File: src/types/display_as_debug.rs
+
+````rust
+use core::fmt::{Debug, Display, Formatter};
+
+/// A wrapper that renders `Display` using the inner type's `Debug` implementation.
+#[derive(Ord, PartialOrd, Eq, PartialEq, Copy, Clone, Debug)]
+pub struct DisplayAsDebug<T: Debug>(
+    /// Inner value rendered with `Debug` for `Display`.
+    pub T,
+);
+
+impl<T: Debug> Display for DisplayAsDebug<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        Debug::fmt(&self.0, f)
+    }
+}
+
+impl<T: Debug> From<T> for DisplayAsDebug<T> {
+    fn from(value: T) -> Self {
+        Self(value)
+    }
+}
+````
+
+## File: src/functions.rs
+
+````rust
+mod get_root_error;
+mod partition_result;
+
+pub use get_root_error::*;
+pub use partition_result::*;
+
+cfg_if::cfg_if! {
+    if #[cfg(feature = "std")] {
+        mod writeln_error;
+        mod write_to_named_temp_file;
+        mod exit_result;
+        pub use writeln_error::*;
+        pub use write_to_named_temp_file::*;
+        pub use exit_result::*;
+    }
+}
+````
+
 ## File: src/types.rs
+
 ````rust
 mod debug_as_display;
 mod display_as_debug;
@@ -550,6 +564,7 @@ cfg_if::cfg_if! {
 ````
 
 ## File: src/macros.rs
+
 ````rust
 /// [`handle!`](crate::handle) is a better alternative to [`map_err`](Result::map_err) because it doesn't capture any variables from the environment if the result is [`Ok`], only when the result is [`Err`].
 /// By contrast, a closure passed to `map_err` always captures the variables from environment, regardless of whether the result is [`Ok`] or [`Err`]
@@ -1021,6 +1036,7 @@ mod tests {
 ````
 
 ## File: src/lib.rs
+
 ````rust
 //! Macros for ergonomic error handling with [thiserror](https://crates.io/crates/thiserror).
 //!
@@ -1057,9 +1073,9 @@ mod tests {
 //!
 //! #[derive(Error, Debug)]
 //! enum ParseConfigError {
-//!     #[error("failed to read file to string: '{}'", path.display())]
+//!     #[error("failed to read file to string: '{path}'")]
 //!     ReadToStringFailed { path: PathBuf, source: std::io::Error },
-//!     #[error("failed to parse the file contents into config: '{}'", path.display())]
+//!     #[error("failed to parse the file contents into config: '{path}'")]
 //!     DeserializeFailed { path: PathBuf, contents: String, source: serde_json::Error }
 //! }
 //! # }
