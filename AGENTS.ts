@@ -16,20 +16,6 @@ const args = parseArgs(Deno.args, {
 
 const rootUrl = new URL(".", import.meta.url)
 
-const requiredFiles = [
-  ".agents/general.md",
-  ".agents/error-handling.md",
-  "Cargo.toml",
-]
-
-const optionalFiles = [
-  ".agents/project.md",
-  ".agents/knowledge.md",
-  ".agents/gotchas.md",
-  "src/main.rs",
-  "src/lib.rs",
-]
-
 const isMarkdownPath = (path: string) => path.toLowerCase().endsWith(".md")
 
 const resolvePath = (path: string) => new URL(path, rootUrl)
@@ -87,24 +73,17 @@ const includeFileIfExists = async (path: string) => {
   return await includeFile(path)
 }
 
-const parts: string[] = ["# Guidelines"]
-
-for (const path of requiredFiles) {
-  const rendered = await includeFileIfExists(path)
-  if (!rendered) {
-    throw new Error(`Required file is missing: ${path}`)
-  }
-  if (rendered.length > 0) {
-    parts.push(rendered)
-  }
-}
-
-for (const path of optionalFiles) {
-  const rendered = await includeFileIfExists(path)
-  if (rendered && rendered.length > 0) {
-    parts.push(rendered)
-  }
-}
+const parts = [
+  "# Guidelines",
+  await includeFile(".agents/general.md"),
+  await includeFileIfExists(".agents/project.md"),
+  await includeFileIfExists(".agents/knowledge.md"),
+  await includeFileIfExists(".agents/gotchas.md"),
+  await includeFile(".agents/error-handling.md"),
+  await includeFile("Cargo.toml"),
+  await includeFileIfExists("src/main.rs"),
+  await includeFileIfExists("src/lib.rs"),
+].filter((part): part is string => !!part && part.length > 0)
 
 const content = parts.join("\n\n")
 
