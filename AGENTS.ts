@@ -34,7 +34,6 @@ const isMarkdownPath = (path: string) => path.toLowerCase().endsWith(".md")
 
 const resolvePath = (path: string) => new URL(path, rootUrl)
 
-// TODO: Use https://docs.deno.com/examples/checking_file_existence/
 const fileExists = async (path: string) => {
   try {
     await Deno.stat(resolvePath(path))
