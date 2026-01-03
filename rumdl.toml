@@ -18,8 +18,8 @@ exclude = [
     "dist",
     "build",
     "target",
-    "doc/dev",
     "CHANGELOG.md",
+    "AGENTS.md",
 ]
 
 # Markdown flavor/dialect
