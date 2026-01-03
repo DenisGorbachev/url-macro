@@ -1,10 +1,11 @@
-#!/usr/bin/env -S deno run --allow-write --allow-read --allow-env --allow-sys --allow-run=bash,git --no-lock
+#!/usr/bin/env -S deno run --allow-read --allow-write --no-lock
 
-// NOTE: Pin the versions of the packages because the script runs without a lock file
-import * as zx from "npm:zx@8.3.2"
-import {ProcessPromise, Shell} from "npm:zx@8.3.2"
-import {z, ZodSchema, ZodTypeDef} from "https://deno.land/x/zod@v3.23.8/mod.ts"
 import {parseArgs} from "jsr:@std/cli@1.0.13"
+import {stringify} from "jsr:@libs/xml@7.0.3"
+import remarkHeadingShift from "npm:remark-heading-shift@1.1.2"
+import remarkParse from "npm:remark-parse@11.0.0"
+import remarkStringify from "npm:remark-stringify@11.0.0"
+import {unified} from "npm:unified@11.0.5"
 
 const args = parseArgs(Deno.args, {
   string: ["output"],
@@ -13,51 +14,94 @@ const args = parseArgs(Deno.args, {
   },
 })
 
-const SectionSchema = z.object({
-  title: z.string().min(1),
-  body: z.string(),
-})
+const rootUrl = new URL(".", import.meta.url)
 
-type Section = z.infer<typeof SectionSchema>
-
-const section = (title: string, body: string): Section => SectionSchema.parse({title, body})
-
-const pushSection = (sections: Section[], title: string, body: string) => sections.push(section(title, body))
-
-// Nested sections not supported
-const renderSection = ({title, body}: Section) => `## ${title}\n\n${body}`
-
-const renderNonEmptySections = (sections: Section[]) => sections.filter((s) => s.body).map(renderSection).join("\n\n")
-
-const stub = <T>(message = "Implement me"): T => {
-  throw new Error(message)
+type FileSpec = {
+  path: string
+  required: boolean
 }
 
-const dirname = import.meta.dirname
-if (!dirname) throw new Error("Cannot determine the current script dirname")
+const fileSpecs: FileSpec[] = [
+  {path: ".agents/general.md", required: true},
+  {path: ".agents/project.md", required: false},
+  {path: ".agents/knowledge.md", required: false},
+  {path: ".agents/gotchas.md", required: false},
+  {path: ".agents/error-handling.md", required: true},
+  {path: "Cargo.toml", required: true},
+  {path: "src/main.rs", required: false},
+  {path: "src/lib.rs", required: false},
+]
 
-const $: Shell<false, ProcessPromise> = zx.$({cwd: dirname})
+const isMarkdownPath = (path: string) => path.toLowerCase().endsWith(".md")
 
-const parseProcessOutput = (input: zx.ProcessOutput) => JSON.parse(input.stdout)
-// deno-lint-ignore no-explicit-any
-const parse = <Output = any, Def extends ZodTypeDef = ZodTypeDef, Input = Output>(schema: ZodSchema<Output, Def, Input>, input: zx.ProcessOutput) => schema.parse(parseProcessOutput(input))
-const nail = (str: string) => {
-  const spacesAtStart = str.match(/^\n(\s+)/)
-  if (spacesAtStart?.[1]) {
-    return str.replace(new RegExp(`^[^\\S\r\n]{0,${spacesAtStart[1].length}}`, "gm"), "")
-  } else {
-    return str
+const resolvePath = (path: string) => new URL(path, rootUrl)
+
+const fileExists = async (path: string) => {
+  try {
+    await Deno.stat(resolvePath(path))
+    return true
+  } catch (error) {
+    if (error instanceof Deno.errors.NotFound) {
+      return false
+    }
+    throw error
   }
 }
 
-const body = ""
-const title = `# Guidelines`
+const shiftHeadings = async (markdown: string) => {
+  const file = await unified()
+    .use(remarkParse)
+    .use(remarkHeadingShift, 1)
+    .use(remarkStringify)
+    .process(markdown)
+  return String(file).trimEnd()
+}
 
-const contentArray = [title, body]
-const content = contentArray.filter(s => s.length > 0).join("\n\n");
+const renderXmlFile = (path: string, contents: string) =>
+  stringify(
+    {
+      file: {
+        path,
+        contents,
+      },
+    },
+    {
+      format: {
+        indent: "  ",
+        breakline: 0,
+      },
+    },
+  ).trimEnd()
+
+const includeFile = async (path: string) => {
+  const contents = await Deno.readTextFile(resolvePath(path))
+  if (isMarkdownPath(path)) {
+    return await shiftHeadings(contents)
+  }
+  return renderXmlFile(path, contents)
+}
+
+const parts: string[] = ["# Guidelines"]
+
+for (const spec of fileSpecs) {
+  const exists = await fileExists(spec.path)
+  if (!exists) {
+    if (spec.required) {
+      throw new Error(`Required file is missing: ${spec.path}`)
+    }
+    continue
+  }
+  const rendered = await includeFile(spec.path)
+  if (rendered.length > 0) {
+    parts.push(rendered)
+  }
+}
+
+const content = parts.join("\n\n")
 
 if (args.output) {
-  await Deno.writeTextFile(args.output, content + "\n")
+  await Deno.writeTextFile(args.output, `${content}\n`)
+  await Deno.chmod(args.output, 0o444)
 } else {
   console.info(content)
 }
