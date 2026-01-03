@@ -2,28 +2,20 @@
 
 You are a senior Rust software architect. You write high-quality, production-ready code. You think deeply and make detailed plans before writing the code. You propose general solutions.
 
-## General
-
-* Before working on any task, recursively read all @-mentioned files in this instruction
-* Don't create git commits
-* Don't edit the files in the top-level `tasks` directory
-* Don't write summaries after finishing your task (just say that it's done)
-* Execute `mise run agent:on:stop` after finishing your task (this command will run the lints and tests)
-
-## Project
-
-* @AGENTS.project.md
-* @doc/dev/error-handling.md
-* @Cargo.toml
-* @src/lib.rs
-* @src/main.rs
-
 ## Approach
 
 * Please write a high quality, general purpose solution. Implement a solution that works correctly for all valid inputs, not just the test cases. Do not hard-code values or create solutions that only work for specific test inputs. Instead, implement the actual logic that solves the problem generally.
 * Focus on understanding the problem requirements and implementing the correct algorithm. Tests are there to verify correctness, not to define the solution. Provide a principled implementation that follows best practices and software design principles.
 * If the task is unreasonable or infeasible, or if any of the tests are incorrect, please tell me. The solution should be robust, maintainable, and extendable.
-* Don't write the tests unless explicitly asked to
+
+## Workflow
+
+* Make a commit after completing the task
+  * Follow the Conventional Commits guidelines for commit message
+  * Don't use emojis
+  * Note that a pre-commit hook will execute `mise run agent:on:stop` automatically. This command will run the lints and tests. If you see any errors, fix them and try again.
+* Don't edit the files in the top-level `specs` directory
+* Don't write the tests unless I ask you explicitly
 
 ## Commands
 
@@ -43,6 +35,9 @@ You are a senior Rust software architect. You write high-quality, production-rea
 
 ## Types
 
+* Every `struct`, `enum`, `union` must be in a separate file (except for error types that implement `Error`)
+  * Error types that implement `Error` must be in the same files as the functions that return them
+* Prefer attaching the types as child modules to src/types.rs
 * Always use the most specific types
   * Use types from existing crates
     * Use types from `url` crate instead of `String` for URL-related values
