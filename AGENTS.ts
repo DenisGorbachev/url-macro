@@ -73,17 +73,17 @@ const includeFileIfExists = async (path: string) => {
   return await includeFile(path)
 }
 
-const parts = [
-  "# Guidelines",
-  await includeFile(".agents/general.md"),
-  await includeFileIfExists(".agents/project.md"),
-  await includeFileIfExists(".agents/knowledge.md"),
-  await includeFileIfExists(".agents/gotchas.md"),
-  await includeFile(".agents/error-handling.md"),
-  await includeFile("Cargo.toml"),
-  await includeFileIfExists("src/main.rs"),
-  await includeFileIfExists("src/lib.rs"),
-].filter((part): part is string => !!part && part.length > 0)
+const parts = (await Promise.all([
+  Promise.resolve("# Guidelines"),
+  includeFile(".agents/general.md"),
+  includeFileIfExists(".agents/project.md"),
+  includeFileIfExists(".agents/knowledge.md"),
+  includeFileIfExists(".agents/gotchas.md"),
+  includeFile(".agents/error-handling.md"),
+  includeFile("Cargo.toml"),
+  includeFileIfExists("src/main.rs"),
+  includeFileIfExists("src/lib.rs"),
+])).filter((part): part is string => !!part && part.length > 0)
 
 const content = parts.join("\n\n")
 
