@@ -16,26 +16,25 @@ const args = parseArgs(Deno.args, {
 
 const rootUrl = new URL(".", import.meta.url)
 
-type FileSpec = {
-  path: string
-  required: boolean
-}
+const requiredFiles = [
+  ".agents/general.md",
+  ".agents/error-handling.md",
+  "Cargo.toml",
+]
 
-const fileSpecs: FileSpec[] = [
-  {path: ".agents/general.md", required: true},
-  {path: ".agents/project.md", required: false},
-  {path: ".agents/knowledge.md", required: false},
-  {path: ".agents/gotchas.md", required: false},
-  {path: ".agents/error-handling.md", required: true},
-  {path: "Cargo.toml", required: true},
-  {path: "src/main.rs", required: false},
-  {path: "src/lib.rs", required: false},
+const optionalFiles = [
+  ".agents/project.md",
+  ".agents/knowledge.md",
+  ".agents/gotchas.md",
+  "src/main.rs",
+  "src/lib.rs",
 ]
 
 const isMarkdownPath = (path: string) => path.toLowerCase().endsWith(".md")
 
 const resolvePath = (path: string) => new URL(path, rootUrl)
 
+// TODO: Use https://docs.deno.com/examples/checking_file_existence/
 const fileExists = async (path: string) => {
   try {
     await Deno.stat(resolvePath(path))
@@ -81,18 +80,29 @@ const includeFile = async (path: string) => {
   return renderXmlFile(path, contents)
 }
 
+const includeFileIfExists = async (path: string) => {
+  const exists = await fileExists(path)
+  if (!exists) {
+    return null
+  }
+  return await includeFile(path)
+}
+
 const parts: string[] = ["# Guidelines"]
 
-for (const spec of fileSpecs) {
-  const exists = await fileExists(spec.path)
-  if (!exists) {
-    if (spec.required) {
-      throw new Error(`Required file is missing: ${spec.path}`)
-    }
-    continue
+for (const path of requiredFiles) {
+  const rendered = await includeFileIfExists(path)
+  if (!rendered) {
+    throw new Error(`Required file is missing: ${path}`)
   }
-  const rendered = await includeFile(spec.path)
   if (rendered.length > 0) {
+    parts.push(rendered)
+  }
+}
+
+for (const path of optionalFiles) {
+  const rendered = await includeFileIfExists(path)
+  if (rendered && rendered.length > 0) {
     parts.push(rendered)
   }
 }
