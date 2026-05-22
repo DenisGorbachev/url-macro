@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --allow-write --allow-read --allow-run=bash,git,cargo --allow-net=docs.rs:443,github.com:443 --allow-env --allow-sys --no-lock
+#!/usr/bin/env -S deno run --node-modules-dir=false --allow-write --allow-read --allow-run=bash,git,cargo --allow-net=docs.rs:443,github.com:443 --allow-env --allow-sys --no-lock
 
 // NOTE: Pin the versions of the packages because the script runs without a lock file
 import * as zx from "npm:zx@8.3.2"
@@ -29,12 +29,11 @@ const CargoTomlSchema = z.object({
         summary: z.string().optional(),
         readme: z.object({
           generate: z.boolean().default(true),
-          ignore_bins: z.array(z.string()).default([]),
         }).default({}),
         peers: z.array(z.string()).default([]).describe("Packages that should be installed alongside this package"),
       }).default({}),
     }).default({}),
-  }),
+  }).optional(),
 })
 
 type CargoToml = z.infer<typeof CargoTomlSchema>
@@ -130,6 +129,11 @@ const theCargoTomlText = await Deno.readTextFile(`${dirname}/Cargo.toml`)
 // deno-lint-ignore no-explicit-any
 const theCargoTomlRaw = parseToml(theCargoTomlText) as any
 
+// If Cargo.toml is not a package manifest (e.g. a virtual workspace manifest), just exit successfully
+if (!theCargoTomlRaw.package) {
+  Deno.exit(0)
+}
+
 // If README generation is manually disabled in the Cargo.toml, just exit successfully
 if (theCargoTomlRaw.package?.metadata?.details?.readme?.generate === false) {
   Deno.exit(0)
@@ -147,19 +151,17 @@ const theOriginUrl = normalizeGitRemoteUrl((await originUrlPromise).stdout.trim(
 
 assertEquals(theOriginUrl, theCargoToml.package.repository)
 
-const {package: {name, description, license, metadata: {details: {title: titleExplicit, peers, readme: {ignore_bins}}}}} = theCargoToml
+const {package: {name, description, license, metadata: {details: {title: titleExplicit, peers}}}} = theCargoToml
 const title = titleExplicit || description
 const _libTargetName = toSnakeCase(name)
 const thePackageMetadata = theCargoMetadata.packages.find((p) => p.name == name)
 assert(thePackageMetadata, "Could not find package metadata")
 const primaryTarget = thePackageMetadata.targets[0]
 assert(primaryTarget, "Could not find package primary target")
-const ignoredBinNames = new Set(ignore_bins)
-const isIgnoredBin = (target: CargoMetadata["packages"][number]["targets"][number]) => target.kind.includes("bin") && ignoredBinNames.has(target.name)
-const primaryBinTarget = thePackageMetadata.targets.find((t) => !isIgnoredBin(t) && t.name == name && t.kind.includes("bin"))
+const primaryBinTarget = thePackageMetadata.targets.find((t) => t.kind.includes("bin"))
 // NOTE: primaryTarget may be equal to primaryBinTarget
-const primaryTargets = [primaryTarget, primaryBinTarget].filter((target) => target !== undefined)
-const secondaryTargets = thePackageMetadata.targets.filter((t) => !primaryTargets.includes(t) && !isIgnoredBin(t))
+const primaryTargets = [primaryTarget, primaryBinTarget]
+const secondaryTargets = thePackageMetadata.targets.filter((t) => !primaryTargets.includes(t))
 const secondaryBinTargets = secondaryTargets.filter((t) => t.kind.includes("bin"))
 const docsUrl = `https://docs.rs/${name}`
 const crateDocsPlaceholder = `

@@ -1,5 +1,3 @@
-<!-- rumdl-disable MD002 -->
-
 @AGENTS.md
 
 ## Tools

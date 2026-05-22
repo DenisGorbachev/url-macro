@@ -6,7 +6,6 @@ env:
     -Dwarnings
     -Clink-arg=-fuse-ld=mold
   RUST_BACKTRACE: 1
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   test:
@@ -21,21 +20,28 @@ jobs:
           - nightly
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-      # mold is a workaround for regression in Rust 1.93 beta
-      - uses: rui314/setup-mold@v1
-      - uses: jdx/mise-action@v2
-        with:
-          version: 2025.10.11
-      - name: Remove rust from mise
+      - uses: actions/checkout@v6
+      - name: "Replace the pinned channel with 'stable'"
+        run: sed -i 's/^channel = \".*\"/channel = \"stable\"/' rust-toolchain.toml
+      - name: Set home dirs
         run: |
-          # a different rust version will be installed in the next step
-          mise rm rust
-      - uses: dtolnay/rust-toolchain@master
+          echo "MISE_DATA_DIR=$RUNNER_TEMP/mise" >> "$GITHUB_ENV"
+          echo "RUSTUP_HOME=$RUNNER_TEMP/mise/rustup" >> "$GITHUB_ENV" # RUSTUP_HOME must live under MISE_DATA_DIR, so that mise caches it automatically (it doesn't cache ~/.rustup)
+          echo "CARGO_HOME=$RUNNER_TEMP/mise/cargo" >> "$GITHUB_ENV" # CARGO_HOME must live under MISE_DATA_DIR, so that mise caches it automatically (it doesn't cache ~/.cargo)
+          echo "DENO_DIR=$RUNNER_TEMP/deno" >> "$GITHUB_ENV" # DENO_DIR must live outside MISE_DATA_DIR, so that actions/cache can save it after later Deno invocations
+      - uses: rui314/setup-mold@v1 # mold is a workaround for regression in Rust 1.93 beta
+      - uses: jdx/mise-action@v4
         with:
-          toolchain: ${{ matrix.rust }}
-          components: clippy, rustfmt
-      - uses: Swatinem/rust-cache@v2.8.0
+          cache_key: "{{default}}-${{ hashFiles('rust-toolchain.toml') }}"
+          # cache_key must contain rust-toolchain.toml
+      - uses: actions/cache@v5
+        with:
+          path: ${{ matrix.rust }}
+          key: deno-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('mise.toml', '*.ts', 'deno.json', '**/deno.lock') }}
+          # actions/cache saves in a post-job hook, so it captures modules downloaded by later Deno invocations
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-bin: false # mise already caches CARGO_HOME
       - run: lefthook run --force pre-commit
       - run: cargo hack test --feature-powerset
       - uses: wagoid/commitlint-github-action@v6

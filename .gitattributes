@@ -1,0 +1,27 @@
+# The following lines require `ours` merge driver:
+#
+# [merge "ours"]
+#   # For conflicting hunks: merge ours
+#   # For non-conflicting hunks: merge normally
+#   name = Prefer ours for conflicting hunks
+#   # wrapping with `test` is needed because `git merge-file` exit status is equal to the number of conflicts (including those resolved with `--ours`)
+#   # %S, %X, %Y, %L are not needed because `--ours` leaves no conflicts
+#   driver = sh -c 'git merge-file --ours --quiet "$1" "$2" "$3" || test $? -le 127' -- %A %O %B
+#   # keep using `text` for ancestor merges
+#   recursive = text
+#
+README.md merge=ours
+AGENTS.md merge=ours
+Cargo.lock merge=ours
+
+# Rationale for `Cargo.lock merge=ours`:
+# - Cargo.lock will be equal between branches
+# - New dependencies will be recorded in Cargo.toml, which would trigger a regeneration of Cargo.lock
+# - A vulnerability monitoring tool (e.g. Dependabot) will continue flagging vulnerable deps
+
+# The following lines require `hidden` diff driver
+# To define `hidden` diff driver, run `git config --global diff.hidden.binary true`
+# Note that `diff.external` setting does not respect internal diff drivers
+README.md diff=hidden
+AGENTS.md diff=hidden
+Cargo.lock diff=hidden

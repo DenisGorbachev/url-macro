@@ -13,6 +13,9 @@
 //! let invalid = url!("foo");
 //! ```
 
+#![deny(clippy::arithmetic_side_effects)]
+#![cfg_attr(not(test), deny(unused_crate_dependencies))]
+
 use proc_macro::{Delimiter, Group, Ident, LexError, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 use std::convert::identity;
 
