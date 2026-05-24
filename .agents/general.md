@@ -46,6 +46,7 @@ Notes:
 
 * After finishing the task: run `mise run agent:on:stop` (this command runs the lints and tests)
   * `mise run agent:on:stop` may modify `README.md`, `AGENTS.md`, `Cargo.toml` (this is normal, don't mention it)
+  * `mise run agent:on:stop` includes `cargo fmt`, `cargo check`, `cargo clippy`, `cargo nextest` (no need to run them separately)
 * Don't edit the files in the following top-level dirs: `specs`, `.agents`
 * Don't write the tests unless I ask you explicitly
 * If a later instruction overrides the former instruction: follow the later instruction (last override wins).
@@ -409,9 +410,16 @@ A function marked with `#[test]` or `#[tokio::test]`.
 * Write `macro_rules!` macros to reduce boilerplate
 * If you see similar code in different places, write a macro and replace the similar code with a macro call
 
+## Shell
+
+* For shell scripts and commands that will be read by the user (written per direct request of the user):
+  * Use long options
+* For shell scripts and commands what won't be read by the user (written to accomplish a local task):
+  * Use short options
+
 ## Cargo.toml
 
-* Don't define package features contain only a single optional dependency (such features are already defined by cargo automatically)
+* Don't define package features with only a single optional dependency (such features are already defined by cargo automatically)
 
 ## Sandbox
 
