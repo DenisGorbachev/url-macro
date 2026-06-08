@@ -490,8 +490,8 @@ url = "2.0.0"
 if_missing = "error"
 
 [providers]
-keychain = { type = "keychain", service = "rust-public-lib-template" }
-pass = { type = "password-store", prefix = "rust-public-lib-template/" }
+keychain = { type = "keychain", service = "url-macro" }
+pass = { type = "password-store", prefix = "url-macro/" }
 ```
 
 ### src/lib.rs
