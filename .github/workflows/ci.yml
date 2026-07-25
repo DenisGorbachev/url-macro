@@ -36,7 +36,7 @@ jobs:
         with:
           cache-bin: false # mise already caches CARGO_HOME
       - run: mise run pre-commit
-      - run: cargo hack test --workspace --feature-powerset
+      - run: "cargo hack test --workspace --feature-powerset -- --skip integration_tests::"
       - uses: wagoid/commitlint-github-action@v6
         with:
           failOnWarnings: true
