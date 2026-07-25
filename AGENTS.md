@@ -469,7 +469,7 @@ A function marked with `#[test]` or `#[tokio::test]`.
 
 You are running in a sandbox with limited network access.
 
-* The list of allowed domains is available in /etc/dnsmasq.d/allowed\_domains.conf
+* The list of allowed domains is available in /run/yolobox/configs/dnsmasq.d/allowed\_domains.conf
 * If you need to run a network command, just do it without checking permissions (they will be enforced automatically)
 * If you need to read the data from other domains, use the web search tool (this tool is executed outside of sandbox)
 

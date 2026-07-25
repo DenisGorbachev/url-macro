@@ -147,7 +147,7 @@ if [[ $# -gt 1 ]]; then
 fi
 
 cargo_toml=$(realpath "${MISE_PROJECT_ROOT:-$(pwd)}/Cargo.toml")
-name_new=${1:-$(mise run --quiet git:repo-name)}
+name_new=${1:-$(mise run git:repo-name)}
 name_key=workspace.metadata.details.name
 if ! name_old=$(taplo get --file-path "$cargo_toml" --strip-newline "$name_key" 2>/dev/null); then
   name_key=package.name
