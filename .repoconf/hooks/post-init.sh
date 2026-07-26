@@ -22,7 +22,7 @@ fnox_toml="$dir/fnox.toml"
     repo_name=$(jq --exit-status --raw-output '.name | strings | select(length > 0)' <<<"$repo_json")
     repo_url=$(jq --exit-status --raw-output '.url | strings | select(length > 0)' <<<"$repo_json")
   else
-    repo_name=$(mise run --quiet git:repo-name)
+    repo_name=$(mise run git:repo-name)
   fi
 
   rm -f README.md

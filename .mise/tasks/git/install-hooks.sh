@@ -5,6 +5,14 @@ set -euo pipefail
 hooks_dir=$(git rev-parse --path-format=absolute --git-path hooks)
 mkdir -p "$hooks_dir"
 
+# Remove obsolete Lefthook launchers, including hooks that no longer have mise replacements.
+for hook_path in "$hooks_dir"/*; do
+  [[ -f $hook_path ]] || continue
+  [[ $(<"$hook_path") == *"call_lefthook run "* ]] || continue
+  rm -f "$hook_path"
+done
+rm -f "$(git rev-parse --path-format=absolute --git-path info/lefthook.checksum)"
+
 write_hook() {
   local hook_path=${1:?}
   local command=${2:?}

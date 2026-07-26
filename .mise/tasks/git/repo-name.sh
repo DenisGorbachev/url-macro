@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+#MISE output="interleave"
+#MISE quiet=true
 
 set -euo pipefail
 
