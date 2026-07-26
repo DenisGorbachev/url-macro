@@ -17,6 +17,6 @@ assert_toml_value() {
 
 project_root=${MISE_PROJECT_ROOT:-$(pwd)}
 fnox_toml="$project_root/fnox.toml"
-project_name=$(mise run --quiet git:repo-name)
+project_name=$(mise run git:repo-name)
 assert_toml_value "$fnox_toml" "providers.keychain.service" "$project_name"
 assert_toml_value "$fnox_toml" "providers.pass.prefix" "$project_name/"

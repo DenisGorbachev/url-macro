@@ -1,4 +1,5 @@
 {
+  "lock": false,
   "fmt": {
     "lineWidth": 100500,
     "semiColons": false

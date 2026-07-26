@@ -1,7 +1,8 @@
-min_version = "2026.4.8"
+min_version = "2026.7.13"
 
 [settings]
 idiomatic_version_file_enable_tools = ["rust"]
+task.output = "keep-order"
 
 [plugins]
 fnox-env = "https://github.com/jdx/mise-env-fnox"
@@ -49,12 +50,12 @@ run = "cargo nextest run --workspace --all-features --no-tests warn"
 [tasks."test:code:integration"]
 # see also: "agent:test:code:integration"
 # `--test-threads 1` because integration tests must be run sequentially
-run = "mise run test:code -- --ignore-default-filter --max-fail 1 --test-threads 1 'integration_tests::'"
+run = [{ task = "test:code", args = ["--ignore-default-filter", "--max-fail", "1", "--test-threads", "1", "integration_tests::"] }]
 
 [tasks."test:code:slow"]
 # see also: "agent:test:code:slow"
 # `--test-threads` is omitted because slow tests may be run in parallel
-run = "mise run test:code -- --ignore-default-filter --max-fail 1 'slow_tests::'"
+run = [{ task = "test:code", args = ["--ignore-default-filter", "--max-fail", "1", "slow_tests::"] }]
 
 [tasks."test:docs"]
 run = "cargo test --workspace --doc --all-features --no-fail-fast --quiet"
@@ -72,7 +73,7 @@ run = [{ task = "git:stage-fixed" }]
 depends = ["git:repair-index"]
 
 [tasks."commit-msg"]
-run = 'mise run commitlint -- --edit "$@"'
+run = 'mise run --output interleave commitlint -- --edit "$@"'
 
 [tasks."fix"]
 depends = ["fix:code", "fix:aux"]
@@ -110,13 +111,7 @@ run = "rumdl check --fix && git add -- '*.md'"
 [tasks."fix:agents"]
 # "fix:agents" depends on "fix:code" because it reads the code files
 depends = ["fix:name", "fix:configs", "fix:code"]
-run = "mise run gen:agents && git add AGENTS.md"
-
-[tasks."fix:readme"]
-# "fix:readme" depends on "fix:code" because it reads the code files
-# skip in CI because `gen:readme` may fail due to transient network errors (e.g. GitHub server not responding). Note: there is no enforcement that committed generated READMEs are current (this is acceptable).
-depends = ["fix:name", "fix:code"]
-run = "if [ \"${CI+x}\" != x ]; then mise run gen:readme && git add -- ':(glob)**/README.md'; fi"
+run = [{ task = "gen:agents" }, "git add AGENTS.md"]
 
 [tasks."gen:readme"]
 run = "./README.ts"
@@ -125,10 +120,11 @@ run = "./README.ts"
 run = "./AGENTS.ts"
 
 [tasks."commitlint"]
-run = "commitlint --extends \"$(mise where npm:@commitlint/config-conventional)/lib/node_modules/@commitlint/config-conventional/lib/index.js\""
+run = "commitlint --extends \"$(mise where npm:@commitlint/config-conventional)/node_modules/@commitlint/config-conventional/lib/index.js\""
 
 [tasks."agent:docs:list"]
 run = "[ -d .agents/docs ] && find .agents/docs -type f -print || true"
+output = "interleave"
 quiet = true
 
 # "fix" may modify the files that are read by "test", so "test" may actually test an old version. This risk is small and acceptable, because the tests are re-run in CI.
@@ -141,14 +137,14 @@ depends = ["agent:test:code", "agent:test:code:integration", "agent:test:code:sl
 [tasks."agent:test:code"]
 # don't include `--fail-fast` because it's better to let the agent see all failures
 # reduce output to save tokens
-run = "mise run test:code -- --cargo-quiet --hide-progress-bar --status-level fail --final-status-level flaky"
+run = [{ task = "test:code", args = ["--cargo-quiet", "--hide-progress-bar", "--status-level", "fail", "--final-status-level", "flaky"] }]
 
 [tasks."agent:test:code:integration"]
 # see also: "test:code:integration"
 # `--test-threads 1` because integration tests must be run sequentially
-run = "mise run agent:test:code -- --ignore-default-filter --max-fail 1 --test-threads 1 'integration_tests::'"
+run = [{ task = "test:code", args = ["--cargo-quiet", "--hide-progress-bar", "--status-level", "fail", "--final-status-level", "flaky", "--ignore-default-filter", "--max-fail", "1", "--test-threads", "1", "integration_tests::"] }]
 
 [tasks."agent:test:code:slow"]
 # see also: "test:code:slow"
 # `--test-threads` is omitted because slow tests may be run in parallel
-run = "mise run agent:test:code -- --ignore-default-filter --max-fail 1 'slow_tests::'"
+run = [{ task = "test:code", args = ["--cargo-quiet", "--hide-progress-bar", "--status-level", "fail", "--final-status-level", "flaky", "--ignore-default-filter", "--max-fail", "1", "slow_tests::"] }]
