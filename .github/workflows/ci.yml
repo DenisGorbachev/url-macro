@@ -36,7 +36,7 @@ jobs:
           # cache_key must contain rust-toolchain.toml
       - uses: actions/cache@v5
         with:
-          path: ${{ matrix.rust }}
+          path: ${{ runner.temp }}/deno
           key: deno-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('mise.toml', '*.ts', 'deno.json', '**/deno.lock') }}
           # actions/cache saves in a post-job hook, so it captures modules downloaded by later Deno invocations
       - uses: Swatinem/rust-cache@v2

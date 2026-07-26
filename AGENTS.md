@@ -465,15 +465,7 @@ A function marked with `#[test]` or `#[tokio::test]`.
 
 * Don't define package features with only a single optional dependency (such features are already defined by cargo automatically)
 
-### Sandbox
-
-You are running in a sandbox with limited network access.
-
-* The list of allowed domains is available in /etc/dnsmasq.d/allowed\_domains.conf
-* If you need to run a network command, just do it without checking permissions (they will be enforced automatically)
-* If you need to read the data from other domains, use the web search tool (this tool is executed outside of sandbox)
-
-## Project files
+### Project files
 
 #### Cargo.toml
 
