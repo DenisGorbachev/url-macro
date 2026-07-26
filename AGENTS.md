@@ -134,7 +134,7 @@ Notes:
 * When creating a new module, attach it with a `mod` declaration followed by `pub use` glob declaration. The parent module must re-export all items from the child modules. This allows to `use` the items right from the crate root, without intermediate module path. For example:
   ```rust
   fn foo() {}
-
+  
   mod my_module_name;
   pub use my_module_name::*;
   ```
@@ -148,7 +148,7 @@ Notes:
     ```rust
     use clap::ValueEnum;
     use serde::{Deserialize, Serialize};
-
+  
     #[derive(ValueEnum, Serialize, Deserialize, Eq, PartialEq, Hash, Clone, Copy, Debug)]
     pub enum Side {
         Buy,
@@ -243,7 +243,7 @@ Notes:
               .filter(|i| i.is_empty().not())
               .collect::<Vec<_>>()
       }
-
+      
       /// This is bad because it is not general enough and also forces the caller to collect the strings into a vec for input, which is bad for performance
       pub fn bar(inputs: Vec<String>) -> Vec<String> {}
       ```
@@ -263,7 +263,7 @@ Notes:
         let iter = inputs.into_iter().map(|s| s.as_ref().trim().parse::<u64>());
         Ok(handle_iter!(iter, InvalidInput))
     }
-
+    
     #[derive(Error, Debug)]
     pub enum ParseNumbersError {
         #[error("failed to parse {len} numbers", len = source.len())]
@@ -273,7 +273,7 @@ Notes:
   * Bad:
     ```rust
     use core::num::ParseIntError;
-
+    
     // Bad: manual loop + mutable accumulator
     pub fn parse_numbers(inputs: impl IntoIterator<Item = impl AsRef<str>>) -> Result<Vec<u64>, ParseIntError> {
         let mut out = Vec::new();
@@ -329,7 +329,7 @@ Notes:
         let input = input.as_mut();
         // do something
     }
-
+    
     pub fn baz(input: &impl AsRef<str>) {
         let input = input.as_ref();
         // do something
@@ -339,7 +339,7 @@ Notes:
     ```rust
     /// This is bad because the callsite may have to call .as_mut() when passing the input argument
     pub fn bar(input: &mut String) {}
-
+    
     /// This is bad because the callsite may have to call .as_ref() when passing the input argument
     pub fn baz(input: &str) {}
     ```
@@ -348,7 +348,7 @@ Notes:
     ```rust
     use core::str::FromStr;
     use core::num::ParseIntError;
-
+    
     impl FromStr for UserId {
         type Err = ParseIntError;
 
@@ -361,10 +361,10 @@ Notes:
   ```rust
   use core::str::FromStr;
   use core::num::ParseIntError;
-
+  
   impl FromStr for UserId {
       type Err = ParseIntError;
-
+  
       fn from_str(s: &str) -> Result<Self, Self::Err> {
           // This is bad because it uses more code to express the same idea
           match s.parse::<u64>() {
@@ -378,7 +378,7 @@ Notes:
   * Good:
   ```rust
   use core::time::Duration;
-
+  
   impl From<Duration> for UnixTimestamp {
       #[inline]
       fn from(duration: Duration) -> Self {
@@ -389,7 +389,7 @@ Notes:
   * Bad:
   ```rust
   use core::time::Duration;
-
+  
   impl From<Duration> for UnixTimestamp {
       #[inline]
       fn from(duration: Duration) -> Self {
@@ -464,14 +464,6 @@ A function marked with `#[test]` or `#[tokio::test]`.
 #### Cargo.toml
 
 * Don't define package features with only a single optional dependency (such features are already defined by cargo automatically)
-
-#### Sandbox
-
-You are running in a sandbox with limited network access.
-
-* The list of allowed domains is available in /run/yolobox/configs/dnsmasq.d/allowed\_domains.conf
-* If you need to run a network command, just do it without checking permissions (they will be enforced automatically)
-* If you need to read the data from other domains, use the web search tool (this tool is executed outside of sandbox)
 
 ### Guidelines for `subtype`
 
@@ -564,17 +556,17 @@ Every fallible function must return an error with enough data for the caller to 
       #[getter(copy)]
       age: u32,
   }
-
+  
   #[derive(Getters, Clone, Debug)]
   pub struct Adult {
       name: NonEmptyString,
       #[getter(copy)]
       age: u32,
   }
-
+  
   impl TryFrom<Human> for Adult {
       type Error = TryFromHumanForAdultError;
-
+  
       fn try_from(input: Human) -> Result<Self, Self::Error> {
           use TryFromHumanForAdultError::*;
           let Human {
@@ -596,7 +588,7 @@ Every fallible function must return an error with enough data for the caller to 
           }
       }
   }
-
+  
   #[derive(Error, Debug)]
   pub enum TryFromHumanForAdultError {
       #[error("failed to convert human to adult")]
@@ -643,7 +635,7 @@ A string that is empty or contains only whitespace characters.
 
 #### File: src/functions/exit.rs
 
-```rust
+````rust
 use crate::eprintln_error;
 use std::error::Error;
 use std::process::ExitCode;
@@ -695,11 +687,11 @@ pub async fn exit_stream_of_results_print_first<E: Error>(stream: impl Stream<It
     }
     ExitCode::SUCCESS
 }
-```
+````
 
-#### File: src/functions/get\_root\_error.rs
+#### File: src/functions/get_root_error.rs
 
-```rust
+````rust
 use core::error::Error;
 
 /// Returns the deepest source error in the error chain (the root cause).
@@ -710,11 +702,11 @@ pub fn get_root_source(error: &dyn Error) -> &dyn Error {
     }
     source
 }
-```
+````
 
-#### File: src/functions/partition\_result.rs
+#### File: src/functions/partition_result.rs
 
-```rust
+````rust
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
@@ -742,11 +734,11 @@ pub fn partition_result<T, E>(results: impl IntoIterator<Item = Result<T, E>>) -
 
     if errors.is_empty() { Ok(oks) } else { Err(errors) }
 }
-```
+````
 
-#### File: src/functions/render\_command.rs
+#### File: src/functions/render_command.rs
 
-```rust
+````rust
 use core::iter::once;
 use std::process::Command;
 
@@ -760,11 +752,11 @@ pub fn render_command(command: &Command) -> String {
         Err(_) => command.get_program().to_string_lossy().into_owned(),
     }
 }
-```
+````
 
-#### File: src/functions/write\_to\_named\_temp\_file.rs
+#### File: src/functions/write_to_named_temp_file.rs
 
-```rust
+````rust
 use crate::{handle, map_err};
 use std::fs::File;
 use std::io;
@@ -796,11 +788,11 @@ pub enum WriteToNamedTempFileError {
     #[error("failed to persist the temporary file")]
     KeepFailed { source: PersistError },
 }
-```
+````
 
-#### File: src/functions/writeln\_error.rs
+#### File: src/functions/writeln_error.rs
 
-```rust
+````rust
 use crate::{ErrorDisplayer, WriteToNamedTempFileError, map_err, write_to_named_temp_file};
 use core::error::Error;
 use core::fmt::{self, Formatter};
@@ -1014,11 +1006,11 @@ mod tests {
         }
     }
 }
-```
+````
 
-#### File: src/types/debug\_as\_display.rs
+#### File: src/types/debug_as_display.rs
 
-```rust
+````rust
 use core::fmt::{self, Debug, Display, Formatter};
 
 /// A wrapper that renders `Debug` using the inner type's `Display` implementation.
@@ -1046,11 +1038,11 @@ impl<T: Display> From<T> for DebugAsDisplay<T> {
         Self(value)
     }
 }
-```
+````
 
-#### File: src/types/display\_as\_debug.rs
+#### File: src/types/display_as_debug.rs
 
-```rust
+````rust
 use core::fmt::{self, Debug, Display, Formatter};
 
 /// A wrapper that renders `Display` using the inner type's `Debug` implementation.
@@ -1071,11 +1063,11 @@ impl<T: Debug> From<T> for DisplayAsDebug<T> {
         Self(value)
     }
 }
-```
+````
 
-#### File: src/types/err\_vec.rs
+#### File: src/types/err_vec.rs
 
-```rust
+````rust
 use crate::ErrorDisplayer;
 use core::error::Error;
 use core::fmt::{self, Debug, Display, Formatter, Write};
@@ -1148,11 +1140,11 @@ impl<E: Error + Clone> From<&[E]> for ErrVec<E> {
         Self(inner.to_vec())
     }
 }
-```
+````
 
-#### File: src/types/error\_displayer.rs
+#### File: src/types/error_displayer.rs
 
-```rust
+````rust
 use crate::writeln_error_to_formatter;
 use core::fmt::{self, Display, Formatter};
 use std::error::Error;
@@ -1170,11 +1162,11 @@ impl<'a, E: Error + ?Sized> From<&'a E> for ErrorDisplayer<'a, E> {
         Self(error)
     }
 }
-```
+````
 
-#### File: src/types/item\_error.rs
+#### File: src/types/item_error.rs
 
-```rust
+````rust
 use thiserror::Error;
 
 /// Associates an error with the item that caused it.
@@ -1186,21 +1178,21 @@ pub struct ItemError<T, E> {
     /// The error produced for the item.
     pub source: E,
 }
-```
+````
 
-#### File: src/types/path\_buf\_display.rs
+#### File: src/types/path_buf_display.rs
 
-```rust
+````rust
 use crate::DisplayAsDebug;
 use std::path::PathBuf;
 
 /// A [`PathBuf`] that returns a `Debug` representation in [`Display`](std::fmt::Display) impl.
 pub type PathBufDisplay = DisplayAsDebug<PathBuf>;
-```
+````
 
 #### File: src/functions.rs
 
-```rust
+````rust
 mod get_root_error;
 mod partition_result;
 
@@ -1224,7 +1216,7 @@ cfg_if::cfg_if! {
         pub use render_command::*;
     }
 }
-```
+````
 
 #### File: src/lib.rs
 
@@ -1337,7 +1329,7 @@ mod drafts;
 
 #### File: src/macros.rs
 
-```rust
+````rust
 /// [`handle!`](crate::handle) is a better alternative to [`map_err`](Result::map_err) because it doesn't capture any variables from the environment if the result is [`Ok`], only when the result is [`Err`].
 /// By contrast, a closure passed to `map_err` always captures the variables from environment, regardless of whether the result is [`Ok`] or [`Err`]
 /// Use [`handle!`](crate::handle) if you need to pass owned variables to an error variant (which is returned only in case when result is [`Err`])
@@ -1856,11 +1848,11 @@ mod tests {
         ResponseContainsError { error: WeirdResponseError },
     }
 }
-```
+````
 
 #### File: src/types.rs
 
-```rust
+````rust
 mod debug_as_display;
 mod display_as_debug;
 mod item_error;
@@ -1880,7 +1872,7 @@ cfg_if::cfg_if! {
         pub use error_displayer::*;
     }
 }
-```
+````
 
 ### Project files
 
