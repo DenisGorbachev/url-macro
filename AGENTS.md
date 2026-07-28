@@ -465,6 +465,10 @@ A function marked with `#[test]` or `#[tokio::test]`.
 
 * Don't define package features with only a single optional dependency (such features are already defined by cargo automatically)
 
+#### Code style
+
+* Don't enforce a line length limit when writing code, comments or documentation
+
 ### Project files
 
 #### Cargo.toml
