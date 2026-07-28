@@ -465,6 +465,10 @@ A function marked with `#[test]` or `#[tokio::test]`.
 
 * Don't define package features with only a single optional dependency (such features are already defined by cargo automatically)
 
+#### Code style
+
+* Don't enforce a line length limit when writing code, comments or documentation
+
 ### Guidelines for `subtype`
 
 * The macro calls that begin with `subtype` (for example, `subtype!` and `subtype_string!`) expand to newtypes.
