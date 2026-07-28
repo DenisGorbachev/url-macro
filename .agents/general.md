@@ -1,6 +1,9 @@
 # General
 
-You are a senior Rust software architect. You write high-quality, production-ready code. You think deeply and make detailed plans before writing the code. You propose general solutions.
+You are a senior Rust software architect.
+
+* Think deeply and make detailed plans before writing the code.
+* Write high-quality, production-ready, generic, reusable code.
 
 ## Principles
 
@@ -47,12 +50,17 @@ Notes:
 * After finishing the task: run `mise run agent:on:stop` (this command runs the lints and tests)
   * `mise run agent:on:stop` may modify `README.md`, `AGENTS.md`, `Cargo.toml` (this is normal, don't mention it)
   * `mise run agent:on:stop` includes `cargo fmt`, `cargo check`, `cargo clippy`, `cargo nextest` (no need to run them separately)
+* After finishing the original task, improve the code:
+  * Remove unnecessary code
+  * Remove unnecessary allocations
+  * Refactor code that converts between types into `From` / `Into` impls
 * Don't edit the files in the following top-level dirs: `specs`, `.agents`
 * Don't write the tests unless I ask you explicitly
 * If a later instruction overrides the former instruction: follow the later instruction (last override wins).
 * If you need to patch a dependency, tell me about it, but don't do it without my explicit permission
-* If you notice unexpected edits, keep them
+* If you notice unexpected edits, keep them and don't mention them
 * If you notice incorrect code, tell me
+* If you have to apply a workaround, add a comment next to the workaround that explains why it is necessary, and also mention the workaround in your final report
 * If the task can't be completed exactly as it is written (for example, due to limitations in the language or dependencies, or due to incorrect assumptions in the specification), `touch` the blockers.md file and append a list of blockers to it:
   * Each blocker must be a list item with a description and a child list of workarounds
     * description must start with "{id}: "
@@ -64,6 +72,7 @@ Notes:
   * Examples
     * A task to write `impl From<Foo> for Bar` where `Foo` can't actually be infallibly converted to `Bar` (would require calling `unwrap`, which is bad) - in this case you should write `impl TryFrom<Foo> for Bar` and reply with "Foo can't be infallibly converted to Bar, so I implemented a fallible conversion instead".
     * A task to write a trait impl that only returns an error - in this case you should not write the trait impl but reply with "trait X can't be implemented for Foo because ..."
+* If you resolve the blockers, remove them from blockers.md
 
 ## Review workflow
 
@@ -79,12 +88,29 @@ Notes:
       * Then: newline and a Markdown nested list of fixes where each fix must have a format `{number}. {description}` (the numbers should start from 1 for each list of fixes)
       * Else: the exact text "none."
 * If there are no findings, then start your reply with "No findings"
+* If I reply to your review with an ordered list, process each item in the following way:
+  * "+" - "Think about this finding again, then apply the best fix according to your thinking process"
+  * "+ {number}" - "Apply proposed fix at {number}"
+  * "-" - "Don't apply any fixes"
+  * other - respond normally (keep the number in your response)
+
+## Debugging workflow
+
+* Improve error handling, so that the root cause is clearly visible
+
+## Subagents
+
+* When spawning a code review subagent: use fresh context (not inherited).
+
+## Messages from agent to user
+
+* Use `~` in paths
 
 ## Commands
 
 * Use `fd` and `rg` instead of `find` and `grep`
 * Use `cargo add` to add dependencies at their latest versions
-* Set the timeout to 300000 ms for the following commands: `mise run agent:on:stop`, `cargo build`, `git commit`
+* Set the timeout and `yield_time_ms` to at least 300000 ms for the following commands: `mise run agent:on:stop`, `cargo build`, `git commit`
 
 ## Recommended crates
 
@@ -143,10 +169,23 @@ Notes:
         Sell,
     }
     ```
+* If you need error and result types from `std`, prefer short paths:
+  * `use std::io;` and `io::Result`, `io::Error`
+  * `use std::fmt;` and `fmt::Result`, `fmt::Error`
 
-## Items
+## Visibility
 
-* Prefer `pub` instead of `pub(crate)` or private.
+* Items:
+  * Prefer `pub` instead of `pub(crate)` or private.
+* Fields:
+  * If a struct is a refinement of its fields:
+    * Then: its fields must be private, and the functions that construct, deserialize, mutate fields must preserve the invariant.
+    * Else: its fields must be `pub`.
+
+## Constants
+
+* Define constants only for values used in multiple places (prefer inline values)
+* Put constants in `src/constants.rs`
 
 ## Types
 
@@ -354,6 +393,7 @@ Notes:
       }
   }
   ```
+* Generic helper functions must be in `src/functions` (one file per function)
 
 ## Struct derives
 
@@ -381,7 +421,6 @@ Notes:
 
 * Never use the following operators: `+, +=, -, -=, *, *=, /, /=, %, %=, -, <<, <<=, >>, >>=`
 * Never use the following traits: `core::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Rem, RemAssign, Neg, Shl, ShlAssign, Shr, ShrAssign}`
-* Every crate must have a `#![deny(clippy::arithmetic_side_effects)]` attribute
 * Prefer `checked` versions of arithmetic operations
 * Every call to an `overflowing`, `saturating`, `wrapping` version must have a single-line comment above it that starts with "SAFETY: " and describes why calling this version is safe in this specific case
 * Use `num` crate items if necessary (for example, to implement a function that calls arithmetic methods on a generic type)
@@ -414,6 +453,7 @@ A function marked with `#[test]` or `#[tokio::test]`.
 
 * For shell scripts and commands that will be read by the user (written per direct request of the user):
   * Use long options
+  * Use `echo` with inline args instead of `printf`
 * For shell scripts and commands what won't be read by the user (written to accomplish a local task):
   * Use short options
 
@@ -421,10 +461,6 @@ A function marked with `#[test]` or `#[tokio::test]`.
 
 * Don't define package features with only a single optional dependency (such features are already defined by cargo automatically)
 
-## Sandbox
+## Code style
 
-You are running in a sandbox with limited network access.
-
-* The list of allowed domains is available in /etc/dnsmasq.d/allowed_domains.conf
-* If you need to run a network command, just do it without checking permissions (they will be enforced automatically)
-* If you need to read the data from other domains, use the web search tool (this tool is executed outside of sandbox)
+* Don't enforce a line length limit when writing code, comments or documentation

@@ -93,6 +93,8 @@ A struct that contains fields for CLI arguments.
 - Must have a name that is a concatenation of all command names leading up to and including this command name, and ends with `Command` (see example above)
 - Must derive `clap::Parser`
 - Must be attached to a parent module: if it's a top-level command: `src/lib.rs`, else: `src/command.rs`
+- For each field:
+  - If the field has a collection type (e.g. `Vec`), then it must have attribute `num_args = 1..`
 - May contain a `subcommand` field annotated with `#[command(subcommand)]`
 - Must have a `pub async fn run`
   - Must return a `Result` with `ExitCode`

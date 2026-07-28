@@ -1,71 +1,69 @@
 #!/usr/bin/env -S usage bash
-#USAGE flag "-n --name <name>" help="Package name (if this flag is not provided, then the package name is inferred from the directory name)"
 #USAGE arg "<dir>"
 
 set -xeuo pipefail
 
 dir=$(realpath "${usage_dir:?}")
-name_new_default="${usage_name:-$(basename "$dir")}"
 cargo_toml="$dir/Cargo.toml"
-#mise_toml="$dir/mise.toml"
-
-read -r -p "Rust package name (default: $name_new_default): " name_new
-if [[ -z $name_new ]]; then
-  name_new=$name_new_default
-fi
-
-description=""
-while [[ -z $description ]]; do
-  read -r -p "Rust package description: " description
-  if [[ -z $description ]]; then
-    echo "Rust package description is required for public packages." >&2
-  fi
-done
-
-read -r -p "Rust package title for README (default: same as description): " title
-if [[ -z $title ]]; then
-  title=$description
-fi
+fnox_toml="$dir/fnox.toml"
 
 (
   cd "$dir"
-
-  files=("README.md")
-  for file in "${files[@]}"; do
-    if [[ -f "$file" ]]; then
-      rm "$file"
-    fi
-  done
 
   mise trust
   mise install
   mise reshim
 
-  name_old=$(taplo get -f "$cargo_toml" "package.name")
-  name_old_snake_case=$(ccase --to snake "$name_old")
-  name_new_snake_case=$(ccase --to snake "$name_new")
-  name_old_kebab_case=$(ccase --to kebab "$name_old")
-  name_new_kebab_case=$(ccase --to kebab "$name_new")
-  repo_url=$(cd "$dir" && gh repo view --json url | jq -r .url)
+  # Using the Git repo name instead of the folder name because a workspace can contain multiple checkouts of the same repository in different folders, and a virtual manifest has no `package.name`.
+  origin_url=$(git remote get-url origin)
+  repo_url=
+  if [[ $origin_url == *github.com* ]]; then
+    repo_json=$(gh repo view --json name,url)
+    repo_name=$(jq --exit-status --raw-output '.name | strings | select(length > 0)' <<<"$repo_json")
+    repo_url=$(jq --exit-status --raw-output '.url | strings | select(length > 0)' <<<"$repo_json")
+  else
+    repo_name=$(mise run git:repo-name)
+  fi
 
-  tomli set -f "$cargo_toml" "package.name" "$name_new" | sponge "$cargo_toml"
-  tomli set -f "$cargo_toml" "package.repository" "$repo_url" | sponge "$cargo_toml"
-  tomli set -f "$cargo_toml" "package.homepage" "$repo_url" | sponge "$cargo_toml"
-  tomli set -f "$cargo_toml" "package.description" "$description" | sponge "$cargo_toml"
-  tomli set -f "$cargo_toml" "package.metadata.details.title" "$title" | sponge "$cargo_toml"
-  tomli set -f "$cargo_toml" "package.metadata.details.readme.generate" --type bool "true" | sponge "$cargo_toml"
+  rm -f README.md
 
-  # rg exits with status code = 1 if it doesn't find any files, so we need to disable & re-enable "set -e"
-  set +e
-  rg --files-with-matches "$name_old_snake_case" "$dir" | xargs gsed -i "s/\b$name_old_snake_case\b/$name_new_snake_case/g"
-  rg --files-with-matches "$name_old_kebab_case" "$dir" | xargs gsed -i "s/\b$name_old_kebab_case\b/$name_new_kebab_case/g"
-  set -e
+  mise run fix:name "$repo_name"
+  cargo metadata --manifest-path "$cargo_toml" --format-version 1 --no-deps |
+    jq --join-output --raw-output '
+      .workspace_members as $members
+      | .packages[]
+      | select(.id as $id | $members | index($id))
+      | .manifest_path + "\u0000"
+    ' |
+    while IFS= read -r -d '' manifest; do
+      tomli set --filepath "$manifest" --in-place "package.metadata.details.title" ""
+      tomli delete --filepath "$manifest" --in-place --if-exists "package.description"
+      # Normalize package URLs to workspace inheritance so no package keeps template repository metadata.
+      for field in repository homepage; do
+        tomli delete --filepath "$manifest" --in-place --if-exists "package.$field"
+        if [[ -n $repo_url ]]; then
+          tomli set --filepath "$manifest" --in-place --type bool --dotted-key "package.$field.workspace" true
+        fi
+      done
+    done
 
-  mise exec -- lefthook install
+  tomli set --filepath "$cargo_toml" --in-place "workspace.metadata.details.title" ""
+  tomli delete --filepath "$cargo_toml" --in-place --if-exists "workspace.package.description"
+  for field in repository homepage; do
+    if [[ -n $repo_url ]]; then
+      tomli set --filepath "$cargo_toml" --in-place "workspace.package.$field" "$repo_url"
+    else
+      tomli delete --filepath "$cargo_toml" --in-place --if-exists "workspace.package.$field"
+    fi
+  done
 
+  tomli set --filepath "$fnox_toml" --in-place "providers.keychain.service" "$repo_name"
+  tomli set --filepath "$fnox_toml" --in-place "providers.pass.prefix" "$repo_name/"
+
+  mise run gen:readme
   mise run build
   mise run test
 
   git add .
-  git -C "$dir" commit -a -m "chore: update package details"
+  git commit -m "chore: update project details"
 )
