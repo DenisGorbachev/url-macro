@@ -118,7 +118,7 @@ fn url_result(input: TokenStream) -> Result<TokenStream, TokenStream> {
     match Url::parse(url_str) {
         Ok(_) => {
             // If parsing succeeds, output the unwrap code
-            let result = format!("::url::Url::parse({}).unwrap()", literal);
+            let result = format!("::url::Url::parse({literal}).unwrap()");
             result
                 .parse()
                 .map_err(|err: LexError| to_compile_error_stream(&err.to_string(), span))
