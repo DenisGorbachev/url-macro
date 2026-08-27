@@ -6,6 +6,87 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.4](https://github.com/DenisGorbachev/url-macro/compare/v0.2.3...v0.2.4) - 2026-07-28
+
+### Added
+
+- implement AGENTS script
+
+### Fixed
+
+- support
+- README
+- refactor to support workspaces
+- update errgonomic
+- update errgonomic
+- clippy
+- clippy
+- general
+- Cargo
+- absolute_paths
+- Cargo
+- bump Rust version
+- AGENTS
+- AGENTS
+- clippy::arithmetic_side_effects
+- AGENTS
+- fnox
+- mv yolobox .yolobox
+- configure deno not to put modules under node_modules
+- idiomatic_version_file_enable_tools
+- update errgonomic
+- update errgonomic
+- update errgonomic
+- update errgonomic
+- update errgonomic
+- update errgonomic
+- update errgonomic
+- update errgonomic
+- update errgonomic
+- remove ignores for cargo-machete
+- general
+- AGENTS
+- serde
+- update errgonomic
+- update errgonomic
+- includeCargoDependencyFileIfExists
+- don't include all agent docs
+- AGENTS
+- AGENTS
+- auto-resolve the docs
+- ExitCode cli guidance
+- add itertools
+- use latest version of package in includeCargoDependencyFile
+- discourage unwrap and expect
+- render error handling docs directly from the dependency
+- update errgonomic
+- update errgonomic
+- update errgonomic
+- update errgonomic
+- update errgonomic
+- update errgonomic
+- update errgonomic
+- update errgonomic
+- AGENTS
+- bump deps
+- update errgonomic
+- update errgonomic
+- fenced code blocks
+- handle backticks in code fences
+- render code blocks in agents output
+- update errgonomic
+- AGENTS
+- AGENTS
+- update errgonomic
+
+### Other
+
+- Merge remote-tracking branch 'repoconf-rust-public-lib-template/main'
+- resolve parts with Promise.all
+- build parts array inline
+- update file existence check
+- add includeFileIfExists
+
 ## [0.2.3](https://github.com/DenisGorbachev/url-macro/compare/v0.2.2...v0.2.3) - 2025-12-30
 
 ### Added
