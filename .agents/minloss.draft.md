@@ -4,8 +4,8 @@ Write code to minimize losses.
 
 Types of losses:
 
-* Unavoidable losses (costs).
-* Avoidable losses (mistakes).
+- Unavoidable losses (costs).
+- Avoidable losses (mistakes).
 
 The most fundamental principle of software development is to minimize loss.
 

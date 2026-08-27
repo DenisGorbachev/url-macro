@@ -21,7 +21,7 @@ prod)
   provider=keychain
   ;;
 test)
-  provider=pass
+  provider=age
   ;;
 *)
   echo "unrecognized profile: $profile" >&2
@@ -29,7 +29,8 @@ test)
   ;;
 esac
 
-# `--key-name` is required to set a different key name per profile (by default fnox sets the same key name as key)
+# `--key-name` keeps prod keychain entries profile-qualified. The inline age
+# provider accepts this option but does not persist or use it.
 fnox_args=(set --profile "$profile" --provider "$provider" --key-name "$key_name" "$key" "$@")
 
 if [[ -t 0 && $# -eq 0 ]]; then

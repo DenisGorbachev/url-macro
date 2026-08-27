@@ -1,7 +1,12 @@
 #:schema https://fnox.jdx.dev/schema.json
 
 if_missing = "error"
+env = "exec"
 
 [providers]
 keychain = { type = "keychain", service = "url-macro" }
 pass = { type = "password-store", prefix = "url-macro/" }
+age = { type = "age", recipients = [
+    "age1sf4r4amev2svqr6llwg8hgtz9n7p5qdh7hh0mavcshzfrmgfduksnq3hql",
+    "age1605gsnxpe536sprwccyumq74veg0g80u55n8ggems0t8deau6qdsfnq3m3"
+] }

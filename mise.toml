@@ -4,13 +4,10 @@ min_version = "2026.7.13"
 idiomatic_version_file_enable_tools = ["rust"]
 task.output = "keep-order"
 
-[plugins]
-fnox-env = "https://github.com/jdx/mise-env-fnox"
-
 [tools]
 node = "24.15.0"
 deno = "1.46.1"
-fnox = "1.21.0"
+fnox = "1.33.1"
 cargo-binstall = "1.10.15"
 "npm:@commitlint/config-conventional" = "19.6.0"
 "npm:@commitlint/cli" = "19.6.0"
@@ -23,29 +20,45 @@ cargo-binstall = "1.10.15"
 "cargo:rumdl" = "0.1.0"
 "cargo:sd" = "1.0.0"
 
-[env]
-_.fnox-env = { tools = true }
-
 [hooks]
 postinstall = { task = "git:install-hooks" }
 
 [tasks."build"]
 run = "cargo build --workspace"
 
-[tasks."lint"]
-depends = ["lint:code", "lint:docs"]
-
-[tasks."lint:code"]
-run = "cargo clippy --workspace --all-targets --all-features -- -D warnings"
-
-[tasks."lint:docs"]
-run = "rumdl check"
+[tasks."check"]
+depends = ["cargo:validate-config"]
+run = [{ tasks = ["lint", "test"] }]
 
 [tasks."test"]
 depends = ["test:code", "test:docs"]
 
+[tasks."lint"]
+depends = ["lint:name", "lint:configs", "lint:code", "lint:code:style", "lint:docs", "lint:reports"]
+
+[tasks."lint:name"]
+run = [{ task = "fix:name", args = ["--check"] }]
+
+[tasks."lint:configs"]
+depends = ["lint:configs:cargo", "lint:configs:fnox"]
+
+[tasks."lint:configs:cargo"]
+run = [{ task = "fix:cargo", args = ["--check"] }]
+
+[tasks."lint:configs:fnox"]
+run = [{ task = "fix:fnox" }]
+
+[tasks."lint:code"]
+run = "cargo clippy --locked --workspace --all-targets --all-features -- -D warnings"
+
+[tasks."lint:code:style"]
+run = "cargo fmt --all -- --check"
+
+[tasks."lint:docs"]
+run = "rumdl check"
+
 [tasks."test:code"]
-run = "cargo nextest run --workspace --all-features --no-tests warn"
+run = "fnox --profile test exec --replace -- cargo nextest run --locked --workspace --all-features --no-tests warn"
 
 [tasks."test:code:integration"]
 # see also: "agent:test:code:integration"
@@ -58,19 +71,17 @@ run = [{ task = "test:code", args = ["--ignore-default-filter", "--max-fail", "1
 run = [{ task = "test:code", args = ["--ignore-default-filter", "--max-fail", "1", "slow_tests::"] }]
 
 [tasks."test:docs"]
-run = "cargo test --workspace --doc --all-features --no-fail-fast --quiet"
+env = { RUSTDOCFLAGS = "-D warnings" }
+run = "cargo test --locked --workspace --doc --all-features --no-fail-fast --quiet"
 
-# "fix" may modify the files that are read by "test", so "test" may actually test an old version. This risk is small and acceptable, because the tests are re-run in CI.
 [tasks."pre-commit"]
 alias = "pre-merge-commit"
-depends = ["fix-and-stage", "test"]
+run = [{ task = "git:validate-commit" }]
 
-[tasks."fix-and-stage"]
-depends = ["fix"]
-run = [{ task = "git:stage-fixed" }]
-
+# Compatibility for existing clones whose generated post-commit hook still invokes this task. The installer removes that hook during this one-time migration.
 [tasks."post-commit"]
-depends = ["git:repair-index"]
+hide = true
+run = [{ task = "git:install-hooks" }]
 
 [tasks."commit-msg"]
 run = 'mise run --output interleave commitlint -- --edit "$@"'
@@ -91,10 +102,10 @@ depends = ["fix:name", "fix:code:style"]
 depends = ["fix:cargo"]
 # second pass is needed because "cargo clippy --fix" exits with 0 even if some warnings remain
 env = { __CARGO_FIX_YOLO = 'yeah' }
-run = """
-cargo clippy --workspace --all-targets --all-features --fix --allow-dirty --allow-staged
-cargo clippy --workspace --all-targets --all-features -- -D warnings
-"""
+run = [
+    "cargo clippy --workspace --all-targets --all-features --fix --allow-dirty --allow-staged",
+    { task = "lint:code" },
+]
 
 [tasks."fix:code:style"]
 # Run after `fix:code:warnings` because both tasks modify the same code files.
@@ -103,15 +114,13 @@ run = "cargo fmt --all"
 
 [tasks."fix:docs"]
 depends = ["fix:agents", "fix:readme"]
-# `rumdl check --fix` may modify any file, so we need to stage all markdown files.
 # use `rumdl check --fix` instead of `rumdl fmt` because `rumdl check --fix` exits with 1 if errors remain (since v0.1.0)
-# use a quoted git pathspec so ignored files (e.g. `*.local.md`) don't fail the task.
-run = "rumdl check --fix && git add -- '*.md'"
+run = "rumdl check --fix"
 
 [tasks."fix:agents"]
 # "fix:agents" depends on "fix:code" because it reads the code files
 depends = ["fix:name", "fix:configs", "fix:code"]
-run = [{ task = "gen:agents" }, "git add AGENTS.md"]
+run = [{ task = "gen:agents" }]
 
 [tasks."gen:readme"]
 run = "./README.ts"
@@ -127,9 +136,9 @@ run = "[ -d .agents/docs ] && find .agents/docs -type f -print || true"
 output = "interleave"
 quiet = true
 
-# "fix" may modify the files that are read by "test", so "test" may actually test an old version. This risk is small and acceptable, because the tests are re-run in CI.
 [tasks."agent:on:stop"]
-depends = ["fix", "agent:test"]
+depends = ["cargo:validate-config"]
+run = [{ task = "fix" }, { task = "agent:test" }]
 
 [tasks."agent:test"]
 depends = ["agent:test:code", "agent:test:code:integration", "agent:test:code:slow", "test:docs"]

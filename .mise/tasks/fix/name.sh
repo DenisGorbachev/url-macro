@@ -141,8 +141,13 @@ apply_rename() (
   touch "$backup_root/committed"
 )
 
+check=false
+if [[ ${1:-} == --check ]]; then
+  check=true
+  shift
+fi
 if [[ $# -gt 1 ]]; then
-  echo "usage: $0 [new-name]" >&2
+  echo "usage: $0 [--check] [new-name]" >&2
   exit 1
 fi
 
@@ -163,6 +168,10 @@ if [[ -z $name_old ]]; then
 fi
 if [[ $name_old == "$name_new" ]]; then
   exit 0
+fi
+if [[ $check == true ]]; then
+  echo "$cargo_toml: $name_key '$name_old' does not match repository name '$name_new'; run 'mise run fix:name'" >&2
+  exit 1
 fi
 
 metadata=$(cargo metadata --manifest-path "$cargo_toml" --format-version 1 --no-deps) || {

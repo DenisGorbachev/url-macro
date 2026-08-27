@@ -61,6 +61,7 @@ fnox_toml="$dir/fnox.toml"
   tomli set --filepath "$fnox_toml" --in-place "providers.pass.prefix" "$repo_name/"
 
   mise run gen:readme
+  cargo fmt --all
   mise run build
   mise run test
 

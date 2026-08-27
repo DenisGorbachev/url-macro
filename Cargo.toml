@@ -16,6 +16,7 @@ exclude = [
     "doc/dev",
     "specs",
     "AGENTS.ts",
+    "CargoMetadata.ts",
     "README.ts",
     "AGENTS*.md",
     "CLAUDE*.md",

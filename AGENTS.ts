@@ -1,11 +1,13 @@
 #!/usr/bin/env -S deno run --node-modules-dir=false --allow-read --allow-write --allow-run --allow-env=HOME --no-lock
 
-import { compare, parse } from "jsr:@std/semver@1.0.0"
-import { stringify } from "jsr:@libs/xml@7.0.3"
+import {CargoMetadataSchema, PackageMetadataSchema, selectWorkspacePackages} from "./CargoMetadata.ts"
+import type {CargoMetadata, CargoPackage} from "./CargoMetadata.ts"
+import {compare, parse} from "jsr:@std/semver@1.0.0"
+import {stringify} from "jsr:@libs/xml@7.0.3"
 import remarkParse from "npm:remark-parse@11.0.0"
-import { unified } from "npm:unified@11.0.5"
-import { visit } from "npm:unist-util-visit@5.0.0"
-import { basename, dirname, extname, fromFileUrl, isAbsolute, join, relative, resolve, SEPARATOR } from "jsr:@std/path@1.1.4"
+import {unified} from "npm:unified@11.0.5"
+import {visit} from "npm:unist-util-visit@5.0.0"
+import {basename, dirname, extname, fromFileUrl, isAbsolute, join, relative, resolve, SEPARATOR} from "jsr:@std/path@1.1.4"
 
 const sourcePath = fromFileUrl(import.meta.url)
 const rootPath = dirname(sourcePath)
@@ -27,7 +29,7 @@ const renderPath = (path: string) => {
   return `~/${posixPath(relativeToHome)}`
 }
 
-const runCommand = (command: string, args: string[], stderr: "inherit" | "piped" = "piped") => new Deno.Command(command, { args, cwd: rootPath, stdout: "piped", stderr }).output()
+const runCommand = (command: string, args: string[], stderr: "inherit" | "piped" = "piped") => new Deno.Command(command, {args, cwd: rootPath, stdout: "piped", stderr}).output()
 
 const fileExists = async (path: string) => {
   try {
@@ -49,14 +51,14 @@ const shiftHeadings = (markdown: string, headingLevel: number) => {
     const depth = Math.min(6, Math.max(1, heading.depth + headingLevel - 1))
     const markerEnd = start.offset + heading.depth
     if (markdown.slice(start.offset, markerEnd) === "#".repeat(heading.depth)) {
-      edits.push({ start: start.offset, end: markerEnd, replacement: "#".repeat(depth) })
+      edits.push({start: start.offset, end: markerEnd, replacement: "#".repeat(depth)})
       return
     }
     const lines = markdown.slice(start.offset, end.offset).split(/\r?\n/)
     lines.pop()
     const indentation = Math.max(0, start.column - 1)
     const contents = lines.map((line, index) => index === 0 ? line : line.slice(indentation)).join(" ")
-    edits.push({ start: start.offset, end: end.offset, replacement: `${"#".repeat(depth)} ${contents}` })
+    edits.push({start: start.offset, end: end.offset, replacement: `${"#".repeat(depth)} ${contents}`})
   })
   return edits.reduceRight(
     (source, edit) => source.slice(0, edit.start) + edit.replacement + source.slice(edit.end),
@@ -96,8 +98,8 @@ const getLanguageIdentifier = (path: string) => {
 
 export const renderXmlFile = (path: string, contents: string) =>
   stringify(
-    { file: { path, contents: "\n" + contents } },
-    { format: { indent: "", breakline: 0 } },
+    {file: {path, contents: "\n" + contents}},
+    {format: {indent: "", breakline: 0}},
   ).trimEnd()
 
 const includeFile = async (path: string, headingLevel = 3) => renderFileContents(path, await Deno.readTextFile(resolvePath(path)), renderPath(path), headingLevel)
@@ -120,22 +122,17 @@ Read the extra docs from the list below if they are relevant to your current tas
 ${files.map((file) => `* ${file}`).join("\n")}`.trim()
 }
 
-type CargoMetadata = {
-  packages: CargoPackage[]
-  resolve: { nodes: { id: string; deps: { name: string; pkg: string }[] }[] } | null
-  workspace_members: string[]
-  workspace_root: string
-}
-
-type CargoPackage = { id: string; name: string; version: string; manifest_path: string }
-
 const readCargoMetadata = async (): Promise<CargoMetadata> => {
   const output = await runCommand("cargo", ["metadata", "--format-version=1"])
   if (!output.success) {
     const stderr = decoder.decode(output.stderr).trim()
     throw new Error(`cargo metadata failed${stderr ? `: ${stderr}` : ""}`)
   }
-  return JSON.parse(decoder.decode(output.stdout)) as CargoMetadata
+  try {
+    return CargoMetadataSchema.parse(JSON.parse(decoder.decode(output.stdout)))
+  } catch (cause) {
+    throw new Error("cargo metadata output is invalid", {cause})
+  }
 }
 
 let cargoMetadataPromise: Promise<CargoMetadata> | undefined
@@ -143,10 +140,8 @@ const getCargoMetadata = () => cargoMetadataPromise ??= readCargoMetadata()
 
 const includeAllCargoFiles = async (relativePaths: string[], headingLevel: number) => {
   const metadata = await getCargoMetadata()
-  const workspaceMembers = new Set(metadata.workspace_members)
   const fullPaths = new Set(
-    metadata.packages
-      .filter((cargoPackage) => workspaceMembers.has(cargoPackage.id))
+    selectWorkspacePackages(metadata)
       .flatMap((cargoPackage) => relativePaths.map((path) => join(dirname(cargoPackage.manifest_path), path))),
   )
   if (relativePaths.includes("Cargo.toml")) fullPaths.add(join(metadata.workspace_root, "Cargo.toml"))
@@ -157,7 +152,7 @@ const includeAllCargoFiles = async (relativePaths: string[], headingLevel: numbe
     }))
     .sort((left, right) => left.renderedPath.localeCompare(right.renderedPath))
   return (await Promise.all(
-    candidates.map(async ({ fullPath, renderedPath }) => {
+    candidates.map(async ({fullPath, renderedPath}) => {
       if (!(await fileExists(fullPath))) return null
       return renderFileContents(fullPath, await Deno.readTextFile(fullPath), renderedPath, headingLevel)
     }),
@@ -182,6 +177,23 @@ const hasDirectDependency = (metadata: CargoMetadata, dependencyName: string) =>
         (dependency) => dependency.name === dependencyName || matchingPackages.has(dependency.pkg),
       ),
   ) ?? false
+}
+
+const getPackageProfiles = (cargoPackage: CargoPackage) => {
+  try {
+    return PackageMetadataSchema.parse(cargoPackage.metadata).details.profiles
+  } catch (cause) {
+    throw new Error(`package metadata in '${renderPath(cargoPackage.manifest_path)}' is invalid`, {cause})
+  }
+}
+
+const hasPackageProfile = (metadata: CargoMetadata, profile: string) => {
+  return selectWorkspacePackages(metadata).some((cargoPackage) => getPackageProfiles(cargoPackage).includes(profile))
+}
+
+const includeFileIfPackageProfileIsEnabled = async (profile: string, path: string, headingLevel = 3) => {
+  const metadata = await getCargoMetadata()
+  return hasPackageProfile(metadata, profile) ? await includeFile(path, headingLevel) : null
 }
 
 const includeFileIfCargoDependencyExists = async (dependencyName: string, path: string, headingLevel = 3) => {
@@ -227,7 +239,7 @@ const parts = (await Promise.all([
       includeFileIfExists(".agents/project.md"),
       includeFileIfExists(".agents/knowledge.md"),
       includeFileIfExists(".agents/docs.md"),
-      includeFileIfExists(".agents/api.md"),
+      includeFileIfPackageProfileIsEnabled("api-client", ".agents/api.md"),
       includeFileIfExists(".agents/gotchas.md"),
       includeCargoDependencyFileIfExists("errgonomic", "DOCS.md"),
     ],
@@ -235,8 +247,9 @@ const parts = (await Promise.all([
   renderSection(
     "### Project files",
     [
-      includeAllCargoFiles(["Cargo.toml"], 4),
+      includeFile("mise.toml", 4),
       includeFile("fnox.toml", 4),
+      includeAllCargoFiles(["Cargo.toml"], 4),
       includeAllCargoFiles(["src/lib.rs", "src/main.rs"], 4),
     ],
   ),

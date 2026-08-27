@@ -77,15 +77,30 @@
 - Must update the original name source: raw workspace metadata or kebab-case root package name.
 - Must roll back every file edit and directory move on failure, then remove transaction data.
 
+## fnox.toml
+
+- Must contain `env = "exec"`.
+- Must contain `providers.age`.
+  - Must have `type = "age"`.
+  - Must contain a `recipients` array with at least two unique native age recipients.
+  - The template baseline recipients must be the host LAK and sandbox LAK.
+  - A GitHub repository with test secrets must additionally contain its repository-specific CAK recipient.
+- Every key under `profiles.test.secrets` must have `provider = "age"`.
+
 ## .mise/tasks/fix/fnox.sh
 
-- Must depend on `fix:name`.
-- Must validate that `providers.keychain.service` and `providers.pass.prefix` equal `git:repo-name` and `git:repo-name/`, respectively.
+- Must `wait_for=["fix:name"]`
+- Must validate that `providers.keychain.service` equals `git:repo-name`.
 - Must not migrate secrets between old and new identifiers.
+
+## .mise/tasks/fnox/github/init-age-key.sh
+
+- May clear the clipboard without preserving contents that predate the task.
+- May treat write races as acceptable because the script is run by a single user who guarantees that other scripts do not run concurrently.
 
 ## .mise/tasks/fix/cargo.sh
 
-- Must depend on `fix:name`.
+- Must `wait_for=["fix:name"]`
 - Must discover workspace package manifests with `cargo metadata`.
 - If a manifest has no `lints` key
   - Then: Must add `lints.workspace = true`.
@@ -104,22 +119,19 @@
 
 ## .mise/tasks/git/install-hooks.sh
 
-- Must install executable `pre-commit`, `pre-merge-commit`, `post-commit`, and `commit-msg` hooks in Git's resolved hooks directory.
+- Must install executable `pre-commit`, `pre-merge-commit`, and `commit-msg` hooks in Git's resolved hooks directory.
 - Hooks must delegate to matching mise tasks and forward all arguments.
 - Installation must replace obsolete Lefthook launchers.
+- Installation must remove the obsolete repository-generated `post-commit` hook without removing a user-modified hook.
 
-## .mise/tasks/git/stage-fixed.sh
+## .mise/tasks/git/validate-commit.sh
 
-- Must restage added, copied, modified, and renamed paths already present in the active index without staging unrelated paths.
-- Must use NUL-delimited literal paths.
-
-## .mise/tasks/git/repair-index.sh
-
-- Must unset `GIT_INDEX_FILE` and repair real-index paths left stale by temporary-index commits.
-- If a staged path's worktree content equals `HEAD`
-  - Then: Must update it.
-  - Else: Must preserve the worktree change.
-- Must use NUL-delimited literal paths and propagate unexpected Git errors.
+- Must reject active-index entries marked `assume-unchanged` or `skip-worktree`.
+- Before checks and after successful checks, must:
+  - Require tracked working-tree contents, including submodules, to match the active index.
+  - Require every nonignored untracked file to be staged or removed.
+- Must run the `check` task against the working tree.
+- Must fail if the active-index tree changes during successful checks.
 
 ## .repoconf/hooks/post-init.sh
 
@@ -139,3 +151,11 @@
   - Else: Must remove `workspace.package.{repository,homepage}`.
 - May rely on the template root defining the workspace fields it updates.
 - Must update fnox identifiers, regenerate READMEs, build, test, stage, and commit.
+
+## .github/workflows/ci.yml
+
+- Must keep the Rust version specified in `rust-toolchain.toml`.
+  - Rationale:
+    - Setting it to "stable" in CI leads to warnings that aren't visible in pre-commit.
+    - Building for both "stable" and pinned version takes extra time & disk space.
+    - Pinning "stable" is not always possible (some projects do require nightly).
