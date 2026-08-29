@@ -29,7 +29,20 @@ const renderPath = (path: string) => {
   return `~/${posixPath(relativeToHome)}`
 }
 
-const runCommand = (command: string, args: string[], stderr: "inherit" | "piped" = "piped") => new Deno.Command(command, {args, cwd: rootPath, stdout: "piped", stderr}).output()
+const renderCommand = (command: string, args: string[]) => [command, ...args].join(" ")
+
+const renderCommandOutput = (stdout: Uint8Array, stderr: Uint8Array) => `stdout:
+${decoder.decode(stdout)}
+stderr:
+${decoder.decode(stderr)}`
+
+const runCommand = async (command: string, args: string[]) => {
+  const output = await new Deno.Command(command, {args, cwd: rootPath, stdout: "piped", stderr: "piped"}).output()
+  if (!output.success) {
+    throw new Error(`'${renderCommand(command, args)}' failed:\n${renderCommandOutput(output.stdout, output.stderr)}`)
+  }
+  return decoder.decode(output.stdout).trimEnd()
+}
 
 const fileExists = async (path: string) => {
   try {
@@ -66,11 +79,14 @@ const shiftHeadings = (markdown: string, headingLevel: number) => {
   ).trimEnd()
 }
 
-const renderCodeFile = (path: string, contents: string, headingLevel: number) => {
+const renderCodeSection = (heading: string, contents: string, languageIdentifier: string, headingLevel: number) => {
   contents = contents.trimEnd()
   const fence = getFence(contents)
-  return `${"#".repeat(headingLevel)} ${path}\n\n${fence}${getLanguageIdentifier(path)}\n${contents}\n${fence}`
+  return `${"#".repeat(headingLevel)} ${heading}\n\n${fence}${languageIdentifier}\n${contents}\n${fence}`
 }
+
+const renderCodeFile = (path: string, contents: string, headingLevel: number) =>
+  renderCodeSection(path, contents, getLanguageIdentifier(path), headingLevel)
 
 const getFence = (contents: string) => {
   const matches = contents.match(/`+/g) ?? []
@@ -104,11 +120,15 @@ export const renderXmlFile = (path: string, contents: string) =>
 
 const includeFile = async (path: string, headingLevel = 3) => renderFileContents(path, await Deno.readTextFile(resolvePath(path)), renderPath(path), headingLevel)
 
+const includeCommand = async (command: string, args: string[], headingLevel = 3) => {
+  const stdout = await runCommand(command, args)
+  return renderCodeSection(`\`${renderCommand(command, args)}\``, stdout, "shell", headingLevel)
+}
+
 const renderFileContents = (path: string, contents: string, pathToRender: string, headingLevel: number) => isMarkdownPath(path) ? shiftHeadings(contents, headingLevel) : renderCodeFile(pathToRender, contents, headingLevel)
 
 export const runAgentDocsList = async (): Promise<string[]> => {
-  const output = await runCommand("mise", ["run", "agent:docs:list"], "inherit")
-  const stdout = decoder.decode(output.stdout).trimEnd()
+  const stdout = await runCommand("mise", ["run", "agent:docs:list"])
   return stdout ? stdout.split(/\r?\n/).filter((line) => line.length > 0) : []
 }
 
@@ -123,13 +143,9 @@ ${files.map((file) => `* ${file}`).join("\n")}`.trim()
 }
 
 const readCargoMetadata = async (): Promise<CargoMetadata> => {
-  const output = await runCommand("cargo", ["metadata", "--format-version=1"])
-  if (!output.success) {
-    const stderr = decoder.decode(output.stderr).trim()
-    throw new Error(`cargo metadata failed${stderr ? `: ${stderr}` : ""}`)
-  }
+  const stdout = await runCommand("cargo", ["metadata", "--format-version=1"])
   try {
-    return CargoMetadataSchema.parse(JSON.parse(decoder.decode(output.stdout)))
+    return CargoMetadataSchema.parse(JSON.parse(stdout))
   } catch (cause) {
     throw new Error("cargo metadata output is invalid", {cause})
   }
@@ -242,6 +258,12 @@ const parts = (await Promise.all([
       includeFileIfPackageProfileIsEnabled("api-client", ".agents/api.md"),
       includeFileIfExists(".agents/gotchas.md"),
       includeCargoDependencyFileIfExists("errgonomic", "DOCS.md"),
+    ],
+  ),
+  renderSection(
+    "### Project info",
+    [
+      includeCommand("git", ["remote"], 4),
     ],
   ),
   renderSection(

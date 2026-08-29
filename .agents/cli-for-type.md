@@ -142,7 +142,7 @@ Examples:
     pub enum FooCommandRunError {
         #[error("failed to run users command")]
         UsersCommandRunFailed { source: FooUsersCommandRunError },
-    
+
         #[error("failed to run set user name command")]
         SetUserNameCommandRunFailed { source: FooSetUserNameCommandRunError },
     }
