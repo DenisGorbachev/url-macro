@@ -1,19 +1,12 @@
 #!/usr/bin/env -S deno run --node-modules-dir=false --allow-write --allow-read --allow-run=bash,git,cargo --allow-net=docs.rs:443,github.com:443 --allow-env --allow-sys --no-lock
 
 // NOTE: Pin the versions of the packages because the script runs without a lock file
-import {
-  CargoMetadataSchema as CargoMetadataBaseSchema,
-  CargoPackageSchema as CargoPackageBaseSchema,
-  PackageMetadataSchema,
-  ReadmeSchema,
-  selectWorkspacePackages,
-  z,
-} from "./CargoMetadata.ts"
+import {CargoMetadataSchema as CargoMetadataBaseSchema, CargoPackageSchema as CargoPackageBaseSchema, PackageMetadataSchema, ReadmeSchema, selectWorkspacePackages, z,} from "./CargoMetadata.ts"
 import * as zx from "npm:zx@8.3.2"
-import { ProcessPromise, Shell } from "npm:zx@8.3.2"
-import { assert, assertEquals } from "jsr:@std/assert@1.0.0"
-import { dirname, join, relative } from "jsr:@std/path@1.1.4"
-import { parse as parseToml } from "jsr:@std/toml@1.0.5"
+import {ProcessPromise, Shell} from "npm:zx@8.3.2"
+import {assert, assertEquals} from "jsr:@std/assert@1.0.0"
+import {dirname, join, relative} from "jsr:@std/path@1.1.4"
+import {parse as parseToml} from "jsr:@std/toml@1.0.5"
 
 const CargoUrlSchema = z.union([z.string().url(), z.literal("")]).nullable()
 const OptionalUrlSchema = CargoUrlSchema.optional()
@@ -68,11 +61,11 @@ type CargoPackage = z.infer<typeof CargoPackageSchema>
 type Badge = Record<"name" | "image" | "url", string>
 type Section = Record<"title" | "body", string>
 
-const badge = (name: string, image: string, url: string): Badge => ({ name, image, url })
-const pushSection = (sections: Section[], title: string, body: string) => sections.push({ title, body })
+const badge = (name: string, image: string, url: string): Badge => ({name, image, url})
+const pushSection = (sections: Section[], title: string, body: string) => sections.push({title, body})
 
 // Nested sections not supported
-const renderSection = ({ title, body }: Section) => `## ${title}\n\n${body}`
+const renderSection = ({title, body}: Section) => `## ${title}\n\n${body}`
 
 const renderNonEmptySections = (sections: Section[]) => sections.filter((value) => value.body).map(renderSection).join("\n\n")
 
@@ -105,19 +98,19 @@ const normalizeGitRemoteUrl = (url: string) => {
 const scriptDir = import.meta.dirname
 if (!scriptDir) throw new Error("Cannot determine the current script dirname")
 
-const $: Shell<false, ProcessPromise> = zx.$({ cwd: scriptDir })
+const $: Shell<false, ProcessPromise> = zx.$({cwd: scriptDir})
 const rootManifestPath = await Deno.realPath(join(scriptDir, "Cargo.toml"))
 
 const parseTomlFile = async <Output>(path: string, schema: z.ZodType<Output>, errorMessage: string) => {
   try {
     return schema.parse(parseToml(await Deno.readTextFile(path)))
   } catch (cause) {
-    throw new Error(`${errorMessage}: '${path}'`, { cause })
+    throw new Error(`${errorMessage}: '${path}'`, {cause})
   }
 }
 
 const parsePackageManifest = async (cargoPackage: CargoPackage) => {
-  const { manifest_path: manifestPath, name } = cargoPackage
+  const {manifest_path: manifestPath, name} = cargoPackage
   const manifest = await parseTomlFile(manifestPath, PackageManifestSchema, `Package '${name}' manifest is invalid`)
   assertEquals(manifest.package.name, name)
 }
@@ -141,11 +134,11 @@ await Promise.all(workspacePackages.map(parsePackageManifest))
 const rootPackage = workspacePackages.find((cargoPackage) => cargoPackage.manifest_path === rootManifestPath)
 const repository = workspaceManifest.workspace?.package?.repository ?? rootPackage?.repository
 if (repository) assertEquals(originUrl, repository)
-for (const { repository: packageRepository } of workspacePackages) if (packageRepository) assertEquals(packageRepository, originUrl)
+for (const {repository: packageRepository} of workspacePackages) if (packageRepository) assertEquals(packageRepository, originUrl)
 
 const checkIsPublicGitHubRepo = async () => {
   if (!URL.canParse(originUrl) || new URL(originUrl).hostname !== "github.com") return false
-  const response = await fetch(originUrl, { method: "GET" })
+  const response = await fetch(originUrl, {method: "GET"})
   if (response.status === 200) return true
   if (response.status === 404) return false
   throw new Error(`Unexpected response status while checking GitHub repo visibility: ${response.status} ${response.statusText}`)
@@ -191,7 +184,7 @@ const writeTemporaryReadme = async (destinationPath: string, content: string) =>
 }
 
 const renderPackageReadme = async (cargoPackage: CargoPackage, isPublicGitHubRepo: boolean): Promise<RenderedReadme> => {
-  const { license, name, targets } = cargoPackage
+  const {license, name, targets} = cargoPackage
   try {
     const packageDirectory = dirname(cargoPackage.manifest_path)
     const destinationPath = join(packageDirectory, "README.md")
@@ -204,14 +197,14 @@ const renderPackageReadme = async (cargoPackage: CargoPackage, isPublicGitHubRep
       (target) => target !== primaryTarget && target !== primaryBinTarget && target.kind.includes("bin"),
     )
     const docsUrl = `https://docs.rs/${name}`
-    const docsUrlPromise = fetch(docsUrl, { method: "HEAD" })
+    const docsUrlPromise = fetch(docsUrl, {method: "HEAD"})
     const helpPromise = primaryBinTarget ? $`cargo run --quiet --manifest-path ${cargoPackage.manifest_path} --package ${name} --bin ${primaryBinTarget.name} -- --help` : undefined
 
     const docsUrlHead = await docsUrlPromise
     const badges: Badge[] = []
     if (isPublicGitHubRepo) badges.push(badge("Build", `${originUrl}/actions/workflows/ci.yml/badge.svg`, originUrl))
     if (docsUrlHead.status === 200) badges.push(badge("Documentation", `https://docs.rs/${name}/badge.svg`, docsUrl))
-    const badgesText = badges.map(({ name: badgeName, image, url }) => `[![${badgeName}](${image})](${url})`).join("\n")
+    const badgesText = badges.map(({name: badgeName, image, url}) => `[![${badgeName}](${image})](${url})`).join("\n")
     const titleSectionBody = [badgesText, crateDocsPlaceholder].filter((value) => value.length > 0).join("\n\n")
 
     const sections: Section[] = []
@@ -271,9 +264,9 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
     const temporaryPath = await writeTemporaryReadme(destinationPath, content)
     await $`cargo insert-docs crate-into-readme --allow-dirty --link-to-latest --shrink-headings 0 --manifest-path ${cargoPackage.manifest_path} --package ${name} --readme-path ${temporaryPath}`
     await Deno.chmod(temporaryPath, 0o644)
-    return { destinationPath, temporaryPath }
+    return {destinationPath, temporaryPath}
   } catch (cause) {
-    throw new Error(`Failed to render README.md for package '${name}'`, { cause })
+    throw new Error(`Failed to render README.md for package '${name}'`, {cause})
   }
 }
 
@@ -287,13 +280,12 @@ const renderVirtualWorkspaceReadme = async (): Promise<RenderedReadme> => {
     const content = [autogeneratedHeader, `# ${title}`, packageLinks(workspaceRoot, workspacePackages)].join("\n\n")
     const temporaryPath = await writeTemporaryReadme(destinationPath, content)
     await Deno.chmod(temporaryPath, 0o644)
-    return { destinationPath, temporaryPath }
+    return {destinationPath, temporaryPath}
   } catch (cause) {
-    throw new Error("Failed to render the virtual workspace README.md", { cause })
+    throw new Error("Failed to render the virtual workspace README.md", {cause})
   }
 }
 
-/// PRUNING: Removes only temporary README render files after commit or failure because they contain no user-owned data.
 const removeTemporaryReadme = async (path: string) => {
   try {
     await Deno.remove(path)
@@ -302,15 +294,14 @@ const removeTemporaryReadme = async (path: string) => {
   }
 }
 
-/// PRUNING: Replaces obsolete generated README contents only after every replacement has rendered successfully.
-const replaceReadme = async ({ destinationPath, temporaryPath }: RenderedReadme) => {
+const replaceReadme = async ({destinationPath, temporaryPath}: RenderedReadme) => {
   await Deno.rename(temporaryPath, destinationPath)
   temporaryPaths.delete(temporaryPath)
 }
 
 try {
   const generateWorkspaceReadme = workspaceManifest.workspace?.metadata?.details?.readme?.generate ?? true
-  const packagesToRender = workspacePackages.filter(({ metadata }) => metadata.details.readme.generate ?? generateWorkspaceReadme)
+  const packagesToRender = workspacePackages.filter(({metadata}) => metadata.details.readme.generate ?? generateWorkspaceReadme)
   const isPublicGitHubRepo = packagesToRender.length > 0 ? await checkIsPublicGitHubRepo() : false
   const renderPromises = packagesToRender.map((cargoPackage) => renderPackageReadme(cargoPackage, isPublicGitHubRepo))
   if (!rootPackage && generateWorkspaceReadme) renderPromises.push(renderVirtualWorkspaceReadme())

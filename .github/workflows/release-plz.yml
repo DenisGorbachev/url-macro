@@ -16,15 +16,18 @@ jobs:
     steps:
       -
         name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           fetch-depth: 0
       -
         name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772
+        with:
+          toolchain: stable
       -
         name: Run release-plz
-        uses: MarcoIeni/release-plz-action@v0.5
+        uses: MarcoIeni/release-plz-action@a80d79efe0a195618acb02a4089d55fe74d2505f
         env:
+          RUSTUP_TOOLCHAIN: stable
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

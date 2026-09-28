@@ -34,7 +34,6 @@ copy_to_clipboard() {
 }
 
 # Invoked indirectly by the EXIT trap.
-# shellcheck disable=SC2329
 cleanup() {
   local status=$? cleanup_failed=false
   trap - EXIT
@@ -47,8 +46,6 @@ cleanup() {
     fi
   fi
 
-  # PRUNING: Remove only the temporary config copy and key-generation directory
-  # created by this invocation. The identity must not survive the workflow.
   if [[ -n $temp_config_path ]]; then
     if ! rm -f -- "$temp_config_path"; then
       echo "warning: failed to remove temporary config: $temp_config_path" >&2
@@ -249,8 +246,6 @@ append_recipient() {
   # Portable Bash has no pathname compare-and-swap. The repository lock
   # serializes cooperating tasks, and the user confirms immediately before
   # this function that editors and other noncooperating writers are stopped.
-  # PRUNING: Atomically replace fnox.toml only after proving that the public
-  # recipient is the sole semantic change; the original contents are preserved.
   mv -f -- "$temp_config_path" "$fnox_path"
   temp_config_path=
 }

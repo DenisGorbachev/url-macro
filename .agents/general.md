@@ -17,15 +17,7 @@ Write code that minimizes losses:
 ### Avoid data loss
 
 - Don't use panicking functions (instead, use checked functions that return a `Result`)
-- Don't delete the data or drop the values unless the specification explicitly requires it
-- Every internal function that drops the values or directly calls a function that deletes the data (according to specification) must have a doc comment with the following properties:
-  - Must start with "/// PRUNING: "
-  - Must describe what exactly this function drops or deletes
-  - Must explain why this is required
-
-Notes:
-
-- A specification may require dropping some fields of the input if these fields are irrelevant to user goal.
+- Don't delete the data unless the specification explicitly requires it
 
 ### Minimize hardcoded data
 
@@ -46,15 +38,16 @@ Notes:
 
 ## Development workflow
 
-- After finishing the task: run `mise run agent:on:stop` (this command runs the lints and tests)
-  - `mise run agent:on:stop` may modify `README.md`, `AGENTS.md`, `Cargo.toml` (this is normal, don't mention it)
-  - `mise run agent:on:stop` includes `cargo fmt`, `cargo check`, `cargo clippy`, `cargo nextest` (no need to run them separately)
-- After finishing the original task, improve the code:
+- After finishing the initial implementation, improve the code:
   - Remove unnecessary code
   - Remove unnecessary allocations
   - Refactor code that converts between types into `From` / `Into` impls
-- Don't write the tests
-- Don't edit the files in the following top-level dirs: `specs`, `.agents`
+- After finishing the task, run `mise run agent:on:stop` (this command runs the lints and tests)
+  - `mise run agent:on:stop` may modify `README.md`, `AGENTS.md`, `Cargo.toml` (this is normal, don't mention it)
+  - `mise run agent:on:stop` includes `cargo fmt`, `cargo check`, `cargo clippy`, `cargo nextest` (no need to run them separately)
+- Don't write tests
+- Don't add comments
+- Don't edit the files in `.agents`
 - If a later instruction overrides the former instruction: follow the later instruction (last override wins)
 - If I explicitly ask to update the code in a way that deviates from the spec, update both the code and the spec
 - If you need to patch a dependency:
@@ -74,7 +67,7 @@ Notes:
     - A task to write `impl From<Foo> for Bar` where `Foo` can't actually be infallibly converted to `Bar` (would require calling `unwrap`, which is bad) - in this case you should write `impl TryFrom<Foo> for Bar` and reply with "Foo can't be infallibly converted to Bar, so I implemented a fallible conversion instead".
     - A task to write a trait impl that only returns an error - in this case you should not write the trait impl but reply with "trait X can't be implemented for Foo because ..."
 - If a sentence starts with "Idea: ":
-  - Evaluate it thorougly.
+  - Evaluate it thoroughly.
   - If you agree:
     - Then: implement it.
     - Else: explain why you didn't implement it and brainstorm solutions.
@@ -100,11 +93,10 @@ Notes:
 
 - When spawning a code review subagent: use fresh context (not inherited).
 
-## Messages from agent to user
+## Skills
 
-- Use `~` in paths
-- Format your message as a sequence of independently addressable items where each item begins with a [chat thread id heading](#chat-thread-id-heading)
-- Don't mention successful verifications and checks unless asked explicitly.
+- When editing or reviewing files that contain shell code, use and follow the `shell-scripts` skill.
+- When choosing between identically named skills, prefer the repository-local copy.
 
 ## Commands
 
@@ -421,7 +413,7 @@ Notes:
 
 - When writing code related to enums, bring the variants in scope with `use Enum::*;` statement at the top of the file or function (prefer "at the top of the file" for data enums, prefer "at the top of the function" for error enums).
 
-## Arithmetics
+## Arithmetic
 
 - Don't use the impls of traits `core::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Rem, RemAssign, Neg, Shl, ShlAssign, Shr, ShrAssign}` or their operators unless they don't panic or silently overflow
 - Write and use arithmetic trait impls that don't panic or silently overflow
@@ -456,23 +448,28 @@ A function marked with `#[test]` or `#[tokio::test]`.
 
 ## Shell
 
-- Don't use hard wraps to enforce max line length (I'll use soft wraps in my editor)
-- If a command is an argument of a tool call:
-  - Then:
-    - Prefer short options
-  - Else:
-    - If it's a common command (one of: set, cd, cp, mv, rm, mkdir, ls, ln, chmod, chown):
-      - Then:
-        - Prefer short options
-      - Else
-        - Prefer long options
-    - Prefer `echo` instead of `printf`
+- Prefer short options for commands used in tool calls.
 
 ## Cargo.toml
 
 - Don't define package features with only a single optional dependency (such features are already defined by cargo automatically)
 - Use `cargo add` to add dependencies
-- If the package is [publishable](#publishable-package): use `cargo add {dependency}@{version}` to add a version whose patch component equals 0, then use `cargo update -p {dependency} --precise {version}` to lock that exact version
+- When adding a dependency from crates.io:
+  - If the package is [publishable](#publishable-package):
+    - Then:
+      - Run `cargo add {dependency}@{version}`
+        - `{version}` patch component must be 0
+      - Try `cargo update -p {dependency} --precise {version}` to lock that exact version
+        - If dependency constraints prevent locking that version:
+          - Keep the version resolved by Cargo
+          - Add a comment in Cargo.toml explaining the constraints
+    - Else:
+      - Run `cargo add {dependency}` without `{version}`
+- When adding a dependency in a workspace:
+  - Add it to top-level manifest first (`workspace.dependencies`)
+- When adding a dependency for a workspace member:
+  - Run `cargo add {dependency}` without `{version}` (cargo will set `workspace = true`)
+- When adding a new workspace member: add it to `packages` dir unless specified otherwise
 
 ## Code style
 

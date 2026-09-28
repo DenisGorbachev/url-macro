@@ -8,20 +8,25 @@ task.output = "keep-order"
 node = "24.15.0"
 deno = "1.46.1"
 fnox = "1.33.1"
-cargo-binstall = "1.10.15"
+fd = "10.4.2"
+"github:ewhauser/shuck" = "0.2.2"
+"aqua:rvben/rumdl" = "0.1.0"
 "npm:@commitlint/config-conventional" = "19.6.0"
 "npm:@commitlint/cli" = "19.6.0"
 "npm:@commitlint/types" = "19.5.0"
-"cargo:cargo-insert-docs" = "1.6.0"
+"npm:skills" = "1.5.24"
+"cargo:https://github.com/DenisGorbachev/cargo-insert-docs" = { version = "rev:9bccf15cc367a50d2652b0eaf5da7faf5929c666", crate = "cargo-insert-docs", locked = true }
 "cargo:cargo-hack" = "0.6.33"
-"cargo:cargo-nextest" = "0.9.102"
+"cargo:cargo-nextest" = "0.9.145"
 "cargo:cargo-expand" = "1.0.114"
 "cargo:taplo-cli" = "0.10.0"
-"cargo:rumdl" = "0.1.0"
 "cargo:sd" = "1.0.0"
 
 [hooks]
 postinstall = { task = "git:install-hooks" }
+
+[env]
+SHUCK_CACHE_DIR = "{{config_root}}/.cache"
 
 [tasks."build"]
 run = "cargo build --workspace"
@@ -34,7 +39,7 @@ run = [{ tasks = ["lint", "test"] }]
 depends = ["test:code", "test:docs"]
 
 [tasks."lint"]
-depends = ["lint:name", "lint:configs", "lint:code", "lint:code:style", "lint:docs", "lint:reports"]
+depends = ["lint:name", "lint:configs", "lint:code", "lint:code:style", "lint:shell", "lint:docs", "lint:reports"]
 
 [tasks."lint:name"]
 run = [{ task = "fix:name", args = ["--check"] }]
@@ -53,6 +58,9 @@ run = "cargo clippy --locked --workspace --all-targets --all-features -- -D warn
 
 [tasks."lint:code:style"]
 run = "cargo fmt --all -- --check"
+
+[tasks."lint:shell"]
+run = '''shuck --config "lint.source-paths = ['$HOME']" check .'''
 
 [tasks."lint:docs"]
 run = "rumdl check"
@@ -78,11 +86,6 @@ run = "cargo test --locked --workspace --doc --all-features --no-fail-fast --qui
 alias = "pre-merge-commit"
 run = [{ task = "git:validate-commit" }]
 
-# Compatibility for existing clones whose generated post-commit hook still invokes this task. The installer removes that hook during this one-time migration.
-[tasks."post-commit"]
-hide = true
-run = [{ task = "git:install-hooks" }]
-
 [tasks."commit-msg"]
 run = 'mise run --output interleave commitlint -- --edit "$@"'
 
@@ -96,7 +99,10 @@ depends = ["fix:configs", "fix:docs", "fix:agents", "fix:readme"]
 depends = ["fix:cargo", "fix:fnox"]
 
 [tasks."fix:code"]
-depends = ["fix:name", "fix:code:style"]
+depends = ["fix:name", "fix:code:style", "fix:shell"]
+
+[tasks."fix:shell"]
+run = '''shuck --config "lint.source-paths = ['$HOME']" check --fix .'''
 
 [tasks."fix:code:warnings"]
 depends = ["fix:cargo"]
@@ -137,7 +143,7 @@ output = "interleave"
 quiet = true
 
 [tasks."agent:on:stop"]
-depends = ["cargo:validate-config"]
+depends = ["cargo:validate-config", "fix:shell"]
 run = [{ task = "fix" }, { task = "agent:test" }]
 
 [tasks."agent:test"]
@@ -146,14 +152,14 @@ depends = ["agent:test:code", "agent:test:code:integration", "agent:test:code:sl
 [tasks."agent:test:code"]
 # don't include `--fail-fast` because it's better to let the agent see all failures
 # reduce output to save tokens
-run = [{ task = "test:code", args = ["--cargo-quiet", "--hide-progress-bar", "--status-level", "fail", "--final-status-level", "flaky"] }]
+run = [{ task = "test:code", args = ["--cargo-quiet", "--show-progress", "none", "--no-input-handler", "--status-level", "fail", "--final-status-level", "flaky", "--no-fail-fast"] }]
 
 [tasks."agent:test:code:integration"]
 # see also: "test:code:integration"
 # `--test-threads 1` because integration tests must be run sequentially
-run = [{ task = "test:code", args = ["--cargo-quiet", "--hide-progress-bar", "--status-level", "fail", "--final-status-level", "flaky", "--ignore-default-filter", "--max-fail", "1", "--test-threads", "1", "integration_tests::"] }]
+run = [{ task = "test:code", args = ["--cargo-quiet", "--show-progress", "none", "--no-input-handler", "--status-level", "fail", "--final-status-level", "flaky", "--ignore-default-filter", "--max-fail", "1", "--test-threads", "1", "integration_tests::"] }]
 
 [tasks."agent:test:code:slow"]
 # see also: "test:code:slow"
 # `--test-threads` is omitted because slow tests may be run in parallel
-run = [{ task = "test:code", args = ["--cargo-quiet", "--hide-progress-bar", "--status-level", "fail", "--final-status-level", "flaky", "--ignore-default-filter", "--max-fail", "1", "slow_tests::"] }]
+run = [{ task = "test:code", args = ["--cargo-quiet", "--show-progress", "none", "--no-input-handler", "--status-level", "fail", "--final-status-level", "flaky", "--ignore-default-filter", "--max-fail", "1", "slow_tests::"] }]
