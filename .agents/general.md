@@ -48,6 +48,7 @@ Write code that minimizes losses:
 - Don't write tests
 - Don't add comments
 - Don't edit the files in `.agents`
+- Don't run `git diff` or `git status` solely to review your own work at the end of a turn
 - If a later instruction overrides the former instruction: follow the later instruction (last override wins)
 - If I explicitly ask to update the code in a way that deviates from the spec, update both the code and the spec
 - If you need to patch a dependency:
