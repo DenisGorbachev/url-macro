@@ -65,6 +65,9 @@ initial_tree=$(git -C "$project_root" write-tree) || {
 }
 assert_worktree_matches_index "before"
 
+# check for whitespace errors or conflict markers
+git -C "$project_root" diff --no-ext-diff --cached --check --
+
 # This design assumes repository-mutating commands do not run concurrently; a transient mutation restored before the final assertions cannot be detected.
 mise run check
 

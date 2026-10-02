@@ -50,6 +50,7 @@ Write code that minimizes losses:
 - Don't write tests
 - Don't add comments
 - Don't edit the files in `.agents`
+- Don't run `git diff` or `git status` solely to review your own work at the end of a turn
 - If a later instruction overrides the former instruction: follow the later instruction (last override wins)
 - If I explicitly ask to update the code in a way that deviates from the spec, update both the code and the spec
 - If you need to patch a dependency:
@@ -62,8 +63,8 @@ Write code that minimizes losses:
 - If you notice unexpected edits, keep them and don't mention them
 - If you notice incorrect code, tell me
 - If you have to apply a workaround, add a comment next to the workaround that explains why it is necessary, and also mention the workaround in your final report
-- If the task can't be completed exactly as it is written (for example, due to limitations in the language or dependencies, or due to incorrect assumptions in the specification), append an item to [`findings.md`](#findingsmd) with priority `P0`.
-- If unexpected behavior impedes your progress, but it's not a blocker (for example: domain is unavailable, program is unavailable, available memory or disk space is too low, command runs for unexpectedly long time or consumes an unexpected amount of resources), append an item to [`findings.md`](#findingsmd) with priority `P2`.
+- If the task can't be completed exactly as it is written (for example, due to limitations in the language or dependencies, or due to incorrect assumptions in the specification), mention it in your final message.
+- If unexpected behavior impedes your progress, but it's not a blocker (for example: domain is unavailable, program is unavailable, available memory or disk space is too low, command runs for unexpectedly long time or consumes an unexpected amount of resources), mention it in your final message.
 - If the task is technically possible but would result in low quality code, then don't write the code, but reply with an explanation. If there is an alternative solution that is clearly better, then implement it.
   - Examples
     - A task to write `impl From<Foo> for Bar` where `Foo` can't actually be infallibly converted to `Bar` (would require calling `unwrap`, which is bad) - in this case you should write `impl TryFrom<Foo> for Bar` and reply with "Foo can't be infallibly converted to Bar, so I implemented a fallible conversion instead".
@@ -73,8 +74,6 @@ Write code that minimizes losses:
   - If you agree:
     - Then: implement it.
     - Else: explain why you didn't implement it and brainstorm solutions.
-- If you resolve the findings, remove them from [findings.md](#findingsmd)
-  - If [findings.md](#findingsmd) becomes empty, remove it
 
 #### Review workflow
 
@@ -503,11 +502,6 @@ Examples:
 - `### AKE`
 - `### LMY`
 
-#### findings.md
-
-- If it exists:
-  - Must contain a non-empty list of [findings](#finding)
-
 #### Finding
 
 - Must be formatted as `### {ctid}\n\n[{priority}] {title}. {body} ({references}). Proposed fixes: {fixes}`
@@ -751,12 +745,15 @@ exclude = [
     "CLAUDE*.md",
     "deno.lock",
     "deno.json",
+    "clippy.toml",
     "commitlint.config.mjs",
     "fnox.toml",
     "mise.toml",
     "rumdl.toml",
     "shuck.toml",
     "rustfmt.toml",
+    "rust-toolchain.toml",
+    "skills-lock.json",
     ".yolobox"
 ]
 
