@@ -751,12 +751,15 @@ exclude = [
     "CLAUDE*.md",
     "deno.lock",
     "deno.json",
+    "clippy.toml",
     "commitlint.config.mjs",
     "fnox.toml",
     "mise.toml",
     "rumdl.toml",
     "shuck.toml",
     "rustfmt.toml",
+    "rust-toolchain.toml",
+    "skills-lock.json",
     ".yolobox"
 ]
 
