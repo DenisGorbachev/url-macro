@@ -2158,6 +2158,18 @@ age = { type = "age", recipients = [
 ] }
 ```
 
+### ~/.cargo/config.toml
+
+```toml
+[build]
+target = "host-tuple"
+# In the sandbox, ~/workspace is mounted from macOS, while Cargo's cache home is on the container-local filesystem.
+# Concurrent Cargo commands have failed when compilation intermediates were stored on the macOS mount.
+# Give each workspace its own local build directory: one directory shared by all workspaces would serialize their builds and let `cargo clean` in one workspace remove another workspace's artifacts.
+# sccache shares reusable compiler outputs without sharing mutable Cargo state.
+build-dir = "{cargo-cache-home}/build/{workspace-path-hash}"
+```
+
 ### Cargo.toml
 
 ```toml
