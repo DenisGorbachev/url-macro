@@ -442,6 +442,9 @@ A function marked with `#[test]` or `#[tokio::test]`.
 #### Macros
 
 - Write `macro_rules!` macros to reduce boilerplate
+- In `macro_rules!` expansions:
+  - Use full paths without a leading `::` for foreign types (e.g. `std::sync::Arc`), except those in the standard prelude.
+  - Use `$crate` paths for types defined in this crate (e.g. `$crate::MyType`).
 - If you see similar code in different places, write a macro and replace the similar code with a macro call
 - If the macros has variadic args:
   - Then: do add `$(,)?`
