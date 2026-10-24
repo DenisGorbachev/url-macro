@@ -2165,6 +2165,9 @@ target = "host-tuple"
 # Give each workspace its own local build directory: one directory shared by all workspaces would serialize their builds and let `cargo clean` in one workspace remove another workspace's artifacts.
 # sccache shares reusable compiler outputs without sharing mutable Cargo state.
 build-dir = "{cargo-cache-home}/build/{workspace-path-hash}"
+
+[net]
+git-fetch-with-cli = true
 ```
 
 ### Cargo.toml

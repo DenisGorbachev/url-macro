@@ -14,20 +14,33 @@
 
 set -euo pipefail
 
+project_root=${MISE_PROJECT_ROOT:-$(pwd)}
+cd "$(dirname -- "${BASH_SOURCE[0]}")"
+source ../../../.agents/skills/shell-scripts/log.sh
+cd "$project_root"
+
 # Invoked indirectly by the EXIT trap in `apply_rename`.
 rollback_transaction() {
-  local backup_root=${1:?} status=${2:?}
+  local backup_root=${1:?} status=${2:?} restored=true
   trap - EXIT
   set +e
   if [[ ! -e $backup_root/committed ]]; then
     while IFS= read -r -d '' source && IFS= read -r -d '' destination; do
-      if [[ -e $source && ! -e $destination ]]; then
-        mv "$source" "$destination"
+      if [[ -e $source ]]; then
+        if [[ -e $destination ]] || ! mv "$source" "$destination"; then
+          restored=false
+        fi
       fi
-    done <"$backup_root/directory-rollbacks"
-    [[ ! -f $backup_root/files.tar ]] || tar -xPf "$backup_root/files.tar"
+    done <"$backup_root/directory-rollbacks" || restored=false
+    if [[ -f $backup_root/files.tar ]] && ! tar -xPf "$backup_root/files.tar"; then
+      restored=false
+    fi
+    if [[ $restored == false ]]; then
+      error "rollback failed; recovery files retained at $backup_root"
+      exit 1
+    fi
   fi
-  rm -rf "$backup_root"
+  rm -rf "$backup_root" || exit 1
   exit "$status"
 }
 
