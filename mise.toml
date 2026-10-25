@@ -21,6 +21,7 @@ fd = "10.4.2"
 "cargo:cargo-expand" = "1.0.114"
 "cargo:taplo-cli" = "0.10.0"
 "cargo:sd" = "1.0.0"
+"cargo:cargo-edit" = "0.13.13"
 
 [hooks]
 postinstall = { task = "git:install-hooks" }

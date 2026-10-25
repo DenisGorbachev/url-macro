@@ -6,6 +6,7 @@
 #USAGE arg "<key>" help="Secret key"
 #USAGE arg "[fnox_args]" help="Additional fnox set arguments, including optional secret value" var=#true
 
+set +x
 set -euo pipefail
 
 profile_raw=${1:?"profile is required"} && shift

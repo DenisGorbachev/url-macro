@@ -21,6 +21,15 @@ if [[ $check == true ]]; then
 fi
 metadata=$("${metadata_args[@]}")
 status=0
+paths_file=$(mktemp)
+trap 'rm -f "$paths_file"' EXIT
+
+  jq --join-output --raw-output '
+    .workspace_members as $members
+    | .packages[]
+    | select(.id as $id | $members | index($id))
+    | .manifest_path + "\u0000"
+  ' <<<"$metadata">"$paths_file"
 
 while IFS= read -r -d '' manifest; do
   if workspace_lints=$(taplo get --file-path "$manifest" --strip-newline "lints.workspace" 2>/dev/null) &&
@@ -33,14 +42,7 @@ while IFS= read -r -d '' manifest; do
   else
     tomli set --filepath "$manifest" --in-place --type bool "lints.workspace" true
   fi
-done < <(
-  jq --join-output --raw-output '
-    .workspace_members as $members
-    | .packages[]
-    | select(.id as $id | $members | index($id))
-    | .manifest_path + "\u0000"
-  ' <<<"$metadata"
-)
+done <"$paths_file"
 
 # External paths are local overrides; publishable non-development dependencies also need a registry version.
 dependency_errors=$(
@@ -68,6 +70,16 @@ fi
 
 # Cargo metadata omits unused workspace dependencies, patches, and replacements.
 root_manifest=$(taplo get --file-path "$manifest_path" --output-format json)
+  jq --join-output --raw-output '
+    def paths($location; $table):
+      ($table // {}) | to_entries[]
+      | select(.value | type == "object" and (.path? | type == "string"))
+      | $location, "\u0000", .key, "\u0000", .value.path, "\u0000";
+    paths("workspace dependency"; .workspace.dependencies?),
+    ((.patch // {}) | to_entries[] | . as $patch | paths("patch \u0027\($patch.key)\u0027 dependency"; $patch.value)),
+    paths("replacement"; .replace?)
+  ' <<<"$root_manifest">"$paths_file"
+
 while IFS= read -r -d '' location && IFS= read -r -d '' dependency_name && IFS= read -r -d '' dependency_path; do
   dependency_path_candidate=$dependency_path
   [[ $dependency_path == /* ]] || dependency_path_candidate="$project_root/$dependency_path"
@@ -86,16 +98,6 @@ while IFS= read -r -d '' location && IFS= read -r -d '' dependency_name && IFS= 
     echo "$manifest_path: $location '$dependency_name' uses non-workspace path '$dependency_path'; use a temporary [patch] entry in .cargo/config.toml for local overrides" >&2
     status=1
   fi
-done < <(
-  jq --join-output --raw-output '
-    def paths($location; $table):
-      ($table // {}) | to_entries[]
-      | select(.value | type == "object" and (.path? | type == "string"))
-      | $location, "\u0000", .key, "\u0000", .value.path, "\u0000";
-    paths("workspace dependency"; .workspace.dependencies?),
-    ((.patch // {}) | to_entries[] | . as $patch | paths("patch \u0027\($patch.key)\u0027 dependency"; $patch.value)),
-    paths("replacement"; .replace?)
-  ' <<<"$root_manifest"
-)
+done <"$paths_file"
 
 exit "$status"
