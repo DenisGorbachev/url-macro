@@ -439,9 +439,9 @@ A function marked with `#[test]` or `#[tokio::test]`.
   - Use full paths without a leading `::` for foreign types (e.g. `std::sync::Arc`), except those in the standard prelude.
   - Use `$crate` paths for types defined in this crate (e.g. `$crate::MyType`).
 - If you see similar code in different places, write a macro and replace the similar code with a macro call
-- If the macros has variadic args:
-  - Then: do add `$(,)?`
-  - Else: don't add `$(,)?`
+- If the last arg of a macro arm is variadic (e.g. `$($item:ident),*`):
+  - Then: do add trailing `$(,)?`
+  - Else: don't add trailing `$(,)?`
 
 #### Shell
 
