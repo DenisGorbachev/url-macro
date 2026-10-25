@@ -58,6 +58,7 @@ fnox_toml="$dir/fnox.toml"
   tomli set --filepath "$fnox_toml" --in-place "providers.keychain.service" "$repo_name"
   tomli set --filepath "$fnox_toml" --in-place "providers.pass.prefix" "$repo_name/"
 
+  cargo upgrade --incompatible
   mise run gen:readme
   cargo fmt --all
   mise run build

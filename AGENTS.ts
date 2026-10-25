@@ -272,6 +272,7 @@ const parts = (await Promise.all([
     [
       includeFile("mise.toml"),
       includeFile("fnox.toml"),
+      includeFileIfExists(join(homePath, ".cargo", "config.toml")),
       includeAllCargoFiles(["Cargo.toml"], 3),
       includeAllCargoFiles(["src/lib.rs", "src/main.rs"], 3),
     ],
