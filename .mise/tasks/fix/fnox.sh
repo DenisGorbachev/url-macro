@@ -26,8 +26,7 @@ done
 project_root=${MISE_PROJECT_ROOT:-$(pwd)}
 fnox_toml=${fnox_toml:-"$project_root/fnox.toml"}
 project_name=$(mise --cd "$project_root" run git:repo-name)
-config_json=$(taplo get --file-path "$fnox_toml" --output-format json)
-jq --exit-status --arg project_name "$project_name" --argjson allow_pass "$allow_pass_test_secrets" '
+taplo get --file-path "$fnox_toml" --output-format json | jq --exit-status --arg project_name "$project_name" --argjson allow_pass "$allow_pass_test_secrets" '
   def require($condition; $message): if $condition then . else error($message) end;
   require(.providers.keychain.service == $project_name; "providers.keychain.service must match repository name")
   | require(.env == "exec"; "env must be exec")
@@ -43,4 +42,4 @@ jq --exit-status --arg project_name "$project_name" --argjson allow_pass "$allow
   | to_entries
   | map(select(.value | if type == "object" then (.provider != "age" and (($allow_pass and .provider == "pass") | not)) else true end))
   | require(length == 0; "test secrets must use age (or pass during migration): " + (map(.key) | join(", ")))
-' >/dev/null <<<"$config_json"
+' >/dev/null
