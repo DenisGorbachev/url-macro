@@ -2,10 +2,7 @@
 
 set -euo pipefail
 
-project_root=$(git rev-parse --show-toplevel)
-cd "$(dirname -- "${BASH_SOURCE[0]}")"
-source ../../../.agents/skills/shell-scripts/log.sh
-cd "$project_root"
+source "$(dirname "${BASH_SOURCE[0]}")/../../../.agents/skills/shell-scripts/log.sh"
 hooks_dir=$(git rev-parse --path-format=absolute --git-path hooks)
 mkdir -p "$hooks_dir"
 temporary=

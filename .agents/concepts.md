@@ -161,7 +161,6 @@ A structure with the following fields:
 - Preferences (optional [listmap](#listmap) of [preferences](#preference))
 - Properties (optional [listmap](#listmap) of [properties](#property))
 - Notes (optional [listmap](#listmap) of [notes](#note))
-
 - Must have methods:
   - `to_markdown`:
     - Requirements:
@@ -213,7 +212,6 @@ A stringtree is a structure with the following fields:
 
 - Text (string)
 - Children (a list of stringtrees)
-
 - Must have methods:
   - `to_markdown`:
     - Requirements:
