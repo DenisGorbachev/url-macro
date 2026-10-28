@@ -51,13 +51,6 @@ Write code that minimizes losses:
 - Don't run `git diff` or `git status` solely to review your own work at the end of a turn
 - If a later instruction overrides the former instruction: follow the later instruction (last override wins)
 - If I explicitly ask to update the code in a way that deviates from the spec, update both the code and the spec
-- If you need to patch a dependency:
-  - If the dependency is owned by Denis Gorbachev:
-    - Then:
-      - Find it in `~/workspace`
-      - Apply edits
-      - Add a temporary local `[patch]` in `.cargo/config.toml`
-    - Else: tell me about it, but don't patch it without my explicit permission
 - If you notice unexpected edits, keep them and don't mention them
 - If you notice incorrect code, tell me
 - If you have to apply a workaround, add a comment next to the workaround that explains why it is necessary, and also mention the workaround in your final report
@@ -440,10 +433,13 @@ A function marked with `#[test]` or `#[tokio::test]`.
 ## Macros
 
 - Write `macro_rules!` macros to reduce boilerplate
+- In `macro_rules!` expansions:
+  - Use full paths without a leading `::` for foreign types (e.g. `std::sync::Arc`), except those in the standard prelude.
+  - Use `$crate` paths for types defined in this crate (e.g. `$crate::MyType`).
 - If you see similar code in different places, write a macro and replace the similar code with a macro call
-- If the macros has variadic args:
-  - Then: do add `$(,)?`
-  - Else: don't add `$(,)?`
+- If the last arg of a macro arm is variadic (e.g. `$($item:ident),*`):
+  - Then: do add trailing `$(,)?`
+  - Else: don't add trailing `$(,)?`
 
 ## Shell
 

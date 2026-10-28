@@ -6,13 +6,13 @@
 #USAGE arg "<key>" help="Secret key"
 #USAGE arg "[fnox_args]" help="Additional fnox set arguments, including optional secret value" var=#true
 
+set +x
 set -euo pipefail
 
-profile_raw=${1:?"profile is required"} && shift
+profile=${1:?"profile is required"} && shift
 key_raw=${1:?"key is required"} && shift
 # this script doesn't define a dedicated value arg because fnox already accepts the value among its own args
 
-profile=$profile_raw
 key=$(ccase --to constant "$key_raw")
 key_name=$(ccase --to constant "${profile}_${key}")
 
