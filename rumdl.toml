@@ -49,6 +49,3 @@ cache-dir = ".cache/rumdl"
 # [MD044]
 # names = ["rumdl", "Markdown", "GitHub"]  # Proper names that should be capitalized correctly
 # code-blocks = false  # Check code blocks for proper names (default: false, skips code blocks)
-
-[MD076]
-allow-loose-continuation = true
