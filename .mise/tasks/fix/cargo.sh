@@ -24,12 +24,7 @@ status=0
 paths_file=$(mktemp)
 trap 'rm -f "$paths_file"' EXIT
 
-  jq --join-output --raw-output '
-    .workspace_members as $members
-    | .packages[]
-    | select(.id as $id | $members | index($id))
-    | .manifest_path + "\u0000"
-  ' <<<"$metadata">"$paths_file"
+jq --raw-output0 '.packages[].manifest_path' <<<"$metadata" >"$paths_file"
 
 while IFS= read -r -d '' manifest; do
   if workspace_lints=$(taplo get --file-path "$manifest" --strip-newline "lints.workspace" 2>/dev/null) &&
@@ -49,10 +44,8 @@ dependency_errors=$(
   jq --raw-output '
     def manifest_dir: sub("[/\\\\]Cargo\\.toml$"; "");
 
-    .workspace_members as $member_ids
-    | [.packages[] | select(.id as $id | $member_ids | index($id))] as $packages
-    | [$packages[] | .manifest_path | manifest_dir] as $package_dirs
-    | $packages[] as $package
+    [.packages[].manifest_path | manifest_dir] as $package_dirs
+    | .packages[] as $package
     | $package.dependencies[]
     | select(.path != null)
     | . as $dependency
@@ -69,16 +62,15 @@ if [[ -n $dependency_errors ]]; then
 fi
 
 # Cargo metadata omits unused workspace dependencies, patches, and replacements.
-root_manifest=$(taplo get --file-path "$manifest_path" --output-format json)
-  jq --join-output --raw-output '
-    def paths($location; $table):
-      ($table // {}) | to_entries[]
-      | select(.value | type == "object" and (.path? | type == "string"))
-      | $location, "\u0000", .key, "\u0000", .value.path, "\u0000";
-    paths("workspace dependency"; .workspace.dependencies?),
-    ((.patch // {}) | to_entries[] | . as $patch | paths("patch \u0027\($patch.key)\u0027 dependency"; $patch.value)),
-    paths("replacement"; .replace?)
-  ' <<<"$root_manifest">"$paths_file"
+taplo get --file-path "$manifest_path" --output-format json | jq --raw-output0 '
+  def paths($location; $table):
+    ($table // {}) | to_entries[]
+    | select(.value | type == "object" and (.path? | type == "string"))
+    | $location, .key, .value.path;
+  paths("workspace dependency"; .workspace.dependencies?),
+  ((.patch // {}) | to_entries[] | . as $patch | paths("patch \u0027\($patch.key)\u0027 dependency"; $patch.value)),
+  paths("replacement"; .replace?)
+' >"$paths_file"
 
 while IFS= read -r -d '' location && IFS= read -r -d '' dependency_name && IFS= read -r -d '' dependency_path; do
   dependency_path_candidate=$dependency_path
@@ -90,10 +82,8 @@ while IFS= read -r -d '' location && IFS= read -r -d '' dependency_name && IFS= 
   fi
   if ! jq --exit-status --arg path "$dependency_dir" '
     def manifest_dir: sub("[/\\\\]Cargo\\.toml$"; "");
-    .workspace_members as $members
-    | [.packages[] | select(.id as $id | $members | index($id))] as $packages
-    | any($packages[].dependencies[]; .path == $path)
-      or any($packages[]; (.manifest_path | manifest_dir) == $path)
+    any(.packages[].dependencies[]; .path == $path)
+      or any(.packages[]; (.manifest_path | manifest_dir) == $path)
   ' <<<"$metadata" >/dev/null; then
     echo "$manifest_path: $location '$dependency_name' uses non-workspace path '$dependency_path'; use a temporary [patch] entry in .cargo/config.toml for local overrides" >&2
     status=1

@@ -15,8 +15,7 @@
 set -euo pipefail
 
 project_root=${MISE_PROJECT_ROOT:-$(pwd)}
-cd "$(dirname -- "${BASH_SOURCE[0]}")"
-source ../../../.agents/skills/shell-scripts/log.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../../.agents/skills/shell-scripts/log.sh"
 cd "$project_root"
 
 # Invoked indirectly by the EXIT trap in `apply_rename`.
@@ -24,7 +23,7 @@ rollback_transaction() {
   local backup_root=${1:?} status=${2:?} restored=true
   trap - EXIT
   set +e
-  if [[ ! -e $backup_root/committed ]]; then
+  if [[ $status -ne 0 ]]; then
     while IFS= read -r -d '' source && IFS= read -r -d '' destination; do
       if [[ -e $source ]]; then
         if [[ -e $destination ]] || ! mv "$source" "$destination"; then
@@ -45,7 +44,6 @@ rollback_transaction() {
 }
 
 apply_rename() (
-  set -euo pipefail
   local metadata=${1:?} name_old=${2:?} name_new=${3:?} name_key=${4:?}
   local workspace_root
   workspace_root=$(jq --exit-status --raw-output '.workspace_root' <<<"$metadata")
@@ -72,14 +70,9 @@ apply_rename() (
   : >"$directory_rollbacks_file"
   trap 'rollback_transaction "$backup_root" "$?"' EXIT
 
-  jq --join-output --raw-output '
-    .workspace_members as $members
-    | [
-        (.workspace_root + "/Cargo.toml"),
-        (.packages[] | select(.id as $id | $members | index($id)) | .manifest_path)
-      ]
+  jq --raw-output0 '
+    [(.workspace_root + "/Cargo.toml"), .packages[].manifest_path]
     | unique | sort_by(split("/") | length) | reverse[]
-    | . + "\u0000"
   ' <<<"$metadata" >"$manifest_paths_file"
   : >"$rust_paths_file"
   if [[ $name_old_snake_case != "$name_new_snake_case" ]]; then
@@ -89,7 +82,7 @@ apply_rename() (
   cat "$manifest_paths_file" "$rust_paths_file" >"$backup_paths_file"
   local cargo_lock="$workspace_root/Cargo.lock"
   if [[ -f $cargo_lock ]]; then
-    jq --null-input --join-output --raw-output --arg path "$cargo_lock" '$path + "\u0000"' >>"$backup_paths_file"
+    jq --null-input --raw-output0 --arg path "$cargo_lock" '$path' >>"$backup_paths_file"
   fi
   # Archive every mutable file before editing so a failure after a directory move can restore the original workspace.
   tar -cPf "$backup_root/files.tar" --null -T "$backup_paths_file"
@@ -107,7 +100,7 @@ apply_rename() (
       return 1
     fi
     rollbacks_file_new="$directory_rollbacks_file.new"
-    jq --null-input --join-output --raw-output --arg source "$destination" --arg destination "$package_dir" '$source + "\u0000" + $destination + "\u0000"' >"$rollbacks_file_new"
+    jq --null-input --raw-output0 --arg source "$destination" --arg destination "$package_dir" '$source, $destination' >"$rollbacks_file_new"
     cat "$directory_rollbacks_file" >>"$rollbacks_file_new"
     mv "$rollbacks_file_new" "$directory_rollbacks_file"
     package_dirs+=("$package_dir")
@@ -148,7 +141,6 @@ apply_rename() (
   if [[ $name_key == workspace.metadata.details.name ]]; then
     tomli set --filepath "$cargo_toml" --in-place "$name_key" "$name_new"
   fi
-  touch "$backup_root/committed"
 )
 
 check=false
@@ -161,7 +153,7 @@ if [[ $# -gt 1 ]]; then
   exit 1
 fi
 
-cargo_toml=$(realpath "${MISE_PROJECT_ROOT:-$(pwd)}/Cargo.toml")
+cargo_toml=$(realpath "$project_root/Cargo.toml")
 name_new=${1:-$(mise run git:repo-name)}
 name_key=workspace.metadata.details.name
 if ! name_old=$(taplo get --file-path "$cargo_toml" --strip-newline "$name_key" 2>/dev/null); then
