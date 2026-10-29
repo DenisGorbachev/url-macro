@@ -67,5 +67,11 @@ fnox_toml="$dir/fnox.toml"
   mise run test
 
   git add .
-  git commit -m "chore: update project details"
+  staged_diff_status=0
+  git diff --cached --quiet || staged_diff_status=$?
+  case "$staged_diff_status" in
+  0) ;;
+  1) git commit -m "chore: update project details" ;;
+  *) exit "$staged_diff_status" ;;
+  esac
 )
