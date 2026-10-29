@@ -58,7 +58,7 @@ fnox_toml="$dir/fnox.toml"
   tomli set --filepath "$fnox_toml" --in-place "providers.keychain.service" "$repo_name"
   tomli set --filepath "$fnox_toml" --in-place "providers.pass.prefix" "$repo_name/"
 
-  # cargo upgrade updates Git dependencies offline, so fetch their refs first.
+  # `cargo update` is necessary because the followup `cargo upgrade` runs `cargo update --offline`, which causes it to fail for Git dependencies
   cargo update
   cargo upgrade --incompatible
   mise run gen:readme
