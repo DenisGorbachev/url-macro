@@ -67,6 +67,8 @@ fnox_toml="$dir/fnox.toml"
   mise run test
 
   git add .
+
+  # staged_diff_status is required because git commit fails on unchanged reruns, and git diff errors must propagate.
   staged_diff_status=0
   git diff --cached --quiet || staged_diff_status=$?
   case "$staged_diff_status" in
