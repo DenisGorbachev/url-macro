@@ -813,19 +813,22 @@ pub fn render_command(command: &Command) -> String {
 
 ````rust
 use crate::{handle, map_err};
-use std::fs::File;
+use std::env::{temp_dir, var_os};
+use std::fs::{File, create_dir_all};
 use std::io;
 use std::io::Write;
 use std::path::PathBuf;
 use tempfile::{NamedTempFile, PersistError};
 use thiserror::Error;
 
-/// Writes the provided buffer to a named temporary file and persists it to disk.
-///
-/// Returns the persisted file handle and its path.
+/// Persists the buffer in `ERRGONOMIC_DIR`, or the system temporary directory when unset.
 pub fn write_to_named_temp_file(buf: &[u8]) -> Result<(File, PathBuf), WriteToNamedTempFileError> {
     use WriteToNamedTempFileError::*;
-    let mut temp = handle!(NamedTempFile::new(), CreateTempFileFailed);
+    let dir = var_os("ERRGONOMIC_DIR")
+        .map(PathBuf::from)
+        .unwrap_or_else(temp_dir);
+    handle!(create_dir_all(&dir), CreateDirAllFailed, dir);
+    let mut temp = handle!(NamedTempFile::new_in(&dir), CreateTempFileFailed, dir);
     handle!(temp.write_all(buf), WriteFailed);
     map_err!(temp.keep(), KeepFailed)
 }
@@ -833,9 +836,11 @@ pub fn write_to_named_temp_file(buf: &[u8]) -> Result<(File, PathBuf), WriteToNa
 /// Errors returned by [`write_to_named_temp_file`].
 #[derive(Error, Debug)]
 pub enum WriteToNamedTempFileError {
+    #[error("failed to create error report directory '{dir}'", dir = dir.display())]
+    CreateDirAllFailed { source: io::Error, dir: PathBuf },
     /// Failed to create a temporary file.
-    #[error("failed to create a temporary file")]
-    CreateTempFileFailed { source: io::Error },
+    #[error("failed to create an error report in '{dir}'", dir = dir.display())]
+    CreateTempFileFailed { source: io::Error, dir: PathBuf },
     /// Failed to write the buffer into the temporary file.
     #[error("failed to write to a temporary file")]
     WriteFailed { source: io::Error },
@@ -848,13 +853,16 @@ pub enum WriteToNamedTempFileError {
 ##### File: src/functions/writeln_error.rs
 
 ````rust
-use crate::{ErrorDisplayer, WriteToNamedTempFileError, map_err, write_to_named_temp_file};
+use crate::{ErrorDisplayer, WriteToNamedTempFileError, handle, map_err, write_to_named_temp_file};
 use alloc::format;
 use core::error::Error;
 use core::fmt::{self, Formatter};
+use shlex::QuoteError;
+use shlex::bytes::try_quote;
 use std::eprintln;
 use std::io;
 use std::io::{Write, stderr};
+use std::path::PathBuf;
 
 /// Writes a human-readable error trace to the provided formatter.
 pub fn writeln_error_to_formatter<E: Error + ?Sized>(error: &E, f: &mut Formatter<'_>) -> fmt::Result {
@@ -868,9 +876,7 @@ pub fn writeln_error_to_formatter<E: Error + ?Sized>(error: &E, f: &mut Formatte
     }
 }
 
-/// Writes a human-readable error trace to the provided writer and persists the full debug output to a temp file.
-///
-/// This is useful for CLI tools that want a concise error trace on stderr and a path to a full report.
+/// Writes the error trace and saves its debug report through [`write_to_named_temp_file`].
 pub fn writeln_error_to_writer_and_file<E: Error>(error: &E, writer: &mut dyn Write) -> Result<(), WritelnErrorToWriterAndFileError> {
     use WritelnErrorToWriterAndFileError::*;
     let displayer = ErrorDisplayer(error);
@@ -884,8 +890,10 @@ pub fn writeln_error_to_writer_and_file<E: Error>(error: &E, writer: &mut dyn Wr
             if cfg!(windows) {
                 map_err!(writeln!(writer, "{}", path_buf.display()), WriteFailed)?;
             } else {
-                // assuming `less` is available
-                map_err!(writeln!(writer, "less {}", path_buf.display()), WriteFailed)?;
+                let path = handle!(try_quote(path_buf.as_os_str().as_encoded_bytes()), TryQuoteFailed, path: path_buf);
+                handle!(writer.write_all(b"less -- "), WriteFailed);
+                handle!(writer.write_all(&path), WriteFailed);
+                handle!(writeln!(writer), WriteFailed);
             }
             Ok(())
         }
@@ -905,6 +913,8 @@ pub enum WritelnErrorToWriterAndFileError {
     WriteFailed { source: io::Error },
     #[error("failed to write the full error report")]
     WriteToNamedTempFileFailed { source: WriteToNamedTempFileError },
+    #[error("failed to shell-quote error report path '{path}'", path = path.display())]
+    TryQuoteFailed { source: QuoteError, path: PathBuf },
 }
 
 /// Writes an error trace to stderr and, if possible, includes a path to the full error report.
@@ -912,17 +922,9 @@ pub fn eprintln_error<E>(error: &E)
 where
     E: Error,
 {
-    use WritelnErrorToWriterAndFileError::*;
     let mut stderr = stderr().lock();
-    let result = writeln_error_to_writer_and_file(error, &mut stderr);
-    match result {
-        Ok(()) => (),
-        Err(WriteFailed {
-            source,
-        }) => eprintln!("failed to write the error to stderr: {source:#?}"),
-        Err(WriteToNamedTempFileFailed {
-            source,
-        }) => eprintln!("failed to write the error to the report file: {source:#?}"),
+    if let Err(error) = writeln_error_to_writer_and_file(error, &mut stderr) {
+        eprintln!("{}", ErrorDisplayer(&error));
     }
 }
 
