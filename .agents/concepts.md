@@ -2,13 +2,13 @@
 
 ## Concept
 
-Structure with fields:
+Struct with fields:
 
 - [Name](#name).
 - [Definition](#definition).
 - [Aliases](#aliases).
 - [Examples](#examples).
-- [Requirements](#requirements).
+- [Reqs](#reqs).
 - [Allowances](#allowances).
 - [Preferences](#preferences).
 - [Constructors](#constructors).
@@ -19,7 +19,7 @@ Structure with fields:
 Examples:
 
 - Definition of Rust package.
-- Definition of Rust function.
+- Definition of Rust fn.
 
 ## Name
 
@@ -62,15 +62,15 @@ Preferences:
 
 Notes:
 
-- Markdown document may contain sections whose headings start with "Examples" but are not exactly "Examples". Treat these sections as related to, but distinct from, examples of concept.
+- Markdown doc may contain sections whose headings start with "Examples" but are not exactly "Examples". Treat these sections as related to, but distinct from, examples of concept.
   - Examples:
     - "Examples of names".
     - "Examples of calls".
     - "Examples of hashes".
 
-## Requirements
+## Reqs
 
-Optional [listmap](#listmap) of [requirements](#requirement).
+Optional [listmap](#listmap) of [reqs](#req).
 
 ## Allowances
 
@@ -86,7 +86,7 @@ Optional list of [constructors](#constructor) that contains all possible constru
 
 Aliases: "One of".
 
-Requirements:
+Reqs:
 
 - Must be exhaustive.
 
@@ -110,19 +110,19 @@ Notes:
 
 - Corresponds to specific instance of type in [dependently typed language](#dependently-typed-language).
 
-## Requirement
+## Req
 
 [stringtree](#stringtree) that [represents](#representation) boolean test of instance of parent object.
 
 Notes:
 
 - Corresponds to predicate in [dependently typed language](#dependently-typed-language).
-- If input doesn't pass requirement test:
+- If input doesn't pass req test:
   - Then: it is not instance of parent object.
 
 ## Allowance
 
-[stringtree](#stringtree) that [represents](#representation) non-requirement (lack of constraint).
+[stringtree](#stringtree) that [represents](#representation) non-req (lack of constraint).
 
 Examples:
 
@@ -135,7 +135,7 @@ Examples:
 Notes:
 
 - Preferences must be sorted by importance (most important first).
-- Preferences should be used to make choice between two inputs that pass [requirements](#requirement).
+- Preferences should be used to make choice between two inputs that pass [reqs](#req).
 
 ## Constructor
 
@@ -155,25 +155,25 @@ Notes:
 
 [stringtree](#stringtree) that [represents](#representation) additional information about parent object.
 
-## Method specification
+## Method spec
 
-Structure with fields:
+Struct with fields:
 
 - [Name](#name).
-- Requirements (optional [listmap](#listmap) of [requirements](#requirement)).
+- Reqs (optional [listmap](#listmap) of [reqs](#req)).
 - Preferences (optional [listmap](#listmap) of [preferences](#preference)).
 - Properties (optional [listmap](#listmap) of [properties](#property)).
 - Notes (optional [listmap](#listmap) of [notes](#note)).
 - Must have methods:
   - `to_markdown`:
-    - Requirements:
-      - Must output list where top-level items correspond to structure fields.
+    - Reqs:
+      - Must output list where top-level items correspond to struct fields.
 
-## Concepts document
+## Concepts doc
 
-Markdown document that presents list of [concepts](#concept) with elements:
+Markdown doc that presents list of [concepts](#concept) with elements:
 
-- Heading level 1: document name that starts with "Concepts".
+- Heading level 1: doc name that starts with "Concepts".
 - For each concept:
   - Name: heading level 2.
   - Definition: paragraph after heading.
@@ -184,9 +184,9 @@ Markdown document that presents list of [concepts](#concept) with elements:
         - Then: call it.
         - Else: render most direct representation (e.g.: render strings directly).
 
-Requirements:
+Reqs:
 
-- Order of other fields in document must match order of other fields in definition of [concept](#concept).
+- Order of other fields in doc must match order of other fields in definition of [concept](#concept).
 - Field must not appear twice.
 - If field is empty:
   - Then: it must not be rendered.
@@ -200,11 +200,11 @@ Listmap of type A is one of:
 - List of values of type A.
 - Map from [names](#name) to values of type A.
 
-Requirements:
+Reqs:
 
 - Must have methods:
   - `to_markdown`:
-    - Requirements:
+    - Reqs:
       - If value is list:
         - Then: must output Markdown list.
         - Else: must output Markdown list where each item is rendered as `{key}: {value}`.
@@ -216,13 +216,13 @@ Notes:
 
 ## Stringtree
 
-Stringtree is structure with fields:
+Stringtree is struct with fields:
 
 - Text (string).
 - Children (list of stringtrees).
 - Must have methods:
   - `to_markdown`:
-    - Requirements:
+    - Reqs:
       - Must output multi-level Markdown list.
         - "Text" field must be rendered as top-level list item.
         - "Children" field must be rendered as child list items.
@@ -230,7 +230,7 @@ Stringtree is structure with fields:
 Notes:
 
 - In Markdown, stringtree is just nested list.
-- In this document, every "Notes", "Requirements", "Preferences" section contains examples of stringtrees as nested lists.
+- In this doc, every "Notes", "Reqs", "Preferences" section contains examples of stringtrees as nested lists.
 
 ## Representation
 
@@ -238,11 +238,11 @@ String that passes [association test](#association-test) evaluated by specific l
 
 Notes:
 
-- List of agents is external input to program that evaluates concept document.
+- List of agents is external input to program that evaluates concept doc.
 
 ## Association test
 
-Function from two strings to boolean.
+Fn from two strings to boolean.
 
 Aliases: is-test.
 

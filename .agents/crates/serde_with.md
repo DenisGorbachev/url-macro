@@ -1,6 +1,6 @@
 # Guidelines for `serde_with`
 
-## Requirements
+## Reqs
 
 - If `#[serde_as]` is necessary:
   - Then: use it.

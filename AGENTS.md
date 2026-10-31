@@ -18,25 +18,25 @@ Write code that minimizes losses:
 
 ##### Avoid data loss
 
-- Don't use panicking functions (instead, use checked functions that return `Result`).
-- Don't delete data unless specification explicitly requires it.
+- Don't use panicking fns (instead, use checked fns that return `Result`).
+- Don't delete data unless spec explicitly requires it.
 
 ##### Minimize hardcoded data
 
-- Don't hardcode values (accept arguments instead).
-- Choose carefully between accepting parameter and defining constant:
+- Don't hardcode values (accept args instead).
+- Choose carefully between accepting param and defining constant:
   - Definitions:
-    - Parameters are execution details (user may want to change them).
-    - Constants are implementation details (user would never want to change them).
+    - Params are execution details (user may want to change them).
+    - Constants are impl details (user would never want to change them).
   - Examples:
-    - Parameters:
+    - Params:
       - Cache TTL.
       - Config path.
     - Constants:
       - Table name.
       - Keyspace name.
   - Recommendations:
-    - When in doubt, prefer accepting parameter instead of defining constant.
+    - When in doubt, prefer accepting param instead of defining constant.
 
 #### Development workflow
 
@@ -45,7 +45,7 @@ Write code that minimizes losses:
     - Commit other requested changes first.
     - For each requested followup:
       - Make separate commit.
-- After finishing initial implementation, improve code:
+- After finishing initial impl, improve code:
   - Remove unnecessary code.
   - Remove unnecessary allocations.
   - Refactor code that converts between types into `From` / `Into` impls.
@@ -71,7 +71,7 @@ Write code that minimizes losses:
   - Then:
     - Add comment next to workaround explaining why it is necessary.
     - Mention workaround in your final report.
-- If task can't be completed exactly as written (for example: language limitations, dependency limitations, incorrect assumptions in specification):
+- If task can't be completed exactly as written (for example: language limitations, dep limitations, incorrect assumptions in spec):
   - Then: mention it in your final message.
 - If unexpected behavior impedes progress but is not blocker (for example: domain is unavailable, program is unavailable, available memory or disk space is too low, command runs for unexpectedly long time or consumes unexpected amount of resources):
   - Then: mention it in your final message.
@@ -126,7 +126,7 @@ Write code that minimizes losses:
 #### Commands
 
 - Use `fd` and `rg` instead of `find` and `grep`.
-- Set command-execution tool call’s timeout parameter and `yield_time_ms` to at least 300000 ms for commands: `mise run agent:on:stop`, `cargo build`, `git commit`.
+- Set command-execution tool call’s timeout param and `yield_time_ms` to at least 300000 ms for commands: `mise run agent:on:stop`, `cargo build`, `git commit`.
 
 #### Recommended crates
 
@@ -138,7 +138,7 @@ Write code that minimizes losses:
 #### Files
 
 - File name must match name of primary item in this file (for example: file with `struct User` must be named `user.rs`).
-- Trait implementations must be in same file as target type (for example: put `impl TryFrom<...> for User` in same file as `struct User`, which is `user.rs`).
+- Trait impls must be in same file as target type (for example: put `impl TryFrom<...> for User` in same file as `struct User`, which is `user.rs`).
 
 #### Modules
 
@@ -199,7 +199,7 @@ Write code that minimizes losses:
   - If struct is refinement of its fields:
     - Then:
       - Fields must be private.
-      - Functions that construct or deserialize struct or mutate its fields must preserve invariant.
+      - Fns that construct or deserialize struct or mutate its fields must preserve invariant.
     - Else: its fields must be `pub`.
 
 #### Constants
@@ -220,21 +220,21 @@ Write code that minimizes losses:
   - If you can't find existing crates:
     - Then: define newtypes using macros from `subtype` crate.
 - Every `struct`, `enum`, `union` must be in separate file (except for error types that implement `Error`).
-  - Error types that implement `Error` must be in same files as functions that return them.
+  - Error types that implement `Error` must be in same files as fns that return them.
 - Prefer attaching types as child modules to `src/types.rs`.
 
-#### Functions
+#### Fns
 
 - Prefer weakest sufficient trait bound for inputs and associated types (`FnOnce` over `FnMut` over `Fn`, `PartialOrd` over `Ord`, `PartialEq` over `Eq`).
 - Implement proper error handling using macros from `errgonomic` crate instead of `unwrap` or `expect` (in normal code and in tests).
-  - Use `expect` only in exceptional cases where you can prove that it always succeeds, and provide proof as first argument to `expect` (proof must start with "always succeeds because").
+  - Use `expect` only in exceptional cases where you can prove that it always succeeds, and provide proof as first arg to `expect` (proof must start with "always succeeds because").
 - Prefer streams and iterators:
   - Guidelines for inputs:
-    - If function uses methods that are available only for specific collection type:
+    - If fn uses methods that are available only for specific collection type:
       - Then: prefer taking specific collection type as input.
       - Else: prefer taking `impl Stream` or `impl IntoIterator` as input.
   - Guidelines for outputs:
-    - If function return type is naturally iterator (for example: function returns output of `map` or `filter`):
+    - If fn return type is naturally iterator (for example: fn returns output of `map` or `filter`):
       - Then: prefer returning `impl Iterator` as output (there's no need to collect into `Vec`).
       - Else: prefer returning specific collection type as output.
   - Examples:
@@ -267,7 +267,7 @@ Write code that minimizes losses:
       ```
 - Prefer implementing and using `From` or `TryFrom` for conversions between types (instead of converting in-place).
 - Don't use early-return fast-path guards for empty vectors, iterators, streams (i.e.: don't use `if items.is_empty() { return ...; }`).
-- Use destructuring assignment for tuple arguments, for example: `fn try_from((name, parent_key): (&str, GroupKey)) -> ...`.
+- Use destructuring assignment for tuple args, for example: `fn try_from((name, parent_key): (&str, GroupKey)) -> ...`.
 - Use iterators instead of for loops. For example:
   - Good:
     ```rust
@@ -302,9 +302,9 @@ Write code that minimizes losses:
         Ok(out)
     }
     ```
-- If function has clear receiver (`self`, `&self`, `&mut self`):
-  - Then: implement it as associated function.
-  - Else: implement it as standalone free function.
+- If fn has clear receiver (`self`, `&self`, `&mut self`):
+  - Then: implement it as associated fn.
+  - Else: implement it as standalone free fn.
 - Add local `use` statement for enums to minimize code size. For example:
   - Good:
     ```rust
@@ -416,7 +416,7 @@ Write code that minimizes losses:
   }
   ```
 - Prefer short method syntax over long trait-path syntax (prefer `value.method(arg)` over `Trait::method(value, arg)`).
-- Generic helper functions must be in `src/functions` (one file per function).
+- Generic helper fns must be in `src/functions` (one file per fn).
 - If Clippy reports `too_many_arguments`:
   - Then:
     - Don't use tuples to silence lint.
@@ -447,7 +447,7 @@ Write code that minimizes losses:
 
 #### Enums
 
-- When writing code related to enums, bring variants into scope with `use Enum::*;` statement at top of file or function (prefer top of file for data enums and top of function for error enums).
+- When writing code related to enums, bring variants into scope with `use Enum::*;` statement at top of file or fn (prefer top of file for data enums and top of fn for error enums).
 
 #### Arithmetic
 
@@ -455,20 +455,20 @@ Write code that minimizes losses:
 - Write and use arithmetic trait impls that don't panic or silently overflow.
 - Prefer `checked` versions of arithmetic operations.
 - Every call to `overflowing`, `saturating`, `wrapping` version must have single-line comment above it that starts with "SAFETY: " and describes why calling this version is safe in this specific case.
-- Use items from `num` crate if necessary (for example: to implement function that calls arithmetic methods on generic type).
+- Use items from `num` crate if necessary (for example: to implement fn that calls arithmetic methods on generic type).
 
 #### Index access
 
 - Never use operators: `[], []=`.
 - Never use traits: `core::ops::{Index, IndexMut}`.
 - If you are sure that `get` or `get_mut` will never panic:
-  - Then: use `expect` with proof message (as described in [Functions](#functions)).
+  - Then: use `expect` with proof message (as described in [Fns](#fns)).
 
 Note: index access operators and traits are banned because they may panic.
 
 #### Test fn
 
-Function marked with `#[test]` or `#[tokio::test]`.
+Fn marked with `#[test]` or `#[tokio::test]`.
 
 - Must return `Result`.
 - Must implement proper error handling via `errgonomic` crate.
@@ -483,7 +483,7 @@ Function marked with `#[test]` or `#[tokio::test]`.
   - Use `$crate` paths for types defined in this crate (e.g.: `$crate::MyType`).
 - If you see similar code in different places:
   - Then: replace similar code with shared macro.
-- If last argument of macro arm is variadic (e.g.: `$($item:ident),*`):
+- If last arg of macro arm is variadic (e.g.: `$($item:ident),*`):
   - Then: add trailing `$(,)?`.
   - Else: don't add trailing `$(,)?`.
 
@@ -493,31 +493,31 @@ Function marked with `#[test]` or `#[tokio::test]`.
 
 #### Cargo.toml
 
-- Don't define package features with only single optional dependency (such features are already defined by Cargo automatically).
-- Use `cargo add` to add dependencies.
-- When adding dependency from crates.io:
+- Don't define package features with only single optional dep (such features are already defined by Cargo automatically).
+- Use `cargo add` to add deps.
+- When adding dep from crates.io:
   - If package is [publishable](#publishable-package):
     - Then:
       - Run `cargo add {dependency}@{version}`.
         - Patch component of `{version}` must be 0.
       - Try `cargo update -p {dependency} --precise {version}` to lock that exact version.
-        - If dependency constraints prevent locking that version:
+        - If dep constraints prevent locking that version:
           - Then:
             - Keep version resolved by Cargo.
             - Add comment in `Cargo.toml` explaining constraints.
     - Else:
       - Run `cargo add {dependency}` without `{version}`.
-- When adding dependency in workspace:
+- When adding dep in workspace:
   - Add it to top-level manifest first (`workspace.dependencies`).
-- When adding dependency for workspace member:
+- When adding dep for workspace member:
   - Run `cargo add {dependency}` without `{version}` (Cargo will set `workspace = true`).
-- When adding new workspace member: add it to `packages` directory unless specified otherwise.
+- When adding new workspace member: add it to `packages` dir unless specified otherwise.
 
 #### Code style
 
 - For each agent doc edit:
   - Follow `.agents/spec.spec.md`.
-- Don't enforce line length limit when writing code, comments, documentation.
+- Don't enforce line length limit when writing code, comments, docs.
 
 #### Chat thread id
 
@@ -552,7 +552,7 @@ Examples:
   - `priority` must be one of `P0`, `P1`, `P2`, `P3`.
   - `references` must be comma-separated list of `reference` values.
   - `reference` must be formatted as `{path}:{line}`.
-  - `path` must be file path relative to your working directory.
+  - `path` must be file path relative to your working dir.
   - `line` must be first line of relevant code or text block.
   - `fixes` must be one of:
     - If there is at least one proposed fix:
@@ -568,7 +568,7 @@ Package that has remote whose name contains `public` or `pre-public` and ends wi
 - Define newtypes as ordinary structs with explicit `From` / `TryFrom` impls.
 - Macro calls that begin with `subtype` (for example: `subtype!` and `subtype_string!`) are legacy APIs that expand to newtypes.
   - Don't use them in new code because their checker and preprocessor concepts have been superseded by explicit conversion impls.
-- Use `SerializeTransparent` derive for refined newtype that must serialize identically to its inner field while using Serde's `try_from` container attribute for validated deserialization.
+- Use `SerializeTransparent` derive for refined newtype that must serialize identically to its inner field while using Serde's `try_from` container attr for validated deserialization.
 
 ### Error handling
 

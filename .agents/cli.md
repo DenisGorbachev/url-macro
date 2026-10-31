@@ -1,6 +1,6 @@
 # CLI guidelines
 
-## Dependencies
+## Deps
 
 - `clap` (features: at least "derive", "env").
 - `tokio` (features: at least "macros", "rt", "rt-multi-thread").
@@ -39,7 +39,7 @@ fn verify_cli() {
 ### File `src/command.rs`
 
 - Must define [command-like struct](#command-like-struct) named `Command`.
-  - Must have attribute:
+  - Must have attr:
     - `#[command(author, version, about, propagate_version = true, flatten_help = true, disable_help_subcommand = true)]`.
 - Must define [subcommand-like enum](#subcommand-like-enum) named `Subcommand`.
 
@@ -90,10 +90,10 @@ pub use print_command::*;
 
 ### Command-like struct
 
-Struct that contains fields for CLI arguments.
+Struct that contains fields for CLI args.
 
 - Must have name formed by concatenating all command names leading up to and including this command, followed by `Command` (see example above).
-- Must have at least attributes:
+- Must have at least attrs:
   - `derive`:
     - Must contain at least:
       - `Parser` (`use clap::Parser`).
@@ -105,7 +105,7 @@ Struct that contains fields for CLI arguments.
   - Else: must be attached to `src/command.rs`.
 - For each field:
   - If field has collection type (e.g.: `Vec`):
-    - Then: it must have attribute `num_args = 1..`.
+    - Then: it must have attr `num_args = 1..`.
 - May contain `subcommand` field annotated with `#[command(subcommand)]`.
 - Must have `pub async fn run` method.
   - Must return `Result` with `ExitCode` success value.
@@ -123,7 +123,7 @@ Command example:
 Enum that contains variants for CLI subcommands.
 
 - Must have name formed by concatenating all command names leading up to and including this command, followed by `Subcommand` (see example above).
-- Must have at least attributes:
+- Must have at least attrs:
   - `derive`:
     - Must contain at least:
       - `Subcommand` (`use clap::Subcommand`).

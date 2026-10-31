@@ -44,6 +44,14 @@
   - `specification` → `spec`.
   - `requirement` → `req`.
   - `directory` → `dir`.
+  - `function` → `fn`.
+  - `argument` → `arg`.
+  - `parameter` → `param`.
+  - `configuration` → `config`.
+  - `document` → `doc`.
+  - `documentation` → `docs`.
+  - `attribute` → `attr`.
+  - `dependency` → `dep`.
 - Apply equivalent plural forms.
 - Preserve code, literal values, paths, URLs.
-- Update links when headings change.
+- Update links, section-name references when headings change.

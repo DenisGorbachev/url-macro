@@ -4,7 +4,7 @@
 
 ### Examples
 
-- Preserve shape of underlying API in CLI (e.g.: commands should accept same arguments as methods).
+- Preserve shape of underlying API in CLI (e.g.: commands should accept same args as methods).
 - Preserve secrecy of private data (e.g.: hide passwords, API keys, private keys).
 
 ### Exceptions
@@ -14,7 +14,7 @@
   - Example:
     - If user explicitly requests data deletion:
       - Then: data may be deleted.
-- If specification explicitly allows breaking preservation:
+- If spec explicitly allows breaking preservation:
   - Then: preservation may be broken.
 - Principle of preservation may be broken due to limitations of physical reality.
   - Examples:
@@ -24,7 +24,7 @@
     - List view may display only 20 items along with "Show more" button (limitation of screen size, limitation of network bandwidth).
     - Confirmation dialog for item deletion may have "Don't ask again" checkbox (limitation of available time).
 
-Cases where principle of preservation is broken must be described in documentation.
+Cases where principle of preservation is broken must be described in docs.
 
 Principle of preservation may not be broken in order to minimize time spent writing code or to minimize amount of code (in other words: lossy simplifications are not allowed).
 

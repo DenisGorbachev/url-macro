@@ -2,11 +2,11 @@
 
 ## Project
 
-Directory with source code or [auxiliary](#auxiliary-file) files.
+Dir with source code or [auxiliary](#auxiliary-file) files.
 
 ## Metric
 
-Function from object to quantitative value.
+Fn from object to quantitative value.
 
 Examples:
 
@@ -40,11 +40,11 @@ Examples:
 
 ## Stat
 
-Structure where every field is [metric](#metric).
+Struct where every field is [metric](#metric).
 
 Notes:
 
-- Given input set of objects and function from objects to stats, it is possible to calculate Pareto front of objects.
+- Given input set of objects and fn from objects to stats, it is possible to calculate Pareto front of objects.
   - Objects that are inferior to Pareto front objects should be discarded.
 
 ## Auxiliary file
@@ -57,7 +57,7 @@ Examples:
 - Linter config.
 - Agent context file.
 
-## High-level specification
+## High-level spec
 
 String that can be interpreted as struct with fields:
 
@@ -80,7 +80,7 @@ Preferences:
 
 ## Constructor of type T
 
-Function whose return type mentions `T`.
+Fn whose return type mentions `T`.
 
 Examples:
 
@@ -94,7 +94,7 @@ Examples:
 
 [constructor](#constructor-of-type-t) that allows callers to set more fields than other constructors of same type.
 
-Requirements:
+Reqs:
 
 - If it doesn't produce side effects:
   - Then: must be named `new`.
@@ -111,7 +111,7 @@ Examples:
 - `UserBuilder::default().name("Alice").build()?` is ProdExp of `User`.
 - `Database::new(config)?` is ProdExp of `Database`.
 
-Requirements:
+Reqs:
 
 - Must set all [relevant fields](#relevant-field).
   - Notes:
@@ -134,9 +134,9 @@ Preferences:
 
 Notes:
 
-- When parsing date without timezone, don't assume UTC unless specification explicitly requires it.
+- When parsing date without timezone, don't assume UTC unless spec explicitly requires it.
 
-## Parameter of producing expression of type T
+## Param of producing expression of type T
 
 Variable that is passed into [producing expression of type T](#producing-expression-of-type-t).
 
@@ -147,7 +147,7 @@ Field of struct is relevant for effect E if effect E depends on value of that fi
 Examples:
 
 - `/books/update` API call:
-  - `id` query parameter is relevant because it influences effect of updating book (determines which book to update).
+  - `id` query param is relevant because it influences effect of updating book (determines which book to update).
   - `Cookie` header is irrelevant because it doesn't influence effect of updating book (setting this header has no effect).
 
 ## Irrelevant field
@@ -156,16 +156,16 @@ Field of struct that is not [relevant](#relevant-field) for effect E.
 
 ## Config struct
 
-Struct that contains configuration parameters.
+Struct that contains config params.
 
-Requirements:
+Reqs:
 
 - Must have `Default` impl.
-  - For each parameter:
+  - For each param:
     - If it can't have default value:
       - Then:
         - Must not be in config struct.
-        - Must be accepted as required argument.
+        - Must be accepted as required arg.
 - Must implement `Serialize` and `Deserialize` from `serde`.
 
 Preferences:
@@ -220,7 +220,7 @@ Rust fn whose effect can be reversed.
 
 Properties:
 
-- Some fns that take arguments only by reference are irreversible.
+- Some fns that take args only by reference are irreversible.
   - Example:
     - `remove_file` that takes `&Path` and removes file.
 - Some reversible fns call irreversible fns.
@@ -242,8 +242,8 @@ Rust fn whose effects are either applied completely or not at all.
 
 Examples:
 
-- Function that wraps database operations in transaction.
-- Function that writes to temp file and then atomically replaces old file with new file (on filesystems that support atomic renames).
+- Fn that wraps database operations in transaction.
+- Fn that writes to temp file and then atomically replaces old file with new file (on filesystems that support atomic renames).
 
 ## Fallible fn
 
@@ -257,7 +257,7 @@ Rust fn that returns `Option`.
 
 Struct that has only partial or fallible constructors.
 
-Requirements:
+Reqs:
 
 - Must enforce validation:
   - Must not have `pub` fields.
@@ -289,9 +289,9 @@ Original location of data that is held by input variable (where program has read
 
 Examples:
 
-- Configuration file.
+- Config file.
 - HTTP request.
-- Program arguments (`argv`).
+- Program args (`argv`).
 - Standard input (`stdin`).
 - Environment (`env`).
 
@@ -325,7 +325,7 @@ Mathematical expectation of amount of time that it takes user to reach specific 
 Notes:
 
 - If product is program:
-  - Then: this amount of time includes execution time plus launch time (e.g.: typing CLI arguments, filling GUI forms).
+  - Then: this amount of time includes execution time plus launch time (e.g.: typing CLI args, filling GUI forms).
 
 TODO:
 
@@ -344,7 +344,7 @@ Optimization that relies on property that cannot be assumed to hold in future.
 
 Examples:
 
-- Optimization that relies on implementation detail in dependency (this property cannot be assumed to hold in future because implementation details are not part of public interface and may change without notice).
+- Optimization that relies on impl detail in dep (this property cannot be assumed to hold in future because impl details are not part of public interface and may change without notice).
 
 ## Monomial
 

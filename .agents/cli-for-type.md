@@ -202,20 +202,20 @@ Examples:
     }
     ```
 
-Requirements:
+Reqs:
 
 - Must be constructible by parent command.
 - Must expose at least one public method that can be invoked by child command.
 
 Notes:
 
-- Target type should not parse CLI arguments itself.
+- Target type should not parse CLI args itself.
 
 ## Parent command
 
 Command that constructs target type and delegates execution to selected child command.
 
-Requirements:
+Reqs:
 
 - Must have fields for all inputs needed to construct target type.
 - Must construct instance of target type.
@@ -227,14 +227,14 @@ Notes:
 
 ## Child command
 
-Subcommand that wraps one target-type method and maps CLI arguments to that method.
+Subcommand that wraps one target-type method and maps CLI args to that method.
 
-Requirements:
+Reqs:
 
-- For each argument of wrapped method:
+- For each arg of wrapped method:
   - Must have corresponding field.
-- Must call wrapped method in its `run` implementation.
-- Must return error type that wraps method's error and relevant argument values.
+- Must call wrapped method in its `run` impl.
+- Must return error type that wraps method's error and relevant arg values.
 - Must write results to stdout efficiently:
   - Must serialize results using `serde_json`.
   - Must use `serde_json::to_writer_pretty`.

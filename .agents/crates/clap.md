@@ -1,6 +1,6 @@
 # Guidelines for `clap`
 
-## Requirements
+## Reqs
 
 - For each enum in project:
   - If enum has only unit variants and doesn't implement `Error`:
