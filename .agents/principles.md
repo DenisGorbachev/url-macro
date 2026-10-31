@@ -4,6 +4,7 @@
 
 ### Examples
 
+- Preserve secrecy of private data using secret types (e.g.: `secrecy::SecretString` for API keys).
 - Preserve shape of underlying API in CLI (e.g.: cmds should accept same args as methods).
 
 ### Exceptions

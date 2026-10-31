@@ -7,14 +7,12 @@
 
 ## Statements
 
-- Omit default-behavior reminders (e.g.: preservation, safety).
-- Use one statement per list item.
-- Use homogeneous lists.
 - End statements with periods.
 - End list labels with colons.
 - Omit `the following`.
 - Omit final `and`, `or` from enumerations.
 - Separate example labels from contents with colons: `for example: ...`, `e.g.: ...`.
+- Prefix example explanations with `Good:`, `Bad:`.
 
 ## Control flow
 
@@ -30,4 +28,5 @@
 ## Compression
 
 - Omit articles (`a`, `an`, `the`) before nouns.
-- Use CS vernacular (e.g.: struct, ident, impl, spec, dir, fn, arg, param, config, doc, attr, dep, pref, db, op).
+- Use CS vernacular (e.g.: struct, ident, impl, spec, dir, fn, arg, param, config, doc, attr, dep, pref, db, op, pkg, lang).
+- Use full `command`, `subcommand` in CLI guidelines.

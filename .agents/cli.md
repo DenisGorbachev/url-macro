@@ -12,7 +12,7 @@
 ### File `src/main.rs`
 
 - Must define `main` entry point.
-- Must define `verify_cli` test for top-level cmd exactly as in example below (with `debug_assert`).
+- Must define `verify_cli` test for top-level command exactly as in example below (with `debug_assert`).
 
 Example:
 
@@ -38,10 +38,10 @@ fn verify_cli() {
 
 ### File `src/command.rs`
 
-- Must define [cmd-like struct](#cmd-like-struct) named `Command`.
+- Must define [command-like struct](#command-like-struct) named `Command`.
   - Must have attr:
     - `#[command(author, version, about, propagate_version = true, flatten_help = true, disable_help_subcommand = true)]`.
-- Must define [subcmd-like enum](#subcmd-like-enum) named `Subcommand`.
+- Must define [subcommand-like enum](#subcommand-like-enum) named `Subcommand`.
 
 Example:
 
@@ -88,11 +88,11 @@ pub use print_command::*;
 
 ## Defs
 
-### Cmd-like struct
+### Command-like struct
 
 Struct that contains fields for CLI args.
 
-- Must have name formed by concatenating all cmd names leading up to and including this cmd, followed by `Command` (see example above).
+- Must have name formed by concatenating all command names leading up to and including this command, followed by `Command` (see example above).
 - Must have at least attrs:
   - `derive`:
     - Must contain at least:
@@ -100,42 +100,42 @@ Struct that contains fields for CLI args.
   - `command`:
     - Must contain at least:
       - `flatten_help = true`.
-- If it is top-level cmd, must be attached to `src/lib.rs`; else: must be attached to `src/command.rs`.
+- If it is top-level command, must be attached to `src/lib.rs`; else: must be attached to `src/command.rs`.
 - For each field:
   - If field has collection type (e.g.: `Vec`), it must have attr `num_args = 1..`.
 - May contain `subcommand` field annotated with `#[command(subcommand)]`.
 - Must have `pub async fn run` method.
   - Must return `Result` with `ExitCode` success value.
-  - If struct contains `subcommand` field, this method must match on `subcommand` and call selected cmd's `run` method.
+  - If struct contains `subcommand` field, this method must match on `subcommand` and call selected command's `run` method.
 
-Cmd example:
+Command example:
 
 - Name: `DbDownloadYcombinatorStartupsCommand`.
 - File: `src/command/db_download_ycombinator_startups_command.rs` (attached to `src/command.rs`).
-- Shell cmd: `cargo run -- db download ycombinator-startups`.
+- Shell command: `cargo run -- db download ycombinator-startups`.
 
-### Subcmd-like enum
+### Subcommand-like enum
 
-Enum that contains variants for CLI subcmds.
+Enum that contains variants for CLI subcommands.
 
-- Must have name formed by concatenating all cmd names leading up to and including this cmd, followed by `Subcommand` (see example above).
+- Must have name formed by concatenating all command names leading up to and including this command, followed by `Subcommand` (see example above).
 - Must have at least attrs:
   - `derive`:
     - Must contain at least:
       - `Subcommand` (`use clap::Subcommand`).
-- Must be located in same file as its parent cmd struct.
-- Each variant must be tuple variant containing exactly one cmd.
+- Must be located in same file as its parent command struct.
+- Each variant must be tuple variant containing exactly one command.
 
-Subcmd example:
+Subcommand example:
 
 - Name: `DbDownloadSubcommand`.
 - File: `src/cli/db_command/db_download_command.rs` (same file as its parent `DbDownloadCommand`).
 
-### Proxy cmd-like struct
+### Proxy command-like struct
 
-[cmd-like struct](#cmd-like-struct) that has `subcommand` field and calls `run` on each subcmd.
+[command-like struct](#command-like-struct) that has `subcommand` field and calls `run` on each subcommand.
 
-Proxy cmd example:
+Proxy command example:
 
 - Name: `DbCommand`.
 - File: `src/command/db_command.rs` (attached to `src/command.rs`).

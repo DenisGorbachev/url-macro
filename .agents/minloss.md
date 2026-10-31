@@ -49,7 +49,7 @@ File that doesn't contain program but is used indirectly when building program.
 
 Examples:
 
-- Package manager config.
+- Pkg manager config.
 - Linter config.
 - Agent ctx file.
 

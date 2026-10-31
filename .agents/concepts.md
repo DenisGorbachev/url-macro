@@ -18,7 +18,7 @@ Struct with fields:
 
 Examples:
 
-- Def of Rust package.
+- Def of Rust pkg.
 - Def of Rust fn.
 
 ## Name
@@ -96,7 +96,7 @@ Optional [listmap](#listmap) of [listmaps](#listmap) of [notes](#note).
 
 Notes:
 
-- Corresponds to specific instance of type in [dependently typed language](#dependently-typed-language).
+- Corresponds to specific instance of type in [dependently typed lang](#dependently-typed-lang).
 
 ## Req
 
@@ -104,7 +104,7 @@ Notes:
 
 Notes:
 
-- Corresponds to predicate in [dependently typed language](#dependently-typed-language).
+- Corresponds to predicate in [dependently typed lang](#dependently-typed-lang).
 - If input doesn't pass req test, it is not instance of parent object.
 
 ## Allowance
@@ -128,7 +128,7 @@ Notes:
 
 String that represents ctor of type.
 
-- Corresponds to ctor in [dependently typed language](#dependently-typed-language).
+- Corresponds to ctor in [dependently typed lang](#dependently-typed-lang).
 
 ## Property
 
@@ -136,7 +136,7 @@ String that represents ctor of type.
 
 Notes:
 
-- Corresponds to theorem in [dependently typed language](#dependently-typed-language).
+- Corresponds to theorem in [dependently typed lang](#dependently-typed-lang).
 
 ## Note
 
@@ -241,9 +241,9 @@ Notes:
 
 Entity whose goal is to prevent its own termination.
 
-## Dependently typed language
+## Dependently typed lang
 
-Programming language that supports dependent types.
+Programming lang that supports dependent types.
 
 Aliases: DTL.
 

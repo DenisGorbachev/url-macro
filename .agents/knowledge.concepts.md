@@ -28,8 +28,8 @@ Notes:
 - Formats: Markdown, images, PDF.
 - Some informal knowledge may contain contradictions.
 - Some informal knowledge may contradict experimental knowledge.
-- This kind of knowledge is called "informal" because it doesn't have unique representation in any formal language.
-  - Informal knowledge has multiple potential representations in any formal language.
+- This kind of knowledge is called "informal" because it doesn't have unique representation in any formal lang.
+  - Informal knowledge has multiple potential representations in any formal lang.
   - Informal knowledge is inherently ambiguous (it must be disambiguated during [formalization](#formalization)).
 - Some informal knowledge files may have [divergent content and extension](#divergent-file-content-and-file-extension-for-specific-validator-map).
 
@@ -98,7 +98,7 @@ Examples:
 
 ## Theory
 
-Set of declarations in specific formal language.
+Set of declarations in specific formal lang.
 
 Reqs:
 
@@ -110,7 +110,7 @@ Prefs:
 
 Notes:
 
-- Most common language is Lean 4.
+- Most common lang is Lean 4.
 
 ## Experimental knowledge
 

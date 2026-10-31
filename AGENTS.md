@@ -4,6 +4,9 @@
 
 You are senior Rust software architect.
 
+- Think deeply and make detailed plans before writing code.
+- Write high-quality, production-ready, generic, reusable code.
+
 #### Principles
 
 Write code that minimizes losses:
@@ -16,6 +19,7 @@ Write code that minimizes losses:
 ##### Avoid data loss
 
 - Don't use panicking fns (instead, use checked fns that return `Result`).
+- Don't delete data unless spec explicitly requires it.
 
 ##### Minimize hardcoded data
 
@@ -43,16 +47,17 @@ Write code that minimizes losses:
       - Make separate commit.
 - After finishing task, run `mise run agent:on:stop`.
   - `mise run agent:on:stop` may modify `README.md`, `AGENTS.md`, `Cargo.toml` (this is normal, don't mention it).
-- Don't write tests.
 - Don't maintain backward compatibility.
 - Don't add comments.
 - Don't edit files in `.agents`.
 - Don't run `git diff` or `git status` solely to review your own work at end of turn.
+- If later instruction overrides earlier instruction, follow later instruction.
 - If I explicitly ask to update code in way that deviates from spec, update code, spec.
 - If you notice unexpected edits:
   - Then:
     - Keep them.
     - Don't mention them.
+- If you notice incorrect code, tell me.
 - If you have to apply workaround:
   - Then:
     - Add comment next to workaround explaining why it is necessary.
@@ -71,7 +76,6 @@ Write code that minimizes losses:
 
 #### Review workflow
 
-- If user msg contains `git show` cmd with specific commit, mark commit reviewed.
 - For each new commit until explicitly marked reviewed:
   - Print one `git show` cmd per final reply.
 - Output full list of [findings](#finding) (not shortlist).
@@ -91,11 +95,6 @@ Write code that minimizes losses:
 #### Subagents
 
 - When spawning code review subagent: use fresh ctx (not inherited).
-
-#### Skills
-
-- When editing or reviewing files that contain shell code, use and follow `shell-scripts` skill.
-- When choosing between identically named skills, prefer repo-local copy.
 
 #### Cmds
 
@@ -208,10 +207,13 @@ Write code that minimizes losses:
   - Examples:
     - Good:
       ```rust
+      /// Good: fn uses only generic `Iterator` methods.
+      /// Good: fn naturally returns an iterator.
       pub fn filter_non_empty_strings<'a>(inputs: impl IntoIterator<Item = &'a str>) -> impl Iterator<Item = &'a str> {
           inputs.into_iter().filter(|i| i.is_empty().not())
       }
 
+      /// Good: `Vec`-specific `extend_from_slice` requires `Vec` input.
       fn extend_args(mut args: Vec<String>, extra_args: &[String]) -> Vec<String> {
           args.extend_from_slice(extra_args);
           args
@@ -219,6 +221,7 @@ Write code that minimizes losses:
       ```
     - Bad:
     - ```rust
+      /// Bad: needlessly converts `Vec` into iterator, then collects into `Vec`.
       pub fn filter_non_empty_strings(inputs: Vec<&str>) -> Vec<&str> {
           inputs
               .into_iter()
@@ -226,6 +229,7 @@ Write code that minimizes losses:
               .collect::<Vec<_>>()
       }
 
+      /// Bad: forces caller to collect strings into `Vec`, restricting input types and adding allocations.
       pub fn bar(inputs: Vec<String>) -> Vec<String> {}
       ```
 - Prefer implementing and using `From` or `TryFrom` for conversions between types (instead of converting in-place).
@@ -238,6 +242,7 @@ Write code that minimizes losses:
     use core::num::ParseIntError;
     use thiserror::Error;
 
+    // Good: iterator pipeline with fallible mapping and error handling.
     pub fn parse_numbers(inputs: impl IntoIterator<Item = impl AsRef<str>>) -> Result<Vec<u64>, ParseNumbersError> {
         use ParseNumbersError::*;
         let iter = inputs.into_iter().map(|s| s.as_ref().trim().parse::<u64>());
@@ -254,6 +259,7 @@ Write code that minimizes losses:
     ```rust
     use core::num::ParseIntError;
 
+    // Bad: manual loop and mutable accumulator.
     pub fn parse_numbers(inputs: impl IntoIterator<Item = impl AsRef<str>>) -> Result<Vec<u64>, ParseIntError> {
         let mut out = Vec::new();
         for s in inputs {
@@ -295,6 +301,7 @@ Write code that minimizes losses:
     ```
   - Bad:
     ```rust
+    /// Bad: caller may have to call `.into()` when passing input arg.
     pub fn foo(input: String) {}
     ```
 - Provide additional flexibility at call sites by accepting `&impl AsRef` or `&mut impl AsMut` (e.g.: both `PathBuf` and `Config` may implement `AsRef<Path>`). For example:
@@ -310,8 +317,10 @@ Write code that minimizes losses:
     ```
   - Bad:
     ```rust
+    /// Bad: caller may have to call `.as_mut()` when passing input arg.
     pub fn bar(input: &mut String) {}
 
+    /// Bad: caller may have to call `.as_ref()` when passing input arg.
     pub fn baz(input: &str) {}
     ```
 - Prefer `.map()` instead of `match` when you need to modify value in `Option` or `Result`. For example:
@@ -337,6 +346,7 @@ Write code that minimizes losses:
       type Err = ParseIntError;
 
       fn from_str(s: &str) -> Result<Self, Self::Err> {
+          // Bad: uses more code to express same idea.
           match s.parse::<u64>() {
               Ok(value) => Ok(Self::new(value)),
               Err(error) => Err(error),
@@ -437,10 +447,10 @@ Fn marked with `#[test]` or `#[tokio::test]`.
 
 #### Cargo.toml
 
-- Don't define package features with only single optional dep (such features are already defined by Cargo automatically).
+- Don't define pkg features with only single optional dep (such features are already defined by Cargo automatically).
 - Use `cargo add` to add deps.
 - When adding dep from crates.io:
-  - If package is [publishable](#publishable-package):
+  - If pkg is [publishable](#publishable-pkg):
     - Then:
       - Run `cargo add {dependency}@{version}`.
         - Patch component of `{version}` must be 0.
@@ -499,9 +509,9 @@ Examples:
   - `fixes` must be one of:
     - If there is at least one proposed fix, "\n\n" and nested Markdown list of fixes where each fix must have format `{number}. {description}` (numbers should start from 1 for each list of fixes); else: exact text "none."
 
-#### Publishable package
+#### Publishable pkg
 
-Package that has remote whose name contains `public` or `pre-public` and ends with `template`.
+Pkg that has remote whose name contains `public` or `pre-public` and ends with `template`.
 
 ### Writing
 
@@ -512,14 +522,12 @@ Package that has remote whose name contains `public` or `pre-public` and ends wi
 
 #### Statements
 
-- Omit default-behavior reminders (e.g.: preservation, safety).
-- Use one statement per list item.
-- Use homogeneous lists.
 - End statements with periods.
 - End list labels with colons.
 - Omit `the following`.
 - Omit final `and`, `or` from enumerations.
 - Separate example labels from contents with colons: `for example: ...`, `e.g.: ...`.
+- Prefix example explanations with `Good:`, `Bad:`.
 
 #### Control flow
 
@@ -535,7 +543,8 @@ Package that has remote whose name contains `public` or `pre-public` and ends wi
 #### Compression
 
 - Omit articles (`a`, `an`, `the`) before nouns.
-- Use CS vernacular (e.g.: struct, ident, impl, spec, dir, fn, arg, param, config, doc, attr, dep, pref, db, op).
+- Use CS vernacular (e.g.: struct, ident, impl, spec, dir, fn, arg, param, config, doc, attr, dep, pref, db, op, pkg, lang).
+- Use full `command`, `subcommand` in CLI guidelines.
 
 ### Guidelines for `subtype`
 

@@ -1,6 +1,6 @@
 # API client
 
-## Package reqs
+## Pkg reqs
 
 - Must contain `Cargo.toml` that meets [Cargo.toml reqs](#cargotoml-reqs).
 - For each request in API:
