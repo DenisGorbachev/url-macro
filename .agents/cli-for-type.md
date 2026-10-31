@@ -6,7 +6,7 @@ The type whose methods are exposed through a CLI and invoked by child commands.
 
 Examples:
 
-- Rust example.
+- Rust example:
   - ```rust
     //! In this example, all types are in the same file. In real code, the types must be in their own files according to project guidelines.
 
@@ -235,8 +235,8 @@ Requirements:
 - Must call the wrapped method in its run implementation.
 - Must return an error type that wraps the method error and the relevant argument values.
 - Must write the results to stdout in an efficient way:
-  - Must serialize the results using `serde_json`
-  - Must use `serde_json::to_writer_pretty`
+  - Must serialize the results using `serde_json`.
+  - Must use `serde_json::to_writer_pretty`.
 
 Notes:
 

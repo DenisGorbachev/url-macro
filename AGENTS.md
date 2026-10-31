@@ -18,49 +18,49 @@ Write code that minimizes losses:
 
 ##### Avoid data loss
 
-- Don't use panicking functions (instead, use checked functions that return a `Result`)
-- Don't delete the data unless the specification explicitly requires it
+- Don't use panicking functions (instead, use checked functions that return a `Result`).
+- Don't delete the data unless the specification explicitly requires it.
 
 ##### Minimize hardcoded data
 
-- Don't hardcode the values (accept arguments instead)
+- Don't hardcode the values (accept arguments instead).
 - Choose carefully between accepting a parameter VS defining a constant:
   - Definitions:
-    - Parameters are execution details (the user may want to change them)
-    - Constants are implementation details (the user would never want to change them)
+    - Parameters are execution details (the user may want to change them).
+    - Constants are implementation details (the user would never want to change them).
   - Examples:
     - Parameters:
-      - Cache TTL
-      - Config path
+      - Cache TTL.
+      - Config path.
     - Constants:
-      - Table name
-      - Keyspace name
+      - Table name.
+      - Keyspace name.
   - Recommendations:
-    - When in doubt, prefer accepting a parameter instead of defining a constant
+    - When in doubt, prefer accepting a parameter instead of defining a constant.
 
 #### Development workflow
 
 - After finishing the initial implementation, improve the code:
-  - Remove unnecessary code
-  - Remove unnecessary allocations
-  - Refactor code that converts between types into `From` / `Into` impls
-- After finishing the task, run `mise run agent:on:stop` (this command runs the lints and tests)
-  - `mise run agent:on:stop` may modify `README.md`, `AGENTS.md`, `Cargo.toml` (this is normal, don't mention it)
-  - `mise run agent:on:stop` includes `cargo fmt`, `cargo check`, `cargo clippy`, `cargo nextest` (no need to run them separately)
-- Don't write tests
-- Don't maintain backwards compatibility
-- Don't add comments
-- Don't edit the files in `.agents`
-- Don't run `git diff` or `git status` solely to review your own work at the end of a turn
-- If a later instruction overrides the former instruction: follow the later instruction (last override wins)
-- If I explicitly ask to update the code in a way that deviates from the spec, update both the code and the spec
-- If you notice unexpected edits, keep them and don't mention them
-- If you notice incorrect code, tell me
-- If you have to apply a workaround, add a comment next to the workaround that explains why it is necessary, and also mention the workaround in your final report
+  - Remove unnecessary code.
+  - Remove unnecessary allocations.
+  - Refactor code that converts between types into `From` / `Into` impls.
+- After finishing the task, run `mise run agent:on:stop` (this command runs the lints and tests).
+  - `mise run agent:on:stop` may modify `README.md`, `AGENTS.md`, `Cargo.toml` (this is normal, don't mention it).
+  - `mise run agent:on:stop` includes `cargo fmt`, `cargo check`, `cargo clippy`, `cargo nextest` (no need to run them separately).
+- Don't write tests.
+- Don't maintain backwards compatibility.
+- Don't add comments.
+- Don't edit the files in `.agents`.
+- Don't run `git diff` or `git status` solely to review your own work at the end of a turn.
+- If a later instruction overrides the former instruction: follow the later instruction (last override wins).
+- If I explicitly ask to update the code in a way that deviates from the spec, update both the code and the spec.
+- If you notice unexpected edits, keep them and don't mention them.
+- If you notice incorrect code, tell me.
+- If you have to apply a workaround, add a comment next to the workaround that explains why it is necessary, and also mention the workaround in your final report.
 - If the task can't be completed exactly as it is written (for example, due to limitations in the language or dependencies, or due to incorrect assumptions in the specification), mention it in your final message.
 - If unexpected behavior impedes your progress, but it's not a blocker (for example: domain is unavailable, program is unavailable, available memory or disk space is too low, command runs for unexpectedly long time or consumes an unexpected amount of resources), mention it in your final message.
 - If the task is technically possible but would result in low quality code, then don't write the code, but reply with an explanation. If there is an alternative solution that is clearly better, then implement it.
-  - Examples
+  - Examples:
     - A task to write `impl From<Foo> for Bar` where `Foo` can't actually be infallibly converted to `Bar` (would require calling `unwrap`, which is bad) - in this case you should write `impl TryFrom<Foo> for Bar` and reply with "Foo can't be infallibly converted to Bar, so I implemented a fallible conversion instead".
     - A task to write a trait impl that only returns an error - in this case you should not write the trait impl but reply with "trait X can't be implemented for Foo because ..."
 - If a sentence starts with "Idea: ":
@@ -71,18 +71,18 @@ Write code that minimizes losses:
 
 #### Review workflow
 
-- Output a full list of [findings](#finding) (not a shortlist)
-- If there are no findings, then start your reply with "No findings"
+- Output a full list of [findings](#finding) (not a shortlist).
+- If there are no findings, then start your reply with "No findings".
 - If I reply to your review with an ordered list, process each item in the following way:
-  - "+" - "Think about this finding again, then apply the best fix according to your thinking process"
-  - "+ {number}" - "Apply proposed fix at {number}"
-  - "-" - "Don't apply any fixes"
-  - other - respond normally (keep the `ctid` in your response)
+  - "+" - "Think about this finding again, then apply the best fix according to your thinking process".
+  - "+ {number}" - "Apply proposed fix at {number}".
+  - "-" - "Don't apply any fixes".
+  - other - respond normally (keep the `ctid` in your response).
 - If there are no more actionable items in the thread identified by a specific `ctid`: drop this `ctid` from your response.
 
 #### Debugging workflow
 
-- Improve error handling, so that the root cause is clearly visible
+- Improve error handling, so that the root cause is clearly visible.
 
 #### Subagents
 
@@ -95,24 +95,24 @@ Write code that minimizes losses:
 
 #### Commands
 
-- Use `fd` and `rg` instead of `find` and `grep`
-- Set the command-execution tool call’s timeout parameter and `yield_time_ms` to at least 300000 ms for the following commands: `mise run agent:on:stop`, `cargo build`, `git commit`
+- Use `fd` and `rg` instead of `find` and `grep`.
+- Set the command-execution tool call’s timeout parameter and `yield_time_ms` to at least 300000 ms for the following commands: `mise run agent:on:stop`, `cargo build`, `git commit`.
 
 #### Recommended crates
 
-- `errgonomic` for error handling
-- `strum` for enum derives
-- `subtype` for defining newtypes
-- `tempfile` for creating temp dirs or files
+- `errgonomic` for error handling.
+- `strum` for enum derives.
+- `subtype` for defining newtypes.
+- `tempfile` for creating temp dirs or files.
 
 #### Files
 
-- The file name must match the name of the primary item in this file (for example: a file with `struct User` must be named `user.rs`)
-- The trait implementations must be in the same file as the target type (for example: put `impl TryFrom<...> for User` in the same file as `struct User`, which is `user.rs`)
+- The file name must match the name of the primary item in this file (for example: a file with `struct User` must be named `user.rs`).
+- The trait implementations must be in the same file as the target type (for example: put `impl TryFrom<...> for User` in the same file as `struct User`, which is `user.rs`).
 
 #### Modules
 
-- Don't use `mod.rs`, use module files with submodules in the folder with the same name (for example: `user.rs` with submodules in `user` folder)
+- Don't use `mod.rs`; use module files with submodules in the folder with the same name (for example: `user.rs` with submodules in `user` folder).
 - When creating a new module, attach it with a `mod` declaration followed by `pub use` glob declaration. The parent module must re-export all items from the child modules. This allows to `use` the items right from the crate root, without intermediate module path. For example:
   ```rust
   fn foo() {}
@@ -156,8 +156,8 @@ Write code that minimizes losses:
     }
     ```
 - If you need error and result types from `std`, prefer short paths:
-  - `use std::io;` and `io::Result`, `io::Error`
-  - `use std::fmt;` and `fmt::Result`, `fmt::Error`
+  - `use std::io;` and `io::Result`, `io::Error`.
+  - `use std::fmt;` and `fmt::Result`, `fmt::Error`.
 
 #### Visibility
 
@@ -170,29 +170,29 @@ Write code that minimizes losses:
 
 #### Constants
 
-- Define constants only for values used in multiple places (prefer inline values)
-- Put constants in `src/constants.rs`
+- Define constants only for values used in multiple places (prefer inline values).
+- Put constants in `src/constants.rs`.
 
 #### Types
 
 - Always use the most specific types (enforce semantic difference through syntactic difference):
-  - Use types from existing crates
-    - Use types from `url` crate instead of `String` for URL-related values
-    - Use types from `time` crate instead of `String` or `u64` for datetime-related values
-    - Use types from `phonenumber` crate instead of `String` for phone-related values
-    - Use types from `email_address` crate instead of `String` for email-related values
-    - Use types from `core::num` module that are prefixed with `NonZero` for values that must be non-zero
-  - Search for other existing crates if you need specific types
-  - If you can't find existing crates, define newtypes using macros from `subtype` crate
-- Every `struct`, `enum`, `union` must be in a separate file (except for error types that implement `Error`)
-  - Error types that implement `Error` must be in the same files as the functions that return them
-- Prefer attaching the types as child modules to src/types.rs
+  - Use types from existing crates.
+    - Use types from `url` crate instead of `String` for URL-related values.
+    - Use types from `time` crate instead of `String` or `u64` for datetime-related values.
+    - Use types from `phonenumber` crate instead of `String` for phone-related values.
+    - Use types from `email_address` crate instead of `String` for email-related values.
+    - Use types from `core::num` module that are prefixed with `NonZero` for values that must be non-zero.
+  - Search for other existing crates if you need specific types.
+  - If you can't find existing crates, define newtypes using macros from `subtype` crate.
+- Every `struct`, `enum`, `union` must be in a separate file (except for error types that implement `Error`).
+  - Error types that implement `Error` must be in the same files as the functions that return them.
+- Prefer attaching the types as child modules to src/types.rs.
 
 #### Functions
 
-- Prefer the weakest sufficient trait bound for inputs and associated types (`FnOnce` over `FnMut` over `Fn`) (`PartialOrd` over `Ord`) (`PartialEq` over `Eq`)
-- Implement proper error handling using macros from `errgonomic` crate instead of `unwrap` or `expect` (in normal code and in tests)
-  - Use `expect` only in exceptional cases where you can prove that it always succeeds, and provide the proof as the first argument to `expect` (the proof must start with "always succeeds because")
+- Prefer the weakest sufficient trait bound for inputs and associated types (`FnOnce` over `FnMut` over `Fn`) (`PartialOrd` over `Ord`) (`PartialEq` over `Eq`).
+- Implement proper error handling using macros from `errgonomic` crate instead of `unwrap` or `expect` (in normal code and in tests).
+  - Use `expect` only in exceptional cases where you can prove that it always succeeds, and provide the proof as the first argument to `expect` (the proof must start with "always succeeds because").
 - Prefer streams and iterators:
   - Guidelines for inputs:
     - If the function uses methods that are available only for a specific collection type:
@@ -230,9 +230,9 @@ Write code that minimizes losses:
       /// This is bad because it is not general enough and also forces the caller to collect the strings into a vec for input, which is bad for performance
       pub fn bar(inputs: Vec<String>) -> Vec<String> {}
       ```
-- Prefer implementing and use `From` or `TryFrom` for conversions between types (instead of converting in-place)
-- Don't use early-return fast-path guards for empty vecs, iterators, streams (i.e. don't use `if items.is_empty() { return ...; }`)
-- Use destructuring assignment for tuple arguments, for example: `fn try_from((name, parent_key): (&str, GroupKey)) -> ...`
+- Prefer implementing and use `From` or `TryFrom` for conversions between types (instead of converting in-place).
+- Don't use early-return fast-path guards for empty vecs, iterators, streams (i.e., don't use `if items.is_empty() { return ...; }`).
+- Use destructuring assignment for tuple arguments, for example: `fn try_from((name, parent_key): (&str, GroupKey)) -> ...`.
 - Use iterators instead of for loops. For example:
   - Good:
     ```rust
@@ -268,8 +268,8 @@ Write code that minimizes losses:
     }
     ```
 - If the function has a clear receiver (`self`, `&self`, `&mut self`):
-  - Then: implement it as an associated function
-  - Else: implement it as a standalone free function
+  - Then: implement it as an associated function.
+  - Else: implement it as a standalone free function.
 - Add a local `use` statement for enums to minimize the code size. For example:
   - Good:
     ```rust
@@ -305,7 +305,7 @@ Write code that minimizes losses:
     /// This is bad because the callsite may have to call .into() when passing the input argument
     pub fn foo(input: String) {}
     ```
-- Provide additional flexibility for callsite by accepting `&impl AsRef` or `&mut impl AsMut` (e.g. both `PathBuf` and `Config` may implement `AsRef<Path>`). For example:
+- Provide additional flexibility for callsite by accepting `&impl AsRef` or `&mut impl AsMut` (e.g., both `PathBuf` and `Config` may implement `AsRef<Path>`). For example:
   - Good:
     ```rust
     pub fn bar(input: &mut impl AsMut<String>) {
@@ -380,15 +380,15 @@ Write code that minimizes losses:
       }
   }
   ```
-- Prefer short method syntax over long trait-path syntax (prefer `value.method(arg)` over `Trait::method(value, arg)`)
-- Generic helper functions must be in `src/functions` (one file per function)
+- Prefer short method syntax over long trait-path syntax (prefer `value.method(arg)` over `Trait::method(value, arg)`).
+- Generic helper functions must be in `src/functions` (one file per function).
 - If clippy reports `too_many_arguments`:
-  - Don't use tuples to silence the lint
-  - Consider refactoring the code for better separation of concerns
+  - Don't use tuples to silence the lint.
+  - Consider refactoring the code for better separation of concerns.
 
 #### Struct derives
 
-- Derive `new` from `derive_new` crate for types that need `fn new`
+- Derive `new` from `derive_new` crate for types that need `fn new`.
 - If the struct derives `Getters`, then each field whose type implements `Copy` must have a `#[getter(copy)]` annotation. For example:
   - Good (note that `username` doesn't have `#[getter(copy)]` because its type is `String` which doesn't implement `Copy`, but `age` has `#[getter(copy)]`, because its type is `u64` which implements `Copy`):
     ```rust
@@ -402,7 +402,7 @@ Write code that minimizes losses:
 
 #### Setters
 
-- Use setters that take `&mut self` instead of setters that take `self` and return `Self` (because passing a `foo: &mut Foo` is more efficient than passing `foo: Foo` and returning `Foo` through the call stack)
+- Use setters that take `&mut self` instead of setters that take `self` and return `Self` (because passing a `foo: &mut Foo` is more efficient than passing `foo: Foo` and returning `Foo` through the call stack).
 
 #### Enums
 
@@ -410,17 +410,17 @@ Write code that minimizes losses:
 
 #### Arithmetic
 
-- Don't use the impls of traits `core::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Rem, RemAssign, Neg, Shl, ShlAssign, Shr, ShrAssign}` or their operators unless they don't panic or silently overflow
-- Write and use arithmetic trait impls that don't panic or silently overflow
-- Prefer `checked` versions of arithmetic operations
-- Every call to an `overflowing`, `saturating`, `wrapping` version must have a single-line comment above it that starts with "SAFETY: " and describes why calling this version is safe in this specific case
-- Use `num` crate items if necessary (for example, to implement a function that calls arithmetic methods on a generic type)
+- Don't use the impls of traits `core::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Rem, RemAssign, Neg, Shl, ShlAssign, Shr, ShrAssign}` or their operators unless they don't panic or silently overflow.
+- Write and use arithmetic trait impls that don't panic or silently overflow.
+- Prefer `checked` versions of arithmetic operations.
+- Every call to an `overflowing`, `saturating`, `wrapping` version must have a single-line comment above it that starts with "SAFETY: " and describes why calling this version is safe in this specific case.
+- Use `num` crate items if necessary (for example, to implement a function that calls arithmetic methods on a generic type).
 
 #### Index access
 
-- Never use the following operators: `[], []=`
-- Never use the following traits: `core::ops::{Index, IndexMut}`
-- If you are sure that `get` or `get_mut` will never panic, use `expect` with a proof message (as described in [Functions](#functions))
+- Never use the following operators: `[], []=`.
+- Never use the following traits: `core::ops::{Index, IndexMut}`.
+- If you are sure that `get` or `get_mut` will never panic, use `expect` with a proof message (as described in [Functions](#functions)).
 
 Note: the index access operators and traits are banned because they may panic.
 
@@ -428,21 +428,21 @@ Note: the index access operators and traits are banned because they may panic.
 
 A function marked with `#[test]` or `#[tokio::test]`.
 
-- Must return a `Result`
-- Must implement proper error handling via `errgonomic` crate
-- Should use macros from `assertables` crate
-  - Should use `assert_infix` instead of `assert_gt`, `assert_ge`, `assert_lt`, `assert_le`, `assert_eq`
+- Must return a `Result`.
+- Must implement proper error handling via `errgonomic` crate.
+- Should use macros from `assertables` crate.
+  - Should use `assert_infix` instead of `assert_gt`, `assert_ge`, `assert_lt`, `assert_le`, `assert_eq`.
 
 #### Macros
 
-- Write `macro_rules!` macros to reduce boilerplate
+- Write `macro_rules!` macros to reduce boilerplate.
 - In `macro_rules!` expansions:
-  - Use full paths without a leading `::` for foreign types (e.g. `std::sync::Arc`), except those in the standard prelude.
-  - Use `$crate` paths for types defined in this crate (e.g. `$crate::MyType`).
-- If you see similar code in different places, write a macro and replace the similar code with a macro call
-- If the last arg of a macro arm is variadic (e.g. `$($item:ident),*`):
-  - Then: do add trailing `$(,)?`
-  - Else: don't add trailing `$(,)?`
+  - Use full paths without a leading `::` for foreign types (e.g., `std::sync::Arc`), except those in the standard prelude.
+  - Use `$crate` paths for types defined in this crate (e.g., `$crate::MyType`).
+- If you see similar code in different places, write a macro and replace the similar code with a macro call.
+- If the last arg of a macro arm is variadic (e.g., `$($item:ident),*`):
+  - Then: do add trailing `$(,)?`.
+  - Else: don't add trailing `$(,)?`.
 
 #### Shell
 
@@ -450,44 +450,44 @@ A function marked with `#[test]` or `#[tokio::test]`.
 
 #### Cargo.toml
 
-- Don't define package features with only a single optional dependency (such features are already defined by cargo automatically)
-- Use `cargo add` to add dependencies
+- Don't define package features with only a single optional dependency (such features are already defined by cargo automatically).
+- Use `cargo add` to add dependencies.
 - When adding a dependency from crates.io:
   - If the package is [publishable](#publishable-package):
     - Then:
-      - Run `cargo add {dependency}@{version}`
-        - `{version}` patch component must be 0
-      - Try `cargo update -p {dependency} --precise {version}` to lock that exact version
+      - Run `cargo add {dependency}@{version}`.
+        - `{version}` patch component must be 0.
+      - Try `cargo update -p {dependency} --precise {version}` to lock that exact version.
         - If dependency constraints prevent locking that version:
-          - Keep the version resolved by Cargo
-          - Add a comment in Cargo.toml explaining the constraints
+          - Keep the version resolved by Cargo.
+          - Add a comment in Cargo.toml explaining the constraints.
     - Else:
-      - Run `cargo add {dependency}` without `{version}`
+      - Run `cargo add {dependency}` without `{version}`.
 - When adding a dependency in a workspace:
-  - Add it to top-level manifest first (`workspace.dependencies`)
+  - Add it to top-level manifest first (`workspace.dependencies`).
 - When adding a dependency for a workspace member:
-  - Run `cargo add {dependency}` without `{version}` (cargo will set `workspace = true`)
-- When adding a new workspace member: add it to `packages` dir unless specified otherwise
+  - Run `cargo add {dependency}` without `{version}` (cargo will set `workspace = true`).
+- When adding a new workspace member: add it to `packages` dir unless specified otherwise.
 
 #### Code style
 
-- Don't enforce a line length limit when writing code, comments or documentation
+- Don't enforce a line length limit when writing code, comments or documentation.
 
 #### Chat thread id
 
-- Must be a string
-- Must contain at least 3 characters
-- Must contain only uppercase characters
+- Must be a string.
+- Must contain at least 3 characters.
+- Must contain only uppercase characters.
 
 Examples:
 
-- `RVC`
-- `AKE`
-- `LMY`
+- `RVC`.
+- `AKE`.
+- `LMY`.
 
 Notes:
 
-- Should match the thread topic
+- Should match the thread topic.
 
 #### Chat thread id heading
 
@@ -495,22 +495,22 @@ A Markdown heading level 3 that contains only [chat thread id](#chat-thread-id).
 
 Examples:
 
-- `### RVC`
-- `### AKE`
-- `### LMY`
+- `### RVC`.
+- `### AKE`.
+- `### LMY`.
 
 #### Finding
 
-- Must be formatted as `### {ctid}\n\n[{priority}] {title}. {body} ({references}). Proposed fixes: {fixes}`
-  - `ctid` must be a [chat thread id](#chat-thread-id)
+- Must be formatted as `### {ctid}\n\n[{priority}] {title}. {body} ({references}). Proposed fixes: {fixes}`.
+  - `ctid` must be a [chat thread id](#chat-thread-id).
   - `priority` must be one of `P0`, `P1`, `P2`, `P3`.
-  - `references` must be a comma-separated list of `reference`
-  - `reference` must must be formatted as `{path}:{line}`
-  - `path` must be a file path relative to your working directory
-  - `line` must be the first line of the relevant code or text block
+  - `references` must be a comma-separated list of `reference`.
+  - `reference` must must be formatted as `{path}:{line}`.
+  - `path` must be a file path relative to your working directory.
+  - `line` must be the first line of the relevant code or text block.
   - `fixes` must be one of the following:
     - If there is at least one proposed fix:
-      - Then: "\n\n" and a Markdown nested list of fixes where each fix must have a format `{number}. {description}` (the numbers should start from 1 for each list of fixes)
+      - Then: "\n\n" and a Markdown nested list of fixes where each fix must have a format `{number}. {description}` (the numbers should start from 1 for each list of fixes).
       - Else: the exact text "none."
 
 #### Publishable package

@@ -6,15 +6,15 @@ A program that downloads [lore](#lore) from [source](#lore-source) into the loca
 
 Requirements:
 
-- Must accept a `path` as the last positional parameter (the target local directory)
-- Must atomically replace the old directory with a new directory
-  - Create the temp path in the same parent directory as `path` (suffix: ".new") (same filesystem required for atomic rename)
-  - Build the new contents fully inside the temp path
-  - Fsync files and the temp path (best-effort where supported)
-  - If `path` exists, rename it to a backup name in the same parent directory (suffix: ".old")
-  - Rename the temp path to `path` (atomic on POSIX and Windows when same filesystem)
-  - If the final rename fails, attempt to restore the backup and keep the temp path for debugging
-  - After a successful replace, remove the backup path
+- Must accept a `path` as the last positional parameter (the target local directory).
+- Must atomically replace the old directory with a new directory.
+  - Create the temp path in the same parent directory as `path` (suffix: ".new") (same filesystem required for atomic rename).
+  - Build the new contents fully inside the temp path.
+  - Fsync files and the temp path (best-effort where supported).
+  - If `path` exists, rename it to a backup name in the same parent directory (suffix: ".old").
+  - Rename the temp path to `path` (atomic on POSIX and Windows when same filesystem).
+  - If the final rename fails, attempt to restore the backup and keep the temp path for debugging.
+  - After a successful replace, remove the backup path.
 
 ## Lore
 
@@ -30,11 +30,11 @@ Notes:
 - This kind of knowledge is called "informal" because it doesn't have a unique representation in any formal language.
   - Informal knowledge has multiple potential representations in any formal language.
   - Informal knowledge is inherently ambiguous (it must be disambiguated during [formalization](#formalization)).
-- Some informal knowledge files have an internal tree structure
-  - Examples
-    - Every valid source code file has an internal tree structure
-    - Every valid Markdown file has an internal tree structure
-- Some informal knowledge files may have [divergent content and extension](#divergent-file-content-and-file-extension-for-a-specific-validator-map)
+- Some informal knowledge files have an internal tree structure.
+  - Examples:
+    - Every valid source code file has an internal tree structure.
+    - Every valid Markdown file has an internal tree structure.
+- Some informal knowledge files may have [divergent content and extension](#divergent-file-content-and-file-extension-for-a-specific-validator-map).
 
 ## Lore dir
 
@@ -54,9 +54,9 @@ A structure with `label` and `locator` string fields that uniquely identifies a 
 
 Examples:
 
-- Polymarket docs: <https://docs.polymarket.com/>
-- Polymarket CTF exchange contract source code: <https://github.com/Polymarket/ctf-exchange>
-- Polymarket CTF exchange contract instance: <https://polygonscan.com/address/0x4bfb41d5b3570defd03c39a9a4d8de6bd8b8982e>
+- Polymarket docs: <https://docs.polymarket.com/>.
+- Polymarket CTF exchange contract source code: <https://github.com/Polymarket/ctf-exchange>.
+- Polymarket CTF exchange contract instance: <https://polygonscan.com/address/0x4bfb41d5b3570defd03c39a9a4d8de6bd8b8982e>.
 
 Notes:
 
@@ -70,12 +70,12 @@ A URI that uniquely identifies a substring relative to the [lore root](#lore-roo
 Requirements:
 
 - Must have a "file://" scheme.
-- Must have a path (interpreted as the path to the lore file relative to the [lore root](#lore-root))
-- May have a query (interpreted as the path to the item within the file)
-  - Requirements
-    - Must not start with "/"
-    - Must be delimited by "/"
-    - The path elements must be URL-encoded
+- Must have a path (interpreted as the path to the lore file relative to the [lore root](#lore-root)).
+- May have a query (interpreted as the path to the item within the file).
+  - Requirements:
+    - Must not start with "/".
+    - Must be delimited by "/".
+    - The path elements must be URL-encoded.
   - Notes:
     - The item resolver should interpret the query according to the file format:
       - Examples:
@@ -87,17 +87,17 @@ Requirements:
     - The item is the exact byte slice returned by the item resolver (without normalization).
       - For text formats, the resolver must return the exact byte slice from the file contents.
   - Reasons:
-    - The [observer](#observer) may output a different informal knowledge base each time
-      - Some items may be modified by external actors that have write permissions on [source](#lore-source)
-      - Some items may be modified as a result of external API calls
+    - The [observer](#observer) may output a different informal knowledge base each time.
+      - Some items may be modified by external actors that have write permissions on [source](#lore-source).
+      - Some items may be modified as a result of external API calls.
         - Examples:
           - The list of trades may be extended due to new orders being placed and matched.
 
 Examples:
 
-- "file://docs.polymarket.com/developers/CLOB/authentication.md?Authentication/L1+Authentication/CLOB+Client/0#e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+- "file://docs.polymarket.com/developers/CLOB/authentication.md?Authentication/L1+Authentication/CLOB+Client/0#e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855".
   - Notes:
-    - "docs.polymarket.com" is a local dir name, not a domain
+    - "docs.polymarket.com" is a local dir name, not a domain.
 
 ## Theory
 
@@ -105,7 +105,7 @@ A set of declarations in a specific formal language.
 
 Requirements:
 
-- Every declaration must contain a [reference](#lore-item-reference) to a specific item of the informal knowledge
+- Every declaration must contain a [reference](#lore-item-reference) to a specific item of the informal knowledge.
 
 Preferences:
 

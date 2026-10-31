@@ -5,25 +5,25 @@
 ## Cargo.toml
 
 - Must contain:
-  - `workspace`
-    - `package`
-    - `metadata`
-      - `details`
-        - `name`
-        - `title`
-    - `lints`
-  - If `package` exists
-    - Then: `package`
-      - `metadata`
-        - `details`
+  - `workspace`:
+    - `package`.
+    - `metadata`:
+      - `details`:
+        - `name`.
+        - `title`.
+    - `lints`.
+  - If `package` exists:
+    - Then: `package`:
+      - `metadata`:
+        - `details`.
 - Every workspace package manifest must contain `lints.workspace = true`.
 - Must not contain:
-  - `workspace`
-    - `package`
-      - `description`
-      - `readme`
-  - `package`
-    - `readme`
+  - `workspace`:
+    - `package`:
+      - `description`.
+      - `readme`.
+  - `package`:
+    - `readme`.
 
 ## README.ts
 
@@ -31,9 +31,9 @@
 - Must use `cargo metadata` to discover workspace packages, manifests, targets, and resolved properties.
 - Must normalize GitHub origin URLs and validate every non-empty package repository against the origin.
 - For the root repository check, must prefer `workspace.package.repository` and fall back to the resolved root `package.repository`.
-- If `package.metadata.details.readme.generate ?? workspace.metadata.details.readme.generate ?? true` is `true` for a README
+- If `package.metadata.details.readme.generate ?? workspace.metadata.details.readme.generate ?? true` is `true` for a README:
   - Then: Must enable it.
-- If a README is enabled
+- If a README is enabled:
   - Then:
     - Must generate one README beside every workspace package manifest.
     - Must generate an `Other packages` section in the root package README.
@@ -50,14 +50,14 @@
 ## AGENTS.ts
 
 - Must preserve `renderXmlFile`, `runAgentDocsList`, `includeAgentDocs`, and `includeAllFiles`.
-- If `.agents/project.md` is present
+- If `.agents/project.md` is present:
   - Then: Must include it.
 - Must use `cargo metadata` to:
   - Include requested files only from workspace members, plus the root `Cargo.toml`.
   - Include repository docs for dependencies used directly by a workspace member.
   - Include requested dependency-owned docs from any matching metadata package, selecting the highest version, then manifest path, before checking whether the file exists.
 - Included paths must be repository-relative and sorted.
-- If a requested path is absent
+- If a requested path is absent:
   - Then: Must skip it.
 - Must preserve Markdown heading shifts and collision-safe language-tagged code fences.
 - Must render to a temporary file beside `AGENTS.md`, replace it only after success, and clean up the temporary file.
@@ -89,7 +89,7 @@
 
 ## .mise/tasks/fix/fnox.sh
 
-- Must `wait_for=["fix:name"]`
+- Must `wait_for=["fix:name"]`.
 - Must validate that `providers.keychain.service` equals `git:repo-name`.
 - Must not migrate secrets between old and new identifiers.
 
@@ -100,13 +100,13 @@
 
 ## .mise/tasks/fix/cargo.sh
 
-- Must `wait_for=["fix:name"]`
+- Must `wait_for=["fix:name"]`.
 - Must discover workspace package manifests with `cargo metadata`.
-- If a manifest has no `lints` key
+- If a manifest has no `lints` key:
   - Then: Must add `lints.workspace = true`.
-- If a manifest has `lints.workspace = true`
+- If a manifest has `lints.workspace = true`:
   - Then: Must preserve it.
-- If a manifest has any other `lints` configuration
+- If a manifest has any other `lints` configuration:
   - Then:
     - Must preserve it.
     - Must fail.
@@ -142,10 +142,10 @@
 - For every package discovered by `cargo metadata`, must:
   - Empty `package.metadata.details.title`.
   - Remove `package.description`.
-  - If no repository URL is available
+  - If no repository URL is available:
     - Then: Remove direct `repository` and `homepage`.
 - Must always empty `workspace.metadata.details.title` and remove `workspace.package.description`.
-- If a repository URL is available
+- If a repository URL is available:
   - Then: Must set `workspace.package.{repository,homepage}` to it.
   - Else: Must remove `workspace.package.{repository,homepage}`.
 - May rely on the template root defining the workspace fields it updates.

@@ -4,17 +4,17 @@
 
 A structure with the following fields:
 
-- [Name](#name)
-- [Definition](#definition)
-- [Aliases](#aliases)
-- [Examples](#examples)
-- [Requirements](#requirements)
-- [Allowances](#allowances)
-- [Preferences](#preferences)
-- [Constructors](#constructors)
-- [Properties](#properties)
-- [Notes](#notes)
-- [Custom sections](#custom-sections)
+- [Name](#name).
+- [Definition](#definition).
+- [Aliases](#aliases).
+- [Examples](#examples).
+- [Requirements](#requirements).
+- [Allowances](#allowances).
+- [Preferences](#preferences).
+- [Constructors](#constructors).
+- [Properties](#properties).
+- [Notes](#notes).
+- [Custom sections](#custom-sections).
 
 Examples:
 
@@ -43,8 +43,8 @@ Notes:
 
 - Definition is optional because some concepts have obvious definitions that can be omitted.
   - Examples:
-    - fn main
-    - Cargo.toml
+    - fn main.
+    - Cargo.toml.
 
 ## Aliases
 
@@ -62,9 +62,9 @@ Notes:
 
 - The Markdown document may contain multiple sections that start with "Examples" but are not exactly equal to "Examples". Such sections should be treated as related to, but not exactly equal to examples of a concept.
   - Examples:
-    - "Examples of names"
-    - "Examples of calls"
-    - "Examples of hashes"
+    - "Examples of names".
+    - "Examples of calls".
+    - "Examples of hashes".
 
 ## Requirements
 
@@ -82,7 +82,7 @@ An optional [listmap](#listmap) of [preferences](#preference).
 
 An optional list of [constructors](#constructor) that contains all possible constructors of a concept.
 
-Aliases: "One of"
+Aliases: "One of".
 
 Requirements:
 
@@ -123,7 +123,7 @@ A [stringtree](#stringtree) that [represents](#representation) a non-requirement
 
 Examples:
 
-- "May access external APIs"
+- "May access external APIs".
 
 ## Preference
 
@@ -156,11 +156,11 @@ A [stringtree](#stringtree) that [represents](#representation) additional inform
 
 A structure with the following fields:
 
-- [Name](#name)
-- Requirements (optional [listmap](#listmap) of [requirements](#requirement))
-- Preferences (optional [listmap](#listmap) of [preferences](#preference))
-- Properties (optional [listmap](#listmap) of [properties](#property))
-- Notes (optional [listmap](#listmap) of [notes](#note))
+- [Name](#name).
+- Requirements (optional [listmap](#listmap) of [requirements](#requirement)).
+- Preferences (optional [listmap](#listmap) of [preferences](#preference)).
+- Properties (optional [listmap](#listmap) of [properties](#property)).
+- Notes (optional [listmap](#listmap) of [notes](#note)).
 - Must have methods:
   - `to_markdown`:
     - Requirements:
@@ -170,22 +170,22 @@ A structure with the following fields:
 
 A Markdown document that renders a list of [concepts](#concept) with the following elements:
 
-- Heading level 1: document name that starts with "Concepts"
+- Heading level 1: document name that starts with "Concepts".
 - For each concept:
   - Name: heading level 2.
   - Definition: paragraph after heading.
   - Other fields:
     - Paragraph that is exactly equal to the field name with ":" in the end.
     - Field value:
-      - If the field type has a `to_markdown` method, then call it, otherwise render the most direct representation (e.g. render strings directly).
+      - If the field type has a `to_markdown` method, then call it, otherwise render the most direct representation (e.g., render strings directly).
 
 Requirements:
 
 - The order of other fields in the document must match the order of other fields in the definition of [concept](#concept).
 - A field must not appear twice.
 - If the field is empty, it must not be rendered.
-- Every code item name and single-line code snippet must be rendered in single backticks
-  - Examples: `u64`, `PrintCommand`, `to_markdown`, `impl From<A> for B`
+- Every code item name and single-line code snippet must be rendered in single backticks.
+  - Examples: `u64`, `PrintCommand`, `to_markdown`, `impl From<A> for B`.
 
 ## Listmap
 
@@ -210,8 +210,8 @@ Notes:
 
 A stringtree is a structure with the following fields:
 
-- Text (string)
-- Children (a list of stringtrees)
+- Text (string).
+- Children (a list of stringtrees).
 - Must have methods:
   - `to_markdown`:
     - Requirements:
@@ -240,11 +240,11 @@ Aliases: is-test.
 
 Examples:
 
-- `is("cow", "animal") == true`
-- `is("function", "relation") == true`
-- `is("war", "peace") == false`
-- `is("slavery", "freedom") == false`
-- `is("love", "good") == true`
+- `is("cow", "animal") == true`.
+- `is("function", "relation") == true`.
+- `is("war", "peace") == false`.
+- `is("slavery", "freedom") == false`.
+- `is("love", "good") == true`.
 
 Notes:
 
@@ -269,6 +269,6 @@ Aliases: DTL.
 
 Examples:
 
-- Lean
-- Agda
-- Gallina (Rocq prover)
+- Lean.
+- Agda.
+- Gallina (Rocq prover).

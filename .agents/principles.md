@@ -4,8 +4,8 @@
 
 ### Examples
 
-- Preserve the shape of the underlying API in the CLI (e.g. commands should accept the same arguments as methods).
-- Preserve the secrecy of private data (e.g. hide passwords, API keys, private keys).
+- Preserve the shape of the underlying API in the CLI (e.g., commands should accept the same arguments as methods).
+- Preserve the secrecy of private data (e.g., hide passwords, API keys, private keys).
 
 ### Exceptions
 
