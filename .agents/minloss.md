@@ -2,54 +2,54 @@
 
 ## Project
 
-A directory with source code or [auxiliary](#auxiliary-file) files.
+Directory with source code or [auxiliary](#auxiliary-file) files.
 
 ## Metric
 
-A function from an object to a quantitative value.
+Function from object to quantitative value.
 
 Examples:
 
-- Peak RSS memory usage of a program.
-- Average wall-clock time of running a program on a specific set of inputs for a specific number of iterations.
+- Peak RSS memory usage of program.
+- Average wall-clock time of running program on specific set of inputs for specific number of iterations.
 - Count of CLI options.
 - Count of lines of code.
 
 Notes:
 
-- The set of metrics depends on the object type.
+- Set of metrics depends on object type.
 
 ## Project metric
 
-A [metric](#metric) of a [project](#project).
+[metric](#metric) of [project](#project).
 
 Examples:
 
 - Test coverage.
-- Test suite wall-clock running time (averaged across N runs with a warmed-up cache).
+- Test suite wall-clock running time (averaged across N runs with warmed-up cache).
 - Compilation time.
 
 ## Program metric
 
-A [metric](#metric) of a program.
+[metric](#metric) of program.
 
 Examples:
 
 - Peak RSS memory usage.
-- Wall clock running time (averaged across N runs with a warmed-up cache).
+- Wall clock running time (averaged across N runs with warmed-up cache).
 
 ## Stat
 
-A structure where every field is a [metric](#metric).
+Structure where every field is [metric](#metric).
 
 Notes:
 
-- Given an input set of objects and a function from objects to stats, it is possible to calculate a Pareto front of objects.
-  - The objects that are inferior to the Pareto front objects should be discarded.
+- Given input set of objects and function from objects to stats, it is possible to calculate Pareto front of objects.
+  - Objects that are inferior to Pareto front objects should be discarded.
 
 ## Auxiliary file
 
-A file that doesn't contain a program but is used indirectly when building a program.
+File that doesn't contain program but is used indirectly when building program.
 
 Examples:
 
@@ -59,17 +59,17 @@ Examples:
 
 ## High-level specification
 
-A string that can be interpreted as a struct with fields:
+String that can be interpreted as struct with fields:
 
-- `frontends` (a list of [frontend APIs](#frontend-api)).
-- `backends` (a list of [backend APIs](#backend-api)).
-- `audience` (a string that describes a list of [agents](#agent)).
+- `frontends` (list of [frontend APIs](#frontend-api)).
+- `backends` (list of [backend APIs](#backend-api)).
+- `audience` (string that describes list of [agents](#agent)).
 
 Examples:
 
 - "A Fjall database CLI for developers":
-  - `frontends` includes the stdio API (stdin, stdout, stderr) and the shell API (e.g.: escape codes).
-  - `backends` includes the Fjall API and the filesystem API.
+  - `frontends` includes stdio API (stdin, stdout, stderr) and shell API (e.g.: escape codes).
+  - `backends` includes Fjall API and filesystem API.
   - `audience` includes developers.
 
 ## Rust fn
@@ -80,19 +80,19 @@ Preferences:
 
 ## Constructor of type T
 
-A function whose return type mentions `T`.
+Function whose return type mentions `T`.
 
 Examples:
 
-- `fn foo(a: A, b: B) -> Result<K, M>` is a producer of `Result`, `K`, `M`.
+- `fn foo(a: A, b: B) -> Result<K, M>` is producer of `Result`, `K`, `M`.
 
 ## Direct constructor of type T
 
-A [constructor](#constructor-of-type-t) whose return type is exactly `T`.
+[constructor](#constructor-of-type-t) whose return type is exactly `T`.
 
 ## Most explicit constructor of type T
 
-A [constructor](#constructor-of-type-t) that allows callers to set more fields than other constructors of the same type.
+[constructor](#constructor-of-type-t) that allows callers to set more fields than other constructors of same type.
 
 Requirements:
 
@@ -102,21 +102,21 @@ Requirements:
 
 ## Producing expression of type T
 
-An expression whose return type mentions `T`.
+Expression whose return type mentions `T`.
 
 Synonyms: ProdExp.
 
 Examples:
 
-- `UserBuilder::default().name("Alice").build()?` is a ProdExp of `User`.
-- `Database::new(config)?` is a ProdExp of `Database`.
+- `UserBuilder::default().name("Alice").build()?` is ProdExp of `User`.
+- `Database::new(config)?` is ProdExp of `Database`.
 
 Requirements:
 
 - Must set all [relevant fields](#relevant-field).
   - Notes:
-    - Should use the most explicit constructor.
-    - The config values have a [config struct](#config-struct) type.
+    - Should use most explicit constructor.
+    - Config values have [config struct](#config-struct) type.
 - Must not set any [irrelevant fields](#irrelevant-field).
 - Must not use naive types that omit crucial data.
   - Examples:
@@ -134,128 +134,128 @@ Preferences:
 
 Notes:
 
-- When parsing a date without a timezone, don't assume UTC unless the specification explicitly requires it.
+- When parsing date without timezone, don't assume UTC unless specification explicitly requires it.
 
-## Parameter of a producing expression of type T
+## Parameter of producing expression of type T
 
-A variable that is passed into the [producing expression of type T](#producing-expression-of-type-t).
+Variable that is passed into [producing expression of type T](#producing-expression-of-type-t).
 
 ## Relevant field
 
-A field of a struct is relevant for the effect E if the effect E depends on the value of that field.
+Field of struct is relevant for effect E if effect E depends on value of that field.
 
 Examples:
 
 - `/books/update` API call:
-  - The `id` query parameter is relevant because it influences the effect of updating the book (determines which book to update).
-  - The `Cookie` header is irrelevant because it doesn't influence the effect of updating the book (setting this header has no effect).
+  - `id` query parameter is relevant because it influences effect of updating book (determines which book to update).
+  - `Cookie` header is irrelevant because it doesn't influence effect of updating book (setting this header has no effect).
 
 ## Irrelevant field
 
-A field of a struct that is not [relevant](#relevant-field) for the effect E.
+Field of struct that is not [relevant](#relevant-field) for effect E.
 
 ## Config struct
 
-A struct that contains configuration parameters.
+Struct that contains configuration parameters.
 
 Requirements:
 
-- Must have a `Default` impl.
+- Must have `Default` impl.
   - For each parameter:
-    - If it can't have a default value:
+    - If it can't have default value:
       - Then:
-        - Must not be in the config struct.
-        - Must be accepted as a required argument.
+        - Must not be in config struct.
+        - Must be accepted as required argument.
 - Must implement `Serialize` and `Deserialize` from `serde`.
 
 Preferences:
 
-- Should be produced by the `figment` crate.
+- Should be produced by `figment` crate.
 
 ## Frontend-facing fn
 
-A Rust fn that calls a [frontend API](#frontend-api).
+Rust fn that calls [frontend API](#frontend-api).
 
 Preferences:
 
-- Should be [reversible](#reversible-fn), unless it is expected by the user to be irreversible.
+- Should be [reversible](#reversible-fn), unless it is expected by user to be irreversible.
   - Examples of fns that are expected to be irreversible:
-    - `FileDeleteCommand::run` (the user explicitly types "delete" when invoking this command).
+    - `FileDeleteCommand::run` (user explicitly types "delete" when invoking this command).
   - Examples of fns that are expected to be reversible:
-    - `FileShowCommand::run` (the user does not type any destructive words when invoking this command).
+    - `FileShowCommand::run` (user does not type any destructive words when invoking this command).
 - If it is irreversible:
   - Then: should be [atomic](#atomic-fn).
 
 ## Internal fn
 
-A Rust fn defined in the current crate.
+Rust fn defined in current crate.
 
 ## External fn
 
-A Rust fn imported from an external crate.
+Rust fn imported from external crate.
 
 ## Frontend API
 
-An API that the program calls to read user input or write output for the user.
+API that program calls to read user input or write output for user.
 
 Examples:
 
 - Terminal emulator API.
 - Shell API.
 - Browser API.
-- Filesystem API (can be a frontend API if it is used to read or write user-provided files).
+- Filesystem API (can be frontend API if it is used to read or write user-provided files).
 
 ## Backend API
 
-An API that the program calls to read or write the parts of the state that are not explicit inputs or outputs.
+API that program calls to read or write parts of state that are not explicit inputs or outputs.
 
 Examples:
 
-- Filesystem API (can be a backend API if it is used to read or write internal state).
+- Filesystem API (can be backend API if it is used to read or write internal state).
 - Database API.
 
 ## Reversible fn
 
-A Rust fn whose effect can be reversed.
+Rust fn whose effect can be reversed.
 
 Properties:
 
 - Some fns that take arguments only by reference are irreversible.
   - Example:
-    - `remove_file` that takes a `&Path` and removes the file.
+    - `remove_file` that takes `&Path` and removes file.
 - Some reversible fns call irreversible fns.
   - Example:
-    - `remove_file_with_backup` that makes a backup of a file before removing it.
+    - `remove_file_with_backup` that makes backup of file before removing it.
 - Every read-only fn is reversible because it has no effects.
 
 Notes:
 
-- Formal definition: Rust fn `f` is reversible if there exists a Rust fn `g` that takes the output of `f` as input so that when `f` and `g` are executed sequentially, the [extended state](#extended-state) of the program is not modified.
+- Formal definition: Rust fn `f` is reversible if there exists Rust fn `g` that takes output of `f` as input so that when `f` and `g` are executed sequentially, [extended state](#extended-state) of program is not modified.
 
 ## Irreversible fn
 
-A Rust fn that is not [reversible](#reversible-fn).
+Rust fn that is not [reversible](#reversible-fn).
 
 ## Atomic fn
 
-A Rust fn whose effects are either applied completely or not at all.
+Rust fn whose effects are either applied completely or not at all.
 
 Examples:
 
-- A function that wraps the database operations in a transaction.
-- A function that writes to a temp file and then atomically replaces the old file with the new file (on filesystems that support atomic renames).
+- Function that wraps database operations in transaction.
+- Function that writes to temp file and then atomically replaces old file with new file (on filesystems that support atomic renames).
 
 ## Fallible fn
 
-A Rust fn that returns a `Result`.
+Rust fn that returns `Result`.
 
 ## Partial fn
 
-A Rust fn that returns an `Option`.
+Rust fn that returns `Option`.
 
 ## Private struct
 
-A struct that has only partial or fallible constructors.
+Struct that has only partial or fallible constructors.
 
 Requirements:
 
@@ -267,11 +267,11 @@ Requirements:
 
 Preferences:
 
-- Should not implement `Default` in most cases (very rarely, it may implement `Default` if the default value is a valid value).
+- Should not implement `Default` in most cases (very rarely, it may implement `Default` if default value is valid value).
 
 ## Input data type
 
-A type that contains fields that hold the input data.
+Type that contains fields that hold input data.
 
 Examples:
 
@@ -281,11 +281,11 @@ Examples:
 
 ## Extended state
 
-A state that contains all data that the program can read (including memory, disks, databases, remote APIs).
+State that contains all data that program can read (including memory, disks, databases, remote APIs).
 
 ## Input source
 
-The original location of the data that is held by the input variable (where the program has read it from).
+Original location of data that is held by input variable (where program has read it from).
 
 Examples:
 
@@ -310,48 +310,48 @@ Examples:
 
 ## Agent
 
-An entity that is assumed to be working towards a specific goal.
+Entity that is assumed to be working towards specific goal.
 
 Notes:
 
 - This definition is intentionally broad.
 - This definition includes both humans and programs.
-- The distinction between "active" and "passive" programs is a false dichotomy: even the operating system can be seen as a passive program that responds to external input from an internal hardware clock.
+- Distinction between "active" and "passive" programs is false dichotomy: even operating system can be seen as passive program that responds to external input from internal hardware clock.
 
 ## User time loss expectation
 
-A mathematical expectation of the amount of time that it takes the user to reach a specific desirable state.
+Mathematical expectation of amount of time that it takes user to reach specific desirable state.
 
 Notes:
 
-- If the product is a program:
+- If product is program:
   - Then: this amount of time includes execution time plus launch time (e.g.: typing CLI arguments, filling GUI forms).
 
 TODO:
 
 - Make this definition more precise.
   - Notes:
-    - The user loses some time initially because they need to read the docs, then install and configure the program.
-    - The user saves time because the program can execute certain actions faster (the same actions that would be done by the user manually).
-    - The user saves time because the program prevents undesirable actions which could have been executed by the user (mistakes).
-    - The user saves time because the program prevents undesirable actions which could have been executed by other agents (hacks).
+    - User loses some time initially because they need to read docs, then install and configure program.
+    - User saves time because program can execute certain actions faster (same actions that would be done by user manually).
+    - User saves time because program prevents undesirable actions which could have been executed by user (mistakes).
+    - User saves time because program prevents undesirable actions which could have been executed by other agents (hacks).
       - Examples:
-        - An ERC-20 contract prevents other actors from increasing the token supply.
+        - ERC-20 contract prevents other actors from increasing token supply.
 
 ## Optimization hack
 
-An optimization that relies on a property that cannot be assumed to hold in the future.
+Optimization that relies on property that cannot be assumed to hold in future.
 
 Examples:
 
-- An optimization that relies on an implementation detail in a dependency (this property cannot be assumed to hold in the future because the implementation details are not a part of the public interface and may change without notice).
+- Optimization that relies on implementation detail in dependency (this property cannot be assumed to hold in future because implementation details are not part of public interface and may change without notice).
 
 ## Monomial
 
-An algebraic expression that is a product of variables raised to specific powers.
+Algebraic expression that is product of variables raised to specific powers.
 
 Examples:
 
-- `1` (a monomial where every variable has a power of zero).
+- `1` (monomial where every variable has power of zero).
 - `a^2`.
-- `a * b * c^-1` (a monomial equivalent to `(a * b) / c`).
+- `a * b * c^-1` (monomial equivalent to `(a * b) / c`).

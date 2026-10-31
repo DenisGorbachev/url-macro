@@ -2,7 +2,7 @@
 
 ## Target type
 
-The type whose methods are exposed through a CLI and invoked by child commands.
+Type whose methods are exposed through CLI and invoked by child commands.
 
 Examples:
 
@@ -204,41 +204,41 @@ Examples:
 
 Requirements:
 
-- Must be constructible by the parent command.
-- Must expose at least one public method that can be invoked by a child command.
+- Must be constructible by parent command.
+- Must expose at least one public method that can be invoked by child command.
 
 Notes:
 
-- The target type should not parse CLI arguments itself.
+- Target type should not parse CLI arguments itself.
 
 ## Parent command
 
-The command that constructs the target type and delegates execution to the selected child command.
+Command that constructs target type and delegates execution to selected child command.
 
 Requirements:
 
-- Must have fields for all inputs needed to construct the target type.
-- Must construct an instance of the target type.
-- Must pass the constructed instance of the target type to the selected child command.
+- Must have fields for all inputs needed to construct target type.
+- Must construct instance of target type.
+- Must pass constructed instance of target type to selected child command.
 
 Notes:
 
-- The parent command isolates CLI parsing from domain logic.
+- Parent command isolates CLI parsing from domain logic.
 
 ## Child command
 
-A subcommand that wraps one target-type method and maps CLI arguments to that method.
+Subcommand that wraps one target-type method and maps CLI arguments to that method.
 
 Requirements:
 
-- For each argument of the wrapped method:
-  - Must have a corresponding field.
-- Must call the wrapped method in its `run` implementation.
-- Must return an error type that wraps the method's error and the relevant argument values.
-- Must write the results to stdout efficiently:
-  - Must serialize the results using `serde_json`.
+- For each argument of wrapped method:
+  - Must have corresponding field.
+- Must call wrapped method in its `run` implementation.
+- Must return error type that wraps method's error and relevant argument values.
+- Must write results to stdout efficiently:
+  - Must serialize results using `serde_json`.
   - Must use `serde_json::to_writer_pretty`.
 
 Notes:
 
-- Child commands should not construct the target type themselves.
+- Child commands should not construct target type themselves.

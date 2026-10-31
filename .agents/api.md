@@ -2,16 +2,16 @@
 
 ## Package requirements
 
-- Must contain a `Cargo.toml` that meets the [Cargo.toml requirements](#cargotoml-requirements).
-- For each request in the API:
-  - Must contain a [request cow type](#request-cow-type-requirements).
-- For each response in the API:
-  - Must contain a [response type](#response-type-requirements).
+- Must contain `Cargo.toml` that meets [Cargo.toml requirements](#cargotoml-requirements).
+- For each request in API:
+  - Must contain [request cow type](#request-cow-type-requirements).
+- For each response in API:
+  - Must contain [response type](#response-type-requirements).
 - Must have layout:
-  - Request data types in the `request` module.
-  - Response data types in the `response` module.
-  - Common data types in the `common` module.
-  - [Technical types](#technical-type) at the top level (attached to `src/lib.rs`).
+  - Request data types in `request` module.
+  - Response data types in `response` module.
+  - Common data types in `common` module.
+  - [Technical types](#technical-type) at top level (attached to `src/lib.rs`).
 
 ## Cargo.toml requirements
 
@@ -24,22 +24,22 @@
 - May have dependencies:
   - `strum`.
   - `url-macro`.
-- Every version under the `dependencies` key must be specified only up to the first nonzero component (good: "1", "0.3"; bad: "1.0", "0.3.3").
+- Every version under `dependencies` key must be specified only up to first nonzero component (good: "1", "0.3"; bad: "1.0", "0.3.3").
 
 ## Key requirements
 
-- Must be a type alias of `secrecy::SecretString`.
+- Must be type alias of `secrecy::SecretString`.
 
 ## RateLimits requirements
 
-- Must be a struct.
-- Every field must have a type exported from `governor`.
+- Must be struct.
+- Every field must have type exported from `governor`.
 - Must have impls:
   - `Default`.
 
 ## HTTP Client requirements
 
-- Must be a struct.
+- Must be struct.
 - Must have attributes:
   - `#[derive(From, Into, Eq, PartialEq, Clone, Debug)]`.
 - Must have fields:
@@ -52,11 +52,11 @@
 - Must have impls:
   - `From<Client>`.
   - `TryFrom<Key>`:
-    - Must set the bearer auth header via `default_headers`.
+    - Must set bearer auth header via `default_headers`.
 
 ## Technical type
 
-A type that meets one of:
+Type that meets one of:
 
 - [Client requirements](#http-client-requirements).
 - [Key requirements](#key-requirements).
@@ -71,28 +71,28 @@ A type that meets one of:
 
 ## Request cow type requirements
 
-- Must meet the [API interface type requirements](#api-interface-type-requirements).
+- Must meet [API interface type requirements](#api-interface-type-requirements).
 - Ident must end with "Request".
-- Every field must be a `Cow`.
+- Every field must be `Cow`.
 - Every field must have its own lifetime.
-  - The lifetime name should be short.
-  - The lifetime name should match the field name (e.g.: its first letter).
+  - Lifetime name should be short.
+  - Lifetime name should match field name (e.g.: its first letter).
 
 ## Request ref type requirements
 
-- Must meet the [API interface type requirements](#api-interface-type-requirements).
+- Must meet [API interface type requirements](#api-interface-type-requirements).
 - Ident must end with "RequestRef".
 - Must derive `Copy`.
-- Every field must be an immutable reference (not owned).
+- Every field must be immutable reference (not owned).
 
 ## Request own type requirements
 
-- Must meet the [API interface type requirements](#api-interface-type-requirements).
+- Must meet [API interface type requirements](#api-interface-type-requirements).
 - Ident must end with "RequestOwn".
-- Every field must be owned (not a reference).
+- Every field must be owned (not reference).
 
 ## Response type requirements
 
-- Must meet the [API interface type requirements](#api-interface-type-requirements).
+- Must meet [API interface type requirements](#api-interface-type-requirements).
 - Ident must end with "Response".
-- Every field must be owned (not a reference).
+- Every field must be owned (not reference).

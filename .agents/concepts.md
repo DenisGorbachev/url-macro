@@ -2,7 +2,7 @@
 
 ## Concept
 
-A structure with fields:
+Structure with fields:
 
 - [Name](#name).
 - [Definition](#definition).
@@ -18,51 +18,51 @@ A structure with fields:
 
 Examples:
 
-- A definition of a Rust package.
-- A definition of a Rust function.
+- Definition of Rust package.
+- Definition of Rust function.
 
 ## Name
 
-A string that uniquely identifies the item within its scope.
+String that uniquely identifies item within its scope.
 
 ## Definition
 
-An optional string that defines a concept.
+Optional string that defines concept.
 
 Preferences:
 
-- Should end with a period.
+- Should end with period.
 
 Allowances:
 
-- May start with an article ("A", "An", "The").
-- May start with the name of the concept being defined.
-- May be a multiline string.
+- May start with article ("A", "An", "The").
+- May start with name of concept being defined.
+- May be multiline string.
 
 Notes:
 
-- The definition is optional because some concepts have obvious definitions that can be omitted.
+- Definition is optional because some concepts have obvious definitions that can be omitted.
   - Examples:
     - `fn main`.
     - `Cargo.toml`.
 
 ## Aliases
 
-An optional list of strings that represent alternative names for a concept.
+Optional list of strings that represent alternative names for concept.
 
 ## Examples
 
-An optional [listmap](#listmap) of [examples](#example).
+Optional [listmap](#listmap) of [examples](#example).
 
 Preferences:
 
 - Should be non-exhaustive.
-- If the listmap is exhaustive:
+- If listmap is exhaustive:
   - Then: move it to "[Constructors](#constructors)".
 
 Notes:
 
-- The Markdown document may contain sections whose headings start with "Examples" but are not exactly "Examples". Treat these sections as related to, but distinct from, examples of a concept.
+- Markdown document may contain sections whose headings start with "Examples" but are not exactly "Examples". Treat these sections as related to, but distinct from, examples of concept.
   - Examples:
     - "Examples of names".
     - "Examples of calls".
@@ -70,19 +70,19 @@ Notes:
 
 ## Requirements
 
-An optional [listmap](#listmap) of [requirements](#requirement).
+Optional [listmap](#listmap) of [requirements](#requirement).
 
 ## Allowances
 
-An optional [listmap](#listmap) of [allowances](#allowance).
+Optional [listmap](#listmap) of [allowances](#allowance).
 
 ## Preferences
 
-An optional [listmap](#listmap) of [preferences](#preference).
+Optional [listmap](#listmap) of [preferences](#preference).
 
 ## Constructors
 
-An optional list of [constructors](#constructor) that contains all possible constructors of a concept.
+Optional list of [constructors](#constructor) that contains all possible constructors of concept.
 
 Aliases: "One of".
 
@@ -92,37 +92,37 @@ Requirements:
 
 ## Properties
 
-An optional [listmap](#listmap) of [properties](#property).
+Optional [listmap](#listmap) of [properties](#property).
 
 ## Notes
 
-An optional [listmap](#listmap) of [notes](#note).
+Optional [listmap](#listmap) of [notes](#note).
 
 ## Custom sections
 
-An optional [listmap](#listmap) of [listmaps](#listmap) of [notes](#note).
+Optional [listmap](#listmap) of [listmaps](#listmap) of [notes](#note).
 
 ## Example
 
-A [stringtree](#stringtree) that [represents](#representation) an instance of a parent object.
+[stringtree](#stringtree) that [represents](#representation) instance of parent object.
 
 Notes:
 
-- Corresponds to a specific instance of a type in a [dependently typed language](#dependently-typed-language).
+- Corresponds to specific instance of type in [dependently typed language](#dependently-typed-language).
 
 ## Requirement
 
-A [stringtree](#stringtree) that [represents](#representation) a boolean test of an instance of a parent object.
+[stringtree](#stringtree) that [represents](#representation) boolean test of instance of parent object.
 
 Notes:
 
-- Corresponds to a predicate in a [dependently typed language](#dependently-typed-language).
-- If an input doesn't pass the requirement test:
-  - Then: it is not an instance of a parent object.
+- Corresponds to predicate in [dependently typed language](#dependently-typed-language).
+- If input doesn't pass requirement test:
+  - Then: it is not instance of parent object.
 
 ## Allowance
 
-A [stringtree](#stringtree) that [represents](#representation) a non-requirement (a lack of constraint).
+[stringtree](#stringtree) that [represents](#representation) non-requirement (lack of constraint).
 
 Examples:
 
@@ -130,34 +130,34 @@ Examples:
 
 ## Preference
 
-A [stringtree](#stringtree) that [represents](#representation) a less-than-or-equal relation on a pair of instances of a parent object.
+[stringtree](#stringtree) that [represents](#representation) less-than-or-equal relation on pair of instances of parent object.
 
 Notes:
 
 - Preferences must be sorted by importance (most important first).
-- Preferences should be used to make a choice between two inputs that pass the [requirements](#requirement).
+- Preferences should be used to make choice between two inputs that pass [requirements](#requirement).
 
 ## Constructor
 
-A string that represents a constructor of a type.
+String that represents constructor of type.
 
-- Corresponds to a constructor in a [dependently typed language](#dependently-typed-language).
+- Corresponds to constructor in [dependently typed language](#dependently-typed-language).
 
 ## Property
 
-A [stringtree](#stringtree) that [represents](#representation) a property of an instance of a parent object.
+[stringtree](#stringtree) that [represents](#representation) property of instance of parent object.
 
 Notes:
 
-- Corresponds to a theorem in a [dependently typed language](#dependently-typed-language).
+- Corresponds to theorem in [dependently typed language](#dependently-typed-language).
 
 ## Note
 
-A [stringtree](#stringtree) that [represents](#representation) additional information about a parent object.
+[stringtree](#stringtree) that [represents](#representation) additional information about parent object.
 
 ## Method specification
 
-A structure with fields:
+Structure with fields:
 
 - [Name](#name).
 - Requirements (optional [listmap](#listmap) of [requirements](#requirement)).
@@ -167,82 +167,82 @@ A structure with fields:
 - Must have methods:
   - `to_markdown`:
     - Requirements:
-      - Must output a list where the top-level items correspond to the structure fields.
+      - Must output list where top-level items correspond to structure fields.
 
 ## Concepts document
 
-A Markdown document that presents a list of [concepts](#concept) with elements:
+Markdown document that presents list of [concepts](#concept) with elements:
 
 - Heading level 1: document name that starts with "Concepts".
 - For each concept:
   - Name: heading level 2.
   - Definition: paragraph after heading.
   - Other fields:
-    - Paragraph that is exactly equal to the field name with ":" at the end.
+    - Paragraph that is exactly equal to field name with ":" at end.
     - Field value:
-      - If the field type has a `to_markdown` method:
+      - If field type has `to_markdown` method:
         - Then: call it.
-        - Else: render the most direct representation (e.g.: render strings directly).
+        - Else: render most direct representation (e.g.: render strings directly).
 
 Requirements:
 
-- The order of other fields in the document must match the order of other fields in the definition of [concept](#concept).
-- A field must not appear twice.
-- If the field is empty:
+- Order of other fields in document must match order of other fields in definition of [concept](#concept).
+- Field must not appear twice.
+- If field is empty:
   - Then: it must not be rendered.
 - Every code item name and single-line code snippet must be rendered in single backticks.
   - Examples: `u64`, `PrintCommand`, `to_markdown`, `impl From<A> for B`.
 
 ## Listmap
 
-A listmap of type A is one of:
+Listmap of type A is one of:
 
-- A list of values of type A.
-- A map from [names](#name) to values of type A.
+- List of values of type A.
+- Map from [names](#name) to values of type A.
 
 Requirements:
 
 - Must have methods:
   - `to_markdown`:
     - Requirements:
-      - If the value is a list:
-        - Then: must output a Markdown list.
-        - Else: must output a Markdown list where each item is rendered as `{key}: {value}`.
+      - If value is list:
+        - Then: must output Markdown list.
+        - Else: must output Markdown list where each item is rendered as `{key}: {value}`.
 
 Notes:
 
-- If a listmap is a map:
-  - Then: its iteration order is the insertion order of keys as they appear in the source text.
+- If listmap is map:
+  - Then: its iteration order is insertion order of keys as they appear in source text.
 
 ## Stringtree
 
-A stringtree is a structure with fields:
+Stringtree is structure with fields:
 
 - Text (string).
-- Children (a list of stringtrees).
+- Children (list of stringtrees).
 - Must have methods:
   - `to_markdown`:
     - Requirements:
-      - Must output a multi-level Markdown list.
-        - The "Text" field must be rendered as the top-level list item.
-        - The "Children" field must be rendered as child list items.
+      - Must output multi-level Markdown list.
+        - "Text" field must be rendered as top-level list item.
+        - "Children" field must be rendered as child list items.
 
 Notes:
 
-- In Markdown, a stringtree is just a nested list.
+- In Markdown, stringtree is just nested list.
 - In this document, every "Notes", "Requirements", "Preferences" section contains examples of stringtrees as nested lists.
 
 ## Representation
 
-A string that passes an [association test](#association-test) evaluated by a specific list of [agents](#agent).
+String that passes [association test](#association-test) evaluated by specific list of [agents](#agent).
 
 Notes:
 
-- The list of agents is an external input to a program that evaluates the concept document.
+- List of agents is external input to program that evaluates concept document.
 
 ## Association test
 
-A function from two strings to a boolean.
+Function from two strings to boolean.
 
 Aliases: is-test.
 
@@ -256,22 +256,22 @@ Examples:
 
 Notes:
 
-- May represent a term-type relation ("cow" has type "animal").
-- May represent a subtype-supertype relation ("function" is a subtype of "relation").
-- May represent a term-predicate relation ("leaf" is "green").
+- May represent term-type relation ("cow" has type "animal").
+- May represent subtype-supertype relation ("function" is subtype of "relation").
+- May represent term-predicate relation ("leaf" is "green").
 - System prompt for association testing by LLMs: "Evaluate whether the statement in the user message is true or false in general".
 
 ## Agent
 
-An entity whose goal is to prevent its own termination.
+Entity whose goal is to prevent its own termination.
 
 Notes:
 
-- An agent can be artificial or natural (an LLM or a human).
+- Agent can be artificial or natural (LLM or human).
 
 ## Dependently typed language
 
-A programming language that supports dependent types.
+Programming language that supports dependent types.
 
 Aliases: DTL.
 
