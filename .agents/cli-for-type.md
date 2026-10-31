@@ -2,7 +2,7 @@
 
 ## Target type
 
-Type whose methods are exposed through CLI and invoked by child cmds.
+Type whose methods are exposed through a CLI and invoked by child cmds.
 
 Examples:
 
@@ -204,7 +204,7 @@ Examples:
 Reqs:
 
 - Must be constructible by parent cmd.
-- Must expose at least one public method that can be invoked by child cmd.
+- Must expose at least one public method that can be invoked by a child cmd.
 
 Notes:
 
@@ -217,19 +217,19 @@ Cmd that constructs target type and delegates execution to selected child cmd.
 Reqs:
 
 - Must have fields for all inputs needed to construct target type.
-- Must construct instance of target type.
+- Must construct an instance of target type.
 - Must pass constructed instance of target type to selected child cmd.
 
 ## Child cmd
 
-Subcmd that wraps one target-type method and maps CLI args to that method.
+A subcmd that wraps one target-type method and maps CLI args to that method.
 
 Reqs:
 
 - For each arg of wrapped method:
-  - Must have corresponding field.
+  - Must have a corresponding field.
 - Must call wrapped method in its `run` impl.
-- Must return error type that wraps method's error and relevant arg values.
+- Must return an error type that wraps method's error and relevant arg values.
 - Must write results to stdout efficiently:
   - Must serialize results using `serde_json`.
   - Must use `serde_json::to_writer_pretty`.

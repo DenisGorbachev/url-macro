@@ -12,10 +12,10 @@
 - Principle of preservation may be broken due to limitations of physical reality.
   - Examples:
     - Old data may be deleted to free space for new data (limitation of disk size).
-      - Interactive program should ask user before deleting data.
-      - Non-interactive program should either display error ("not enough disk space") instead of silently deleting data, or at least display log line.
-    - List view may display only 20 items along with "Show more" button (limitation of screen size, limitation of network bandwidth).
-    - Confirmation dialog for item deletion may have "Don't ask again" checkbox (limitation of available time).
+      - An interactive program should ask user before deleting data.
+      - A non-interactive program should either display an error ("not enough disk space") instead of silently deleting data, or at least display a log line.
+    - List view may display only 20 items along with a "Show more" button (limitation of screen size, limitation of network bandwidth).
+    - Confirmation dialog for item deletion may have a "Don't ask again" checkbox (limitation of available time).
 
 Cases where principle of preservation is broken must be described in docs.
 
@@ -28,6 +28,6 @@ Principle of preservation may not be broken in order to minimize time spent writ
 
 ### Examples
 
-- In Rust, "result" refers to `Result` type.
+- In Rust, "result" refers to a `Result` type.
 - For each custom type:
-  - If it does not include `Result`, its name must not contain `Result`.
+  - If it does not include a `Result`, its name must not contain `Result`.

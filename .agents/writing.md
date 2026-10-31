@@ -27,6 +27,7 @@
 
 ## Compression
 
-- Omit articles (`a`, `an`, `the`) before nouns.
+- Omit `the` before nouns.
+- Retain indefinite articles (`a`, `an`).
 - Use CS vernacular (e.g.: struct, ident, impl, spec, dir, fn, arg, param, config, doc, attr, dep, pref, db, op, pkg, lang).
 - Use full `command`, `subcommand` in CLI guidelines.

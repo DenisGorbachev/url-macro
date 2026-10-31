@@ -2,11 +2,11 @@
 
 ## Pkg reqs
 
-- Must contain `Cargo.toml` that meets [Cargo.toml reqs](#cargotoml-reqs).
+- Must contain a `Cargo.toml` that meets [Cargo.toml reqs](#cargotoml-reqs).
 - For each request in API:
-  - Must contain [request cow type](#request-cow-type-reqs).
+  - Must contain a [request cow type](#request-cow-type-reqs).
 - For each response in API:
-  - Must contain [response type](#response-type-reqs).
+  - Must contain a [response type](#response-type-reqs).
 - Must have layout:
   - Request data types in `request` module.
   - Response data types in `response` module.
@@ -28,18 +28,18 @@
 
 ## Key reqs
 
-- Must be type alias of `secrecy::SecretString`.
+- Must be a type alias of `secrecy::SecretString`.
 
 ## RateLimits reqs
 
-- Must be struct.
-- Every field must have type exported from `governor`.
+- Must be a struct.
+- Every field must have a type exported from `governor`.
 - Must have impls:
   - `Default`.
 
 ## HTTP Client reqs
 
-- Must be struct.
+- Must be a struct.
 - Must have attrs:
   - `#[derive(From, Into, Eq, PartialEq, Clone, Debug)]`.
 - Must have fields:
@@ -56,7 +56,7 @@
 
 ## Technical type
 
-Type that meets one of:
+A type that meets one of:
 
 - [Client reqs](#http-client-reqs).
 - [Key reqs](#key-reqs).
@@ -73,7 +73,7 @@ Type that meets one of:
 
 - Must meet [API interface type reqs](#api-interface-type-reqs).
 - Ident must end with "Request".
-- Every field must be `Cow`.
+- Every field must be a `Cow`.
 - Every field must have its own lifetime.
   - Lifetime name should be short.
   - Lifetime name should match field name (e.g.: its first letter).
@@ -83,7 +83,7 @@ Type that meets one of:
 - Must meet [API interface type reqs](#api-interface-type-reqs).
 - Ident must end with "RequestRef".
 - Must derive `Copy`.
-- Every field must be immutable ref.
+- Every field must be an immutable ref.
 
 ## Request own type reqs
 
