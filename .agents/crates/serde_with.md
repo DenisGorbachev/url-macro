@@ -1,4 +1,4 @@
-# Guidelines for `serde`
+# Guidelines for `serde_with`
 
 ## Requirements
 

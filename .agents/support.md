@@ -89,7 +89,7 @@
 
 ## .mise/tasks/fix/fnox.sh
 
-- Must `wait_for=["fix:name"]`.
+- Must declare `wait_for=["fix:name"]`.
 - Must validate that `providers.keychain.service` equals `git:repo-name`.
 - Must not migrate secrets between old and new identifiers.
 
@@ -100,7 +100,7 @@
 
 ## .mise/tasks/fix/cargo.sh
 
-- Must `wait_for=["fix:name"]`.
+- Must declare `wait_for=["fix:name"]`.
 - Must discover workspace package manifests with `cargo metadata`.
 - If a manifest has no `lints` key:
   - Then: Must add `lints.workspace = true`.
@@ -156,5 +156,5 @@
 - Must keep the Rust version specified in `rust-toolchain.toml`.
   - Rationale:
     - Setting it to "stable" in CI leads to warnings that aren't visible in pre-commit.
-    - Building for both "stable" and pinned version takes extra time & disk space.
+    - Building for both "stable" and the pinned version takes extra time and disk space.
     - Pinning "stable" is not always possible (some projects do require nightly).

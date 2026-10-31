@@ -35,16 +35,16 @@ Preferences:
 
 Allowances:
 
-- May start with an article ("A", "An", "The").
+- May start with an article ("A", "An", or "The").
 - May start with the name of the concept being defined.
 - May be a multiline string.
 
 Notes:
 
-- Definition is optional because some concepts have obvious definitions that can be omitted.
+- The definition is optional because some concepts have obvious definitions that can be omitted.
   - Examples:
-    - fn main.
-    - Cargo.toml.
+    - `fn main`.
+    - `Cargo.toml`.
 
 ## Aliases
 
@@ -60,7 +60,7 @@ Preferences:
 
 Notes:
 
-- The Markdown document may contain multiple sections that start with "Examples" but are not exactly equal to "Examples". Such sections should be treated as related to, but not exactly equal to examples of a concept.
+- The Markdown document may contain sections whose headings start with "Examples" but are not exactly "Examples". Treat these sections as related to, but distinct from, examples of a concept.
   - Examples:
     - "Examples of names".
     - "Examples of calls".
@@ -106,7 +106,7 @@ A [stringtree](#stringtree) that [represents](#representation) an instance of a 
 
 Notes:
 
-- Corresponds to a specific instance of a type in a [dependently-typed language](#dependently-typed-language).
+- Corresponds to a specific instance of a type in a [dependently typed language](#dependently-typed-language).
 
 ## Requirement
 
@@ -114,7 +114,7 @@ A [stringtree](#stringtree) that [represents](#representation) a boolean test of
 
 Notes:
 
-- Corresponds to a predicate in a [dependently-typed language](#dependently-typed-language).
+- Corresponds to a predicate in a [dependently typed language](#dependently-typed-language).
 - If an input doesn't pass the requirement test, then it is not an instance of a parent object.
 
 ## Allowance
@@ -138,7 +138,7 @@ Notes:
 
 A string that represents a constructor of a type.
 
-- Corresponds to a constructor in a [dependently-typed language](#dependently-typed-language).
+- Corresponds to a constructor in a [dependently typed language](#dependently-typed-language).
 
 ## Property
 
@@ -146,7 +146,7 @@ A [stringtree](#stringtree) that [represents](#representation) a property of an 
 
 Notes:
 
-- Corresponds to a theorem in a [dependently-typed language](#dependently-typed-language).
+- Corresponds to a theorem in a [dependently typed language](#dependently-typed-language).
 
 ## Note
 
@@ -168,16 +168,16 @@ A structure with the following fields:
 
 ## Concepts document
 
-A Markdown document that renders a list of [concepts](#concept) with the following elements:
+A Markdown document that presents a list of [concepts](#concept) with the following elements:
 
 - Heading level 1: document name that starts with "Concepts".
 - For each concept:
   - Name: heading level 2.
   - Definition: paragraph after heading.
   - Other fields:
-    - Paragraph that is exactly equal to the field name with ":" in the end.
+    - Paragraph that is exactly equal to the field name with ":" at the end.
     - Field value:
-      - If the field type has a `to_markdown` method, then call it, otherwise render the most direct representation (e.g., render strings directly).
+      - If the field type has a `to_markdown` method, then call it; otherwise, render the most direct representation (e.g., render strings directly).
 
 Requirements:
 
@@ -222,7 +222,7 @@ A stringtree is a structure with the following fields:
 Notes:
 
 - In Markdown, a stringtree is just a nested list.
-- In this document, every "Notes", "Requirements", "Preferences" contain examples of stringtrees as nested lists.
+- In this document, every "Notes", "Requirements", and "Preferences" section contains examples of stringtrees as nested lists.
 
 ## Representation
 
@@ -259,9 +259,9 @@ An entity whose goal is to prevent its own termination.
 
 Notes:
 
-- An agent can be artificial or natural (LLM or human).
+- An agent can be artificial or natural (an LLM or a human).
 
-## Dependently-typed language
+## Dependently typed language
 
 A programming language that supports dependent types.
 

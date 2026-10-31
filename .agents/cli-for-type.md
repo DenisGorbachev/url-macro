@@ -232,9 +232,9 @@ A subcommand that wraps one target-type method and maps CLI arguments to that me
 Requirements:
 
 - Must have a field for each argument of the wrapped method.
-- Must call the wrapped method in its run implementation.
-- Must return an error type that wraps the method error and the relevant argument values.
-- Must write the results to stdout in an efficient way:
+- Must call the wrapped method in its `run` implementation.
+- Must return an error type that wraps the method's error and the relevant argument values.
+- Must write the results to stdout efficiently:
   - Must serialize the results using `serde_json`.
   - Must use `serde_json::to_writer_pretty`.
 

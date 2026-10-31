@@ -11,7 +11,7 @@
 
 ### File `src/main.rs`
 
-- Must define a `main` entrypoint.
+- Must define a `main` entry point.
 - Must define a `verify_cli` test for the top-level command exactly as in the example below (with `debug_assert`).
 
 Example:
@@ -39,7 +39,7 @@ fn verify_cli() {
 ### File `src/command.rs`
 
 - Must define a [command-like struct](#command-like-struct) named `Command`.
-  - Must have attributes:
+  - Must have the following attribute:
     - `#[command(author, version, about, propagate_version = true, flatten_help = true, disable_help_subcommand = true)]`.
 - Must define a [subcommand-like enum](#subcommand-like-enum) named `Subcommand`.
 
@@ -92,7 +92,7 @@ pub use print_command::*;
 
 A struct that contains fields for CLI arguments.
 
-- Must have a name that is a concatenation of all command names leading up to and including this command name, and ends with `Command` (see example above).
+- Must have a name formed by concatenating all command names leading up to and including this command, followed by `Command` (see the example above).
 - Must have at least the following attributes:
   - `derive`:
     - Must contain at least:
@@ -100,13 +100,13 @@ A struct that contains fields for CLI arguments.
   - `command`:
     - Must contain at least:
       - `flatten_help = true`.
-- Must be attached to a parent module: if it's a top-level command: `src/lib.rs`, else: `src/command.rs`.
+- Must be attached to `src/lib.rs` if it is a top-level command, or to `src/command.rs` otherwise.
 - For each field:
-  - If the field has a collection type (e.g., `Vec`), then it must have attribute `num_args = 1..`.
+  - If the field has a collection type (e.g., `Vec`), then it must have the attribute `num_args = 1..`.
 - May contain a `subcommand` field annotated with `#[command(subcommand)]`.
-- Must have a `pub async fn run`.
-  - Must return a `Result` with `ExitCode`.
-  - If it contains a `subcommand` field: must match on `subcommand` and call `run` of each command.
+- Must have a `pub async fn run` method.
+  - Must return a `Result` with an `ExitCode` success value.
+  - If the struct contains a `subcommand` field, this method must match on `subcommand` and call the selected command's `run` method.
 
 Command example:
 
@@ -118,7 +118,7 @@ Command example:
 
 An enum that contains variants for CLI subcommands.
 
-- Must have a name that is a concatenation of all command names leading up to and including this command name, and ends with `Subcommand` (see example above).
+- Must have a name formed by concatenating all command names leading up to and including this command, followed by `Subcommand` (see the example above).
 - Must have at least the following attributes:
   - `derive`:
     - Must contain at least:

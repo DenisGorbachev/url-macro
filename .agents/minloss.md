@@ -6,18 +6,18 @@ A directory with source code or [auxiliary](#auxiliary-file) files.
 
 ## Metric
 
-A function from an object to a quantity value.
+A function from an object to a quantitative value.
 
 Examples:
 
 - Peak RSS memory usage of a program.
-- Average wall clock time of running a program on a specific set of inputs for a specific number of iterations.
+- Average wall-clock time of running a program on a specific set of inputs for a specific number of iterations.
 - Count of CLI options.
 - Count of lines of code.
 
 Notes:
 
-- The set of metrics depends on object type.
+- The set of metrics depends on the object type.
 
 ## Project metric
 
@@ -26,7 +26,7 @@ A [metric](#metric) of a [project](#project).
 Examples:
 
 - Test coverage.
-- Test suite wall clock running time (avg across N runs with warmed-up cache).
+- Test suite wall-clock running time (averaged across N runs with a warmed-up cache).
 - Compilation time.
 
 ## Program metric
@@ -36,7 +36,7 @@ A [metric](#metric) of a program.
 Examples:
 
 - Peak RSS memory usage.
-- Wall clock running time (avg across N runs with warmed-up cache).
+- Wall clock running time (averaged across N runs with a warmed-up cache).
 
 ## Stat
 
@@ -44,7 +44,7 @@ A structure where every field is a [metric](#metric).
 
 Notes:
 
-- Given an input set of objects and a function from object to stat, it is possible to calculate a Pareto front of objects.
+- Given an input set of objects and a function from objects to stats, it is possible to calculate a Pareto front of objects.
   - The objects that are inferior to the Pareto front objects should be discarded.
 
 ## Auxiliary file
@@ -70,7 +70,7 @@ Examples:
 - "A Fjall database CLI for developers":
   - `frontends` includes the stdio API (stdin, stdout, stderr) and the shell API (e.g., escape codes).
   - `backends` includes the Fjall API and the filesystem API.
-  - `audience` includes the developers.
+  - `audience` includes developers.
 
 ## Rust fn
 
@@ -92,13 +92,13 @@ A [constructor](#constructor-of-type-t) whose return type is exactly `T`.
 
 ## Most explicit constructor of type T
 
-A [constructor](#constructor-of-type-t) that allows to set more fields than other constructors of the same type.
+A [constructor](#constructor-of-type-t) that allows callers to set more fields than other constructors of the same type.
 
 Requirements:
 
 - If it doesn't produce side effects:
-  - Then: must have a name `new`.
-  - Else: must have a name `create`.
+  - Then: must be named `new`.
+  - Else: must be named `create`.
 
 ## Producing expression of type T
 
@@ -120,21 +120,21 @@ Requirements:
 - Must not set any [irrelevant fields](#irrelevant-field).
 - Must not use naive types that omit crucial data.
   - Examples:
-    - Must not use `NaiveDateTime` which omits timezone data.
+    - Must not use `NaiveDateTime`, which omits timezone data.
 
 Preferences:
 
-- Should rely on `impl Into` to reduce the code size.
+- Should rely on `impl Into` to reduce code size.
   - Examples:
     - `Article::new`:
       - Constructor: `impl Article { pub fn new(title: impl Into<String>, text: impl Into<String>) -> Self { ... } }`.
       - ProdExp:
-        - Bad: `Article::new("Title".to_string(), "Text".to_string())` (bad because it explicitly converts str to String using to_string).
+        - Bad: `Article::new("Title".to_string(), "Text".to_string())` (bad because it explicitly converts `str` to `String` using `to_string`).
         - Good: `Article::new("Title", "Text")` (good because it relies on `impl Into`).
 
 Notes:
 
-- When parsing a date without timezone: don't assume UTC unless the specification explicitly requires it.
+- When parsing a date without a timezone, don't assume UTC unless the specification explicitly requires it.
 
 ## Parameter of a producing expression of type T
 
@@ -147,8 +147,8 @@ A field of a struct is relevant for the effect E if the effect E depends on the 
 Examples:
 
 - `/books/update` API call:
-  - `id` query parameter is relevant because it influences the effect of updating the book (determines which book to update).
-  - `Cookie` header is irrelevant because it doesn't influence the effect of updating the book (setting this header has no effect).
+  - The `id` query parameter is relevant because it influences the effect of updating the book (determines which book to update).
+  - The `Cookie` header is irrelevant because it doesn't influence the effect of updating the book (setting this header has no effect).
 
 ## Irrelevant field
 
@@ -166,7 +166,7 @@ Requirements:
 
 Preferences:
 
-- Should be produced by `figment` crate.
+- Should be produced by the `figment` crate.
 
 ## Frontend-facing fn
 
@@ -191,7 +191,7 @@ A Rust fn imported from an external crate.
 
 ## Frontend API
 
-An API that the program calls to read the user input or write the user output.
+An API that the program calls to read user input or write output for the user.
 
 Examples:
 
@@ -202,7 +202,7 @@ Examples:
 
 ## Backend API
 
-An API that the program calls to read or write the parts of the state which are not an explicit input or output.
+An API that the program calls to read or write the parts of the state that are not explicit inputs or outputs.
 
 Examples:
 
@@ -225,7 +225,7 @@ Properties:
 
 Notes:
 
-- Formal definition: Rust fn `f` is reversible if there exists a Rust fn `g` that takes the output of `f` as input so that when `f` and `g` are executed sequentially the [extended state](#extended-state) of the program is not modified.
+- Formal definition: Rust fn `f` is reversible if there exists a Rust fn `g` that takes the output of `f` as input so that when `f` and `g` are executed sequentially, the [extended state](#extended-state) of the program is not modified.
 
 ## Irreversible fn
 
@@ -261,7 +261,7 @@ Requirements:
 
 Preferences:
 
-- Should not implement `Default` in most cases (very rarely it may implement `Default` if the default value is a valid value).
+- Should not implement `Default` in most cases (very rarely, it may implement `Default` if the default value is a valid value).
 
 ## Input data type
 
@@ -297,10 +297,10 @@ Examples:
   - Remote server processor (speed).
 - Memory:
   - RAM (capacity, speed).
-  - GPU Memory (capacity, speed).
+  - GPU memory (capacity, speed).
   - Disk (capacity, speed).
   - Remote server storage (speed).
-- Rate limits on external API.
+- Rate limits on external APIs.
 
 ## Agent
 
@@ -318,13 +318,13 @@ A mathematical expectation of the amount of time that it takes the user to reach
 
 Notes:
 
-- If the product is a program: this amount of time includes the execution time of the program itself and also the time it takes to launch it (e.g., type the arguments in a CLI or fill the form in a GUI).
+- If the product is a program: this amount of time includes the execution time of the program itself and also the time it takes to launch it (e.g., type the arguments in a CLI or fill out the form in a GUI).
 
 TODO:
 
 - Make this definition more precise.
   - Notes:
-    - The user loses some time initially because he needs to read the docs, then install and configure the program.
+    - The user loses some time initially because they need to read the docs, then install and configure the program.
     - The user saves time because the program can execute certain actions faster (the same actions that would be done by the user manually).
     - The user saves time because the program prevents undesirable actions which could have been executed by the user (mistakes).
     - The user saves time because the program prevents undesirable actions which could have been executed by other agents (hacks).
@@ -341,7 +341,7 @@ Examples:
 
 ## Monomial
 
-An algebraic expression which is a multiplication of a set of variables raised to specific powers.
+An algebraic expression that is a product of variables raised to specific powers.
 
 Examples:
 
