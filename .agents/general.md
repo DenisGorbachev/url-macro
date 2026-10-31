@@ -46,6 +46,7 @@ Write code that minimizes losses:
   - `mise run agent:on:stop` may modify `README.md`, `AGENTS.md`, `Cargo.toml` (this is normal, don't mention it)
   - `mise run agent:on:stop` includes `cargo fmt`, `cargo check`, `cargo clippy`, `cargo nextest` (no need to run them separately)
 - Don't write tests
+- Don't maintain backwards compatibility
 - Don't add comments
 - Don't edit the files in `.agents`
 - Don't run `git diff` or `git status` solely to review your own work at the end of a turn
