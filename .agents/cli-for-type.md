@@ -2,7 +2,7 @@
 
 ## Target type
 
-Type whose methods are exposed through CLI and invoked by child commands.
+Type whose methods are exposed through CLI and invoked by child cmds.
 
 Examples:
 
@@ -204,30 +204,30 @@ Examples:
 
 Reqs:
 
-- Must be constructible by parent command.
-- Must expose at least one public method that can be invoked by child command.
+- Must be constructible by parent cmd.
+- Must expose at least one public method that can be invoked by child cmd.
 
 Notes:
 
 - Target type should not parse CLI args itself.
 
-## Parent command
+## Parent cmd
 
-Command that constructs target type and delegates execution to selected child command.
+Cmd that constructs target type and delegates execution to selected child cmd.
 
 Reqs:
 
 - Must have fields for all inputs needed to construct target type.
 - Must construct instance of target type.
-- Must pass constructed instance of target type to selected child command.
+- Must pass constructed instance of target type to selected child cmd.
 
 Notes:
 
-- Parent command isolates CLI parsing from domain logic.
+- Parent cmd isolates CLI parsing from domain logic.
 
-## Child command
+## Child cmd
 
-Subcommand that wraps one target-type method and maps CLI args to that method.
+Subcmd that wraps one target-type method and maps CLI args to that method.
 
 Reqs:
 
@@ -241,4 +241,4 @@ Reqs:
 
 Notes:
 
-- Child commands should not construct target type themselves.
+- Child cmds should not construct target type themselves.

@@ -5,31 +5,31 @@
 Struct with fields:
 
 - [Name](#name).
-- [Definition](#definition).
+- [Def](#def).
 - [Aliases](#aliases).
 - [Examples](#examples).
 - [Reqs](#reqs).
 - [Allowances](#allowances).
-- [Preferences](#preferences).
-- [Constructors](#constructors).
+- [Prefs](#prefs).
+- [Ctors](#ctors).
 - [Properties](#properties).
 - [Notes](#notes).
 - [Custom sections](#custom-sections).
 
 Examples:
 
-- Definition of Rust package.
-- Definition of Rust fn.
+- Def of Rust package.
+- Def of Rust fn.
 
 ## Name
 
 String that uniquely identifies item within its scope.
 
-## Definition
+## Def
 
 Optional string that defines concept.
 
-Preferences:
+Prefs:
 
 - Should end with period.
 
@@ -41,7 +41,7 @@ Allowances:
 
 Notes:
 
-- Definition is optional because some concepts have obvious definitions that can be omitted.
+- Def is optional because some concepts have obvious defs that can be omitted.
   - Examples:
     - `fn main`.
     - `Cargo.toml`.
@@ -54,11 +54,10 @@ Optional list of strings that represent alternative names for concept.
 
 Optional [listmap](#listmap) of [examples](#example).
 
-Preferences:
+Prefs:
 
 - Should be non-exhaustive.
-- If listmap is exhaustive:
-  - Then: move it to "[Constructors](#constructors)".
+- If listmap is exhaustive, move it to "[Ctors](#ctors)".
 
 Notes:
 
@@ -76,13 +75,13 @@ Optional [listmap](#listmap) of [reqs](#req).
 
 Optional [listmap](#listmap) of [allowances](#allowance).
 
-## Preferences
+## Prefs
 
-Optional [listmap](#listmap) of [preferences](#preference).
+Optional [listmap](#listmap) of [prefs](#pref).
 
-## Constructors
+## Ctors
 
-Optional list of [constructors](#constructor) that contains all possible constructors of concept.
+Optional list of [ctors](#ctor) that contains all possible ctors of concept.
 
 Aliases: "One of".
 
@@ -112,13 +111,12 @@ Notes:
 
 ## Req
 
-[stringtree](#stringtree) that [represents](#representation) boolean test of instance of parent object.
+[stringtree](#stringtree) that [represents](#representation) bool test of instance of parent object.
 
 Notes:
 
 - Corresponds to predicate in [dependently typed language](#dependently-typed-language).
-- If input doesn't pass req test:
-  - Then: it is not instance of parent object.
+- If input doesn't pass req test, it is not instance of parent object.
 
 ## Allowance
 
@@ -128,20 +126,20 @@ Examples:
 
 - "May access external APIs".
 
-## Preference
+## Pref
 
 [stringtree](#stringtree) that [represents](#representation) less-than-or-equal relation on pair of instances of parent object.
 
 Notes:
 
-- Preferences must be sorted by importance (most important first).
-- Preferences should be used to make choice between two inputs that pass [reqs](#req).
+- Prefs must be sorted by importance (most important first).
+- Prefs should be used to make choice between two inputs that pass [reqs](#req).
 
-## Constructor
+## Ctor
 
-String that represents constructor of type.
+String that represents ctor of type.
 
-- Corresponds to constructor in [dependently typed language](#dependently-typed-language).
+- Corresponds to ctor in [dependently typed language](#dependently-typed-language).
 
 ## Property
 
@@ -161,7 +159,7 @@ Struct with fields:
 
 - [Name](#name).
 - Reqs (optional [listmap](#listmap) of [reqs](#req)).
-- Preferences (optional [listmap](#listmap) of [preferences](#preference)).
+- Prefs (optional [listmap](#listmap) of [prefs](#pref)).
 - Properties (optional [listmap](#listmap) of [properties](#property)).
 - Notes (optional [listmap](#listmap) of [notes](#note)).
 - Must have methods:
@@ -176,20 +174,17 @@ Markdown doc that presents list of [concepts](#concept) with elements:
 - Heading level 1: doc name that starts with "Concepts".
 - For each concept:
   - Name: heading level 2.
-  - Definition: paragraph after heading.
+  - Def: paragraph after heading.
   - Other fields:
     - Paragraph that is exactly equal to field name with ":" at end.
     - Field value:
-      - If field type has `to_markdown` method:
-        - Then: call it.
-        - Else: render most direct representation (e.g.: render strings directly).
+      - If field type has `to_markdown` method, call it; else: render most direct representation (e.g.: render strings directly).
 
 Reqs:
 
-- Order of other fields in doc must match order of other fields in definition of [concept](#concept).
+- Order of other fields in doc must match order of other fields in def of [concept](#concept).
 - Field must not appear twice.
-- If field is empty:
-  - Then: it must not be rendered.
+- If field is empty, it must not be rendered.
 - Every code item name and single-line code snippet must be rendered in single backticks.
   - Examples: `u64`, `PrintCommand`, `to_markdown`, `impl From<A> for B`.
 
@@ -205,14 +200,11 @@ Reqs:
 - Must have methods:
   - `to_markdown`:
     - Reqs:
-      - If value is list:
-        - Then: must output Markdown list.
-        - Else: must output Markdown list where each item is rendered as `{key}: {value}`.
+      - If value is list, must output Markdown list; else: must output Markdown list where each item is rendered as `{key}: {value}`.
 
 Notes:
 
-- If listmap is map:
-  - Then: its iteration order is insertion order of keys as they appear in source text.
+- If listmap is map, its iteration order is insertion order of keys as they appear in source text.
 
 ## Stringtree
 
@@ -230,7 +222,7 @@ Stringtree is struct with fields:
 Notes:
 
 - In Markdown, stringtree is just nested list.
-- In this doc, every "Notes", "Reqs", "Preferences" section contains examples of stringtrees as nested lists.
+- In this doc, every "Notes", "Reqs", "Prefs" section contains examples of stringtrees as nested lists.
 
 ## Representation
 
@@ -242,7 +234,7 @@ Notes:
 
 ## Association test
 
-Fn from two strings to boolean.
+Fn from two strings to bool.
 
 Aliases: is-test.
 

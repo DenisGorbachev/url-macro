@@ -4,18 +4,15 @@
 
 ### Examples
 
-- Preserve shape of underlying API in CLI (e.g.: commands should accept same args as methods).
+- Preserve shape of underlying API in CLI (e.g.: cmds should accept same args as methods).
 - Preserve secrecy of private data (e.g.: hide passwords, API keys, private keys).
 
 ### Exceptions
 
-- If user explicitly requests breaking preservation:
-  - Then: preservation may be broken.
+- If user explicitly requests breaking preservation, preservation may be broken.
   - Example:
-    - If user explicitly requests data deletion:
-      - Then: data may be deleted.
-- If spec explicitly allows breaking preservation:
-  - Then: preservation may be broken.
+    - If user explicitly requests data deletion, data may be deleted.
+- If spec explicitly allows breaking preservation, preservation may be broken.
 - Principle of preservation may be broken due to limitations of physical reality.
   - Examples:
     - Old data may be deleted to free space for new data (limitation of disk size).
@@ -37,5 +34,4 @@ Principle of preservation may not be broken in order to minimize time spent writ
 
 - In Rust, "result" refers to `Result` type.
 - For each custom type:
-  - If it does not include `Result`:
-    - Then: its name must not contain `Result`.
+  - If it does not include `Result`, its name must not contain `Result`.

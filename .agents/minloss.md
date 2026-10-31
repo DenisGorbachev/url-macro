@@ -1,4 +1,4 @@
-# Definitions
+# Defs
 
 ## Project
 
@@ -55,7 +55,7 @@ Examples:
 
 - Package manager config.
 - Linter config.
-- Agent context file.
+- Agent ctx file.
 
 ## High-level spec
 
@@ -67,18 +67,18 @@ String that can be interpreted as struct with fields:
 
 Examples:
 
-- "A Fjall database CLI for developers":
+- "A Fjall db CLI for developers":
   - `frontends` includes stdio API (stdin, stdout, stderr) and shell API (e.g.: escape codes).
   - `backends` includes Fjall API and filesystem API.
   - `audience` includes developers.
 
 ## Rust fn
 
-Preferences:
+Prefs:
 
 - Should not use [optimization hacks](#optimization-hack).
 
-## Constructor of type T
+## Ctor of type T
 
 Fn whose return type mentions `T`.
 
@@ -86,23 +86,21 @@ Examples:
 
 - `fn foo(a: A, b: B) -> Result<K, M>` is producer of `Result`, `K`, `M`.
 
-## Direct constructor of type T
+## Direct ctor of type T
 
-[constructor](#constructor-of-type-t) whose return type is exactly `T`.
+[ctor](#ctor-of-type-t) whose return type is exactly `T`.
 
-## Most explicit constructor of type T
+## Most explicit ctor of type T
 
-[constructor](#constructor-of-type-t) that allows callers to set more fields than other constructors of same type.
+[ctor](#ctor-of-type-t) that allows callers to set more fields than other ctors of same type.
 
 Reqs:
 
-- If it doesn't produce side effects:
-  - Then: must be named `new`.
-  - Else: must be named `create`.
+- If it doesn't produce side effects, must be named `new`; else: must be named `create`.
 
-## Producing expression of type T
+## Producing expr of type T
 
-Expression whose return type mentions `T`.
+Expr whose return type mentions `T`.
 
 Synonyms: ProdExp.
 
@@ -115,19 +113,19 @@ Reqs:
 
 - Must set all [relevant fields](#relevant-field).
   - Notes:
-    - Should use most explicit constructor.
+    - Should use most explicit ctor.
     - Config values have [config struct](#config-struct) type.
 - Must not set any [irrelevant fields](#irrelevant-field).
 - Must not use naive types that omit crucial data.
   - Examples:
     - Must not use `NaiveDateTime`, which omits timezone data.
 
-Preferences:
+Prefs:
 
 - Should rely on `impl Into` to reduce code size.
   - Examples:
     - `Article::new`:
-      - Constructor: `impl Article { pub fn new(title: impl Into<String>, text: impl Into<String>) -> Self { ... } }`.
+      - Ctor: `impl Article { pub fn new(title: impl Into<String>, text: impl Into<String>) -> Self { ... } }`.
       - ProdExp:
         - Bad: `Article::new("Title".to_string(), "Text".to_string())` (bad because it explicitly converts `str` to `String` using `to_string`).
         - Good: `Article::new("Title", "Text")` (good because it relies on `impl Into`).
@@ -136,9 +134,9 @@ Notes:
 
 - When parsing date without timezone, don't assume UTC unless spec explicitly requires it.
 
-## Param of producing expression of type T
+## Param of producing expr of type T
 
-Variable that is passed into [producing expression of type T](#producing-expression-of-type-t).
+Var that is passed into [producing expr of type T](#producing-expr-of-type-t).
 
 ## Relevant field
 
@@ -168,7 +166,7 @@ Reqs:
         - Must be accepted as required arg.
 - Must implement `Serialize` and `Deserialize` from `serde`.
 
-Preferences:
+Prefs:
 
 - Should be produced by `figment` crate.
 
@@ -176,15 +174,14 @@ Preferences:
 
 Rust fn that calls [frontend API](#frontend-api).
 
-Preferences:
+Prefs:
 
 - Should be [reversible](#reversible-fn), unless it is expected by user to be irreversible.
   - Examples of fns that are expected to be irreversible:
-    - `FileDeleteCommand::run` (user explicitly types "delete" when invoking this command).
+    - `FileDeleteCommand::run` (user explicitly types "delete" when invoking this cmd).
   - Examples of fns that are expected to be reversible:
-    - `FileShowCommand::run` (user does not type any destructive words when invoking this command).
-- If it is irreversible:
-  - Then: should be [atomic](#atomic-fn).
+    - `FileShowCommand::run` (user does not type any destructive words when invoking this cmd).
+- If it is irreversible, should be [atomic](#atomic-fn).
 
 ## Internal fn
 
@@ -212,7 +209,7 @@ API that program calls to read or write parts of state that are not explicit inp
 Examples:
 
 - Filesystem API (can be backend API if it is used to read or write internal state).
-- Database API.
+- Db API.
 
 ## Reversible fn
 
@@ -220,7 +217,7 @@ Rust fn whose effect can be reversed.
 
 Properties:
 
-- Some fns that take args only by reference are irreversible.
+- Some fns that take args only by ref are irreversible.
   - Example:
     - `remove_file` that takes `&Path` and removes file.
 - Some reversible fns call irreversible fns.
@@ -230,7 +227,7 @@ Properties:
 
 Notes:
 
-- Formal definition: Rust fn `f` is reversible if there exists Rust fn `g` that takes output of `f` as input so that when `f` and `g` are executed sequentially, [extended state](#extended-state) of program is not modified.
+- Formal def: Rust fn `f` is reversible if there exists Rust fn `g` that takes output of `f` as input so that when `f` and `g` are executed sequentially, [extended state](#extended-state) of program is not modified.
 
 ## Irreversible fn
 
@@ -242,7 +239,7 @@ Rust fn whose effects are either applied completely or not at all.
 
 Examples:
 
-- Fn that wraps database operations in transaction.
+- Fn that wraps db ops in transaction.
 - Fn that writes to temp file and then atomically replaces old file with new file (on filesystems that support atomic renames).
 
 ## Fallible fn
@@ -255,17 +252,16 @@ Rust fn that returns `Option`.
 
 ## Private struct
 
-Struct that has only partial or fallible constructors.
+Struct that has only partial or fallible ctors.
 
 Reqs:
 
 - Must enforce validation:
   - Must not have `pub` fields.
   - Must implement `TryFrom` instead of `From` (must not implement `From`).
-  - If it has `#[derive(Deserialize)]`:
-    - Then: must have `#[serde(try_from = ...)]` to enforce validation during deserialization.
+  - If it has `#[derive(Deserialize)]`, must have `#[serde(try_from = ...)]` to enforce validation during deserialization.
 
-Preferences:
+Prefs:
 
 - Should not implement `Default` in most cases (very rarely, it may implement `Default` if default value is valid value).
 
@@ -281,11 +277,11 @@ Examples:
 
 ## Extended state
 
-State that contains all data that program can read (including memory, disks, databases, remote APIs).
+State that contains all data that program can read (including memory, disks, dbs, remote APIs).
 
 ## Input source
 
-Original location of data that is held by input variable (where program has read it from).
+Original location of data that is held by input var (where program has read it from).
 
 Examples:
 
@@ -293,7 +289,7 @@ Examples:
 - HTTP request.
 - Program args (`argv`).
 - Standard input (`stdin`).
-- Environment (`env`).
+- Env (`env`).
 
 ## Software resources
 
@@ -314,8 +310,8 @@ Entity that is assumed to be working towards specific goal.
 
 Notes:
 
-- This definition is intentionally broad.
-- This definition includes both humans and programs.
+- This def is intentionally broad.
+- This def includes both humans and programs.
 - Distinction between "active" and "passive" programs is false dichotomy: even operating system can be seen as passive program that responds to external input from internal hardware clock.
 
 ## User time loss expectation
@@ -324,12 +320,11 @@ Mathematical expectation of amount of time that it takes user to reach specific 
 
 Notes:
 
-- If product is program:
-  - Then: this amount of time includes execution time plus launch time (e.g.: typing CLI args, filling GUI forms).
+- If product is program, this amount of time includes execution time plus launch time (e.g.: typing CLI args, filling GUI forms).
 
 TODO:
 
-- Make this definition more precise.
+- Make this def more precise.
   - Notes:
     - User loses some time initially because they need to read docs, then install and configure program.
     - User saves time because program can execute certain actions faster (same actions that would be done by user manually).
@@ -348,10 +343,10 @@ Examples:
 
 ## Monomial
 
-Algebraic expression that is product of variables raised to specific powers.
+Algebraic expr that is product of vars raised to specific powers.
 
 Examples:
 
-- `1` (monomial where every variable has power of zero).
+- `1` (monomial where every var has power of zero).
 - `a^2`.
-- `a * b * c^-1` (monomial equivalent to `(a * b) / c`).
+- `a * b * c^-1` (monomial equiv to `(a * b) / c`).

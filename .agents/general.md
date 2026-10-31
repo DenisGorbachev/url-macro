@@ -22,19 +22,19 @@ Write code that minimizes losses:
 ### Minimize hardcoded data
 
 - Don't hardcode values (accept args instead).
-- Choose carefully between accepting param and defining constant:
-  - Definitions:
+- Choose carefully between accepting param and defining const:
+  - Defs:
     - Params are execution details (user may want to change them).
-    - Constants are impl details (user would never want to change them).
+    - Consts are impl details (user would never want to change them).
   - Examples:
     - Params:
       - Cache TTL.
       - Config path.
-    - Constants:
+    - Consts:
       - Table name.
       - Keyspace name.
   - Recommendations:
-    - When in doubt, prefer accepting param instead of defining constant.
+    - When in doubt, prefer accepting param instead of defining const.
 
 ## Development workflow
 
@@ -47,7 +47,7 @@ Write code that minimizes losses:
   - Remove unnecessary code.
   - Remove unnecessary allocations.
   - Refactor code that converts between types into `From` / `Into` impls.
-- After finishing task, run `mise run agent:on:stop` (this command runs lints and tests).
+- After finishing task, run `mise run agent:on:stop` (this cmd runs lints and tests).
   - `mise run agent:on:stop` may modify `README.md`, `AGENTS.md`, `Cargo.toml` (this is normal, don't mention it).
   - `mise run agent:on:stop` includes `cargo fmt`, `cargo check`, `cargo clippy`, `cargo nextest` (no need to run them separately).
 - Don't write tests.
@@ -55,58 +55,44 @@ Write code that minimizes losses:
 - Don't add comments.
 - Don't edit files in `.agents`.
 - Don't run `git diff` or `git status` solely to review your own work at end of turn.
-- If later instruction overrides earlier instruction:
-  - Then: follow later instruction.
-- If I explicitly ask to update code in way that deviates from spec:
-  - Then: update code, spec.
+- If later instruction overrides earlier instruction, follow later instruction.
+- If I explicitly ask to update code in way that deviates from spec, update code, spec.
 - If you notice unexpected edits:
   - Then:
     - Keep them.
     - Don't mention them.
-- If you notice incorrect code:
-  - Then: tell me.
+- If you notice incorrect code, tell me.
 - If you have to apply workaround:
   - Then:
     - Add comment next to workaround explaining why it is necessary.
     - Mention workaround in your final report.
-- If task can't be completed exactly as written (for example: language limitations, dep limitations, incorrect assumptions in spec):
-  - Then: mention it in your final message.
-- If unexpected behavior impedes progress but is not blocker (for example: domain is unavailable, program is unavailable, available memory or disk space is too low, command runs for unexpectedly long time or consumes unexpected amount of resources):
-  - Then: mention it in your final message.
+- If task can't be completed exactly as written (for example: language limitations, dep limitations, incorrect assumptions in spec), mention it in your final msg.
+- If unexpected behavior impedes progress but is not blocker (for example: domain is unavailable, program is unavailable, available memory or disk space is too low, cmd runs for unexpectedly long time or consumes unexpected amount of resources), mention it in your final msg.
 - If task is technically possible but would result in low-quality code:
   - Then:
-    - If there is clearly better alternative:
-      - Then: implement it.
-      - Else: explain why requested code should not be written.
+    - If there is clearly better alternative, implement it; else: explain why requested code should not be written.
   - Examples:
     - Task to write `impl From<Foo> for Bar` where `Foo` can't actually be infallibly converted to `Bar` (conversion would require calling `unwrap`, which is bad) — in this case, you should write `impl TryFrom<Foo> for Bar` and reply with "Foo can't be infallibly converted to Bar, so I implemented a fallible conversion instead".
     - Task to write trait impl that only returns error — in this case, you should not write trait impl but reply with "trait X can't be implemented for Foo because ..."
 - If sentence starts with "Idea: ":
   - Then:
     - Evaluate it thoroughly.
-    - If you agree:
-      - Then: implement it.
-      - Else: explain why you didn't implement it and brainstorm solutions.
+    - If you agree, implement it; else: explain why you didn't implement it and brainstorm solutions.
 
 ## Review workflow
 
+- If user msg contains `git show` cmd with specific commit, mark commit reviewed.
 - For each new commit until explicitly marked reviewed:
-  - Print one `git show` command per final reply.
+  - Print one `git show` cmd per final reply.
 - Output full list of [findings](#finding) (not shortlist).
-- If there are no findings:
-  - Then: start your reply with "No findings".
+- If there are no findings, start your reply with "No findings".
 - For each item in ordered reply to your review:
-  - If item is "+":
-    - Then: reconsider finding, apply best fix.
+  - If item is "+", reconsider finding, apply best fix.
     - Else:
-      - If item matches "+ {number}":
-        - Then: apply proposed fix {number}.
+      - If item matches "+ {number}", apply proposed fix {number}.
         - Else:
-          - If item is "-":
-            - Then: don't apply fixes.
-            - Else: respond normally (keep `ctid` in your response).
-- If no actionable items remain in thread identified by specific `ctid`:
-  - Then: drop this `ctid` from your response.
+          - If item is "-", don't apply fixes; else: respond normally (keep `ctid` in your response).
+- If no actionable items remain in thread identified by specific `ctid`, drop this `ctid` from your response.
 
 ## Debugging workflow
 
@@ -114,17 +100,17 @@ Write code that minimizes losses:
 
 ## Subagents
 
-- When spawning code review subagent: use fresh context (not inherited).
+- When spawning code review subagent: use fresh ctx (not inherited).
 
 ## Skills
 
 - When editing or reviewing files that contain shell code, use and follow `shell-scripts` skill.
-- When choosing between identically named skills, prefer repository-local copy.
+- When choosing between identically named skills, prefer repo-local copy.
 
-## Commands
+## Cmds
 
 - Use `fd` and `rg` instead of `find` and `grep`.
-- Set command-execution tool call’s timeout param and `yield_time_ms` to at least 300000 ms for commands: `mise run agent:on:stop`, `cargo build`, `git commit`.
+- Set cmd-execution tool call’s timeout param and `yield_time_ms` to at least 300000 ms for cmds: `mise run agent:on:stop`, `cargo build`, `git commit`.
 
 ## Recommended crates
 
@@ -183,8 +169,7 @@ Write code that minimizes losses:
         Sell,
     }
     ```
-- If you need error and result types from `std`:
-  - Then: prefer short paths.
+- If you need error and result types from `std`, prefer short paths.
   - Examples:
     - `use std::io;`: `io::Result`, `io::Error`.
     - `use std::fmt;`: `fmt::Result`, `fmt::Error`.
@@ -200,10 +185,10 @@ Write code that minimizes losses:
       - Fns that construct or deserialize struct or mutate its fields must preserve invariant.
     - Else: its fields must be `pub`.
 
-## Constants
+## Consts
 
-- Define constants only for values used in multiple places (prefer inline values).
-- Put constants in `src/constants.rs`.
+- Define consts only for values used in multiple places (prefer inline values).
+- Put consts in `src/constants.rs`.
 
 ## Types
 
@@ -215,8 +200,7 @@ Write code that minimizes losses:
     - Use types from `email_address` crate instead of `String` for email-related values.
     - Use types from `core::num` module that are prefixed with `NonZero` for values that must be non-zero.
   - Search for other existing crates if you need specific types.
-  - If you can't find existing crates:
-    - Then: define newtypes using macros from `subtype` crate.
+  - If you can't find existing crates, define newtypes using macros from `subtype` crate.
 - Every `struct`, `enum`, `union` must be in separate file (except for error types that implement `Error`).
   - Error types that implement `Error` must be in same files as fns that return them.
 - Prefer attaching types as child modules to `src/types.rs`.
@@ -228,13 +212,9 @@ Write code that minimizes losses:
   - Use `expect` only in exceptional cases where you can prove that it always succeeds, and provide proof as first arg to `expect` (proof must start with "always succeeds because").
 - Prefer streams and iterators:
   - Guidelines for inputs:
-    - If fn uses methods that are available only for specific collection type:
-      - Then: prefer taking specific collection type as input.
-      - Else: prefer taking `impl Stream` or `impl IntoIterator` as input.
+    - If fn uses methods that are available only for specific collection type, prefer taking specific collection type as input; else: prefer taking `impl Stream` or `impl IntoIterator` as input.
   - Guidelines for outputs:
-    - If fn return type is naturally iterator (for example: fn returns output of `map` or `filter`):
-      - Then: prefer returning `impl Iterator` as output (there's no need to collect into `Vec`).
-      - Else: prefer returning specific collection type as output.
+    - If fn return type is naturally iterator (for example: fn returns output of `map` or `filter`), prefer returning `impl Iterator` as output (there's no need to collect into `Vec`); else: prefer returning specific collection type as output.
   - Examples:
     - Good:
       ```rust
@@ -300,9 +280,7 @@ Write code that minimizes losses:
         Ok(out)
     }
     ```
-- If fn has clear receiver (`self`, `&self`, `&mut self`):
-  - Then: implement it as associated fn.
-  - Else: implement it as standalone free fn.
+- If fn has clear receiver (`self`, `&self`, `&mut self`), implement it as associated fn; else: implement it as standalone free fn.
 - Add local `use` statement for enums to minimize code size. For example:
   - Good:
     ```rust
@@ -426,8 +404,7 @@ Write code that minimizes losses:
 - If struct derives `Getters`:
   - Then:
     - For each field:
-      - If its type implements `Copy`:
-        - Then: it must have `#[getter(copy)]` annotation.
+      - If its type implements `Copy`, it must have `#[getter(copy)]` annotation.
   - Examples:
     - Good (`username` has no `#[getter(copy)]` because `String` doesn't implement `Copy`, but `age` has it because `u64` implements `Copy`):
       ```rust
@@ -451,7 +428,7 @@ Write code that minimizes losses:
 
 - Don't use impls of traits `core::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Rem, RemAssign, Neg, Shl, ShlAssign, Shr, ShrAssign}` or their operators unless they don't panic or silently overflow.
 - Write and use arithmetic trait impls that don't panic or silently overflow.
-- Prefer `checked` versions of arithmetic operations.
+- Prefer `checked` versions of arithmetic ops.
 - Every call to `overflowing`, `saturating`, `wrapping` version must have single-line comment above it that starts with "SAFETY: " and describes why calling this version is safe in this specific case.
 - Use items from `num` crate if necessary (for example: to implement fn that calls arithmetic methods on generic type).
 
@@ -459,8 +436,7 @@ Write code that minimizes losses:
 
 - Never use operators: `[], []=`.
 - Never use traits: `core::ops::{Index, IndexMut}`.
-- If you are sure that `get` or `get_mut` will never panic:
-  - Then: use `expect` with proof message (as described in [Fns](#fns)).
+- If you are sure that `get` or `get_mut` will never panic, use `expect` with proof msg (as described in [Fns](#fns)).
 
 Note: index access operators and traits are banned because they may panic.
 
@@ -479,15 +455,12 @@ Fn marked with `#[test]` or `#[tokio::test]`.
 - In `macro_rules!` expansions:
   - Use full paths without leading `::` for foreign types (e.g.: `std::sync::Arc`), except those in standard prelude.
   - Use `$crate` paths for types defined in this crate (e.g.: `$crate::MyType`).
-- If you see similar code in different places:
-  - Then: replace similar code with shared macro.
-- If last arg of macro arm is variadic (e.g.: `$($item:ident),*`):
-  - Then: add trailing `$(,)?`.
-  - Else: don't add trailing `$(,)?`.
+- If you see similar code in different places, replace similar code with shared macro.
+- If last arg of macro arm is variadic (e.g.: `$($item:ident),*`), add trailing `$(,)?`; else: don't add trailing `$(,)?`.
 
 ## Shell
 
-- Prefer short options for commands used in tool calls.
+- Prefer short options for cmds used in tool calls.
 
 ## Cargo.toml
 
@@ -514,8 +487,8 @@ Fn marked with `#[test]` or `#[tokio::test]`.
 ## Code style
 
 - For each agent doc edit:
-  - Follow `.agents/spec.spec.md`.
-- Don't enforce line length limit when writing code, comments, docs.
+  - Follow `.agents/writing.md`.
+- Don't enforce line len limit when writing code, comments, docs.
 
 ## Chat thread id
 
@@ -553,9 +526,7 @@ Examples:
   - `path` must be file path relative to your working dir.
   - `line` must be first line of relevant code or text block.
   - `fixes` must be one of:
-    - If there is at least one proposed fix:
-      - Then: "\n\n" and nested Markdown list of fixes where each fix must have format `{number}. {description}` (numbers should start from 1 for each list of fixes).
-      - Else: exact text "none."
+    - If there is at least one proposed fix, "\n\n" and nested Markdown list of fixes where each fix must have format `{number}. {description}` (numbers should start from 1 for each list of fixes); else: exact text "none."
 
 ## Publishable package
 

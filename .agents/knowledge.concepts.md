@@ -11,8 +11,7 @@ Reqs:
   - Create temp path in same parent dir as `path` (suffix: ".new") (same filesystem is required for atomic rename).
   - Build new contents fully inside temp path.
   - Fsync files and temp path on best-effort basis where supported.
-  - If `path` exists:
-    - Then: rename it to backup name in same parent dir (suffix: ".old").
+  - If `path` exists, rename it to backup name in same parent dir (suffix: ".old").
   - Rename temp path to `path` (atomic on POSIX and Windows when both paths are on same filesystem).
   - If final rename fails:
     - Then:
@@ -67,7 +66,7 @@ Notes:
 - Lore source may be formatted as key-value pair (see examples).
 - Lore source is identified by its `locator` (`label` is just human-readable note).
 
-## Lore item reference
+## Lore item ref
 
 URI that uniquely identifies substring relative to [lore root](#lore-root).
 
@@ -109,11 +108,11 @@ Set of declarations in specific formal language.
 
 Reqs:
 
-- Every declaration must contain [reference](#lore-item-reference) to specific item of informal knowledge.
+- Every declaration must contain [ref](#lore-item-ref) to specific item of informal knowledge.
 
-Preferences:
+Prefs:
 
-- Declaration A is better than Declaration B if Declaration A's [reference](#lore-item-reference) is more precise than Declaration B's [reference](#lore-item-reference) and other properties are equal.
+- Declaration A is better than Declaration B if Declaration A's [ref](#lore-item-ref) is more precise than Declaration B's [ref](#lore-item-ref) and other properties are equal.
 
 Notes:
 
@@ -125,7 +124,7 @@ Notes:
 
 Examples:
 
-- `/markets` endpoint of Polymarket API returns array of markets with maximum length of 1000.
+- `/markets` endpoint of Polymarket API returns array of markets with max len of 1000.
 - In complete set of markets obtained from `/markets` endpoint, `market_slug` field has unique values.
 - Some markets have `question_id` set to empty string.
 
@@ -157,13 +156,13 @@ Notes:
 - Given [lore root](#lore-root) `input`, applying chain of formalization and informalization may not return same `input`.
 - Equivalence relation `eqv` is external program (not defined in this spec).
 
-## Reference A is more precise than Reference B
+## Ref A is more precise than Ref B
 
-[Reference A](#lore-item-reference) is more precise than [Reference B](#lore-item-reference) if Reference B is prefix of Reference A when compared without hash fragments.
+[Ref A](#lore-item-ref) is more precise than [Ref B](#lore-item-ref) if Ref B is prefix of Ref A when compared without hash fragments.
 
 Examples:
 
-- Given source code file `s`, reference to specific method within `s` is more precise than reference to `s` itself.
+- Given source code file `s`, ref to specific method within `s` is more precise than ref to `s` itself.
 
 ## Divergent file content and file extension for specific validator map
 
