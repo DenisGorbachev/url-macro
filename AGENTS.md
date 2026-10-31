@@ -4,9 +4,6 @@
 
 You are senior Rust software architect.
 
-- Think deeply and make detailed plans before writing code.
-- Write high-quality, production-ready, generic, reusable code.
-
 #### Principles
 
 Write code that minimizes losses:
@@ -19,7 +16,6 @@ Write code that minimizes losses:
 ##### Avoid data loss
 
 - Don't use panicking fns (instead, use checked fns that return `Result`).
-- Don't delete data unless spec explicitly requires it.
 
 ##### Minimize hardcoded data
 
@@ -45,30 +41,22 @@ Write code that minimizes losses:
     - Commit other requested changes first.
     - For each requested followup:
       - Make separate commit.
-- After finishing initial impl, improve code:
-  - Remove unnecessary code.
-  - Remove unnecessary allocations.
-  - Refactor code that converts between types into `From` / `Into` impls.
-- After finishing task, run `mise run agent:on:stop` (this cmd runs lints and tests).
+- After finishing task, run `mise run agent:on:stop`.
   - `mise run agent:on:stop` may modify `README.md`, `AGENTS.md`, `Cargo.toml` (this is normal, don't mention it).
-  - `mise run agent:on:stop` includes `cargo fmt`, `cargo check`, `cargo clippy`, `cargo nextest` (no need to run them separately).
 - Don't write tests.
 - Don't maintain backward compatibility.
 - Don't add comments.
 - Don't edit files in `.agents`.
 - Don't run `git diff` or `git status` solely to review your own work at end of turn.
-- If later instruction overrides earlier instruction, follow later instruction.
 - If I explicitly ask to update code in way that deviates from spec, update code, spec.
 - If you notice unexpected edits:
   - Then:
     - Keep them.
     - Don't mention them.
-- If you notice incorrect code, tell me.
 - If you have to apply workaround:
   - Then:
     - Add comment next to workaround explaining why it is necessary.
     - Mention workaround in your final report.
-- If task can't be completed exactly as written (for example: language limitations, dep limitations, incorrect assumptions in spec), mention it in your final msg.
 - If unexpected behavior impedes progress but is not blocker (for example: domain is unavailable, program is unavailable, available memory or disk space is too low, cmd runs for unexpectedly long time or consumes unexpected amount of resources), mention it in your final msg.
 - If task is technically possible but would result in low-quality code:
   - Then:
@@ -129,7 +117,7 @@ Write code that minimizes losses:
 #### Modules
 
 - Don't use `mod.rs`; use module files with submodules in folder with same name (for example: `user.rs` with submodules in `user` folder).
-- When creating new module, attach it with `mod` declaration followed by `pub use` glob declaration. The parent module must re-export all items from child modules. This allows you to `use` items directly from crate root without intermediate module path. For example:
+- When creating new module, attach it with `mod` declaration followed by `pub use` glob declaration. The parent module must re-export all items from child modules. For example:
   ```rust
   fn foo() {}
 
@@ -220,13 +208,10 @@ Write code that minimizes losses:
   - Examples:
     - Good:
       ```rust
-      /// This is good because the function doesn't use any type-specific methods, only generic `Iterator` trait methods
-      /// This is good because the function naturally returns an iterator, not a specific collection type
       pub fn filter_non_empty_strings<'a>(inputs: impl IntoIterator<Item = &'a str>) -> impl Iterator<Item = &'a str> {
           inputs.into_iter().filter(|i| i.is_empty().not())
       }
 
-      /// This is good because the function uses the `Vec`-specific method `extend_from_slice`, so it can't take a generic `impl IntoIterator`
       fn extend_args(mut args: Vec<String>, extra_args: &[String]) -> Vec<String> {
           args.extend_from_slice(extra_args);
           args
@@ -234,7 +219,6 @@ Write code that minimizes losses:
       ```
     - Bad:
     - ```rust
-      /// This is bad because it needlessly converts a `Vec` into an iterator and then collects it back into a `Vec`
       pub fn filter_non_empty_strings(inputs: Vec<&str>) -> Vec<&str> {
           inputs
               .into_iter()
@@ -242,7 +226,6 @@ Write code that minimizes losses:
               .collect::<Vec<_>>()
       }
 
-      /// This is bad because it is not general enough and also forces the caller to collect the strings into a `Vec` for input, which is bad for performance
       pub fn bar(inputs: Vec<String>) -> Vec<String> {}
       ```
 - Prefer implementing and using `From` or `TryFrom` for conversions between types (instead of converting in-place).
@@ -255,7 +238,6 @@ Write code that minimizes losses:
     use core::num::ParseIntError;
     use thiserror::Error;
 
-    // Good: iterator pipeline with fallible mapping + correct error handling
     pub fn parse_numbers(inputs: impl IntoIterator<Item = impl AsRef<str>>) -> Result<Vec<u64>, ParseNumbersError> {
         use ParseNumbersError::*;
         let iter = inputs.into_iter().map(|s| s.as_ref().trim().parse::<u64>());
@@ -272,7 +254,6 @@ Write code that minimizes losses:
     ```rust
     use core::num::ParseIntError;
 
-    // Bad: manual loop + mutable accumulator
     pub fn parse_numbers(inputs: impl IntoIterator<Item = impl AsRef<str>>) -> Result<Vec<u64>, ParseIntError> {
         let mut out = Vec::new();
         for s in inputs {
@@ -310,12 +291,10 @@ Write code that minimizes losses:
     ```rust
     pub fn foo(input: impl Into<String>) {
         let input = input.into();
-        // do something
     }
     ```
   - Bad:
     ```rust
-    /// This is bad because the caller may have to call `.into()` when passing the input argument
     pub fn foo(input: String) {}
     ```
 - Provide additional flexibility at call sites by accepting `&impl AsRef` or `&mut impl AsMut` (e.g.: both `PathBuf` and `Config` may implement `AsRef<Path>`). For example:
@@ -323,20 +302,16 @@ Write code that minimizes losses:
     ```rust
     pub fn bar(input: &mut impl AsMut<String>) {
         let input = input.as_mut();
-        // do something
     }
 
     pub fn baz(input: &impl AsRef<str>) {
         let input = input.as_ref();
-        // do something
     }
     ```
   - Bad:
     ```rust
-    /// This is bad because the caller may have to call `.as_mut()` when passing the input argument
     pub fn bar(input: &mut String) {}
 
-    /// This is bad because the caller may have to call `.as_ref()` when passing the input argument
     pub fn baz(input: &str) {}
     ```
 - Prefer `.map()` instead of `match` when you need to modify value in `Option` or `Result`. For example:
@@ -362,7 +337,6 @@ Write code that minimizes losses:
       type Err = ParseIntError;
 
       fn from_str(s: &str) -> Result<Self, Self::Err> {
-          // This is bad because it uses more code to express the same idea
           match s.parse::<u64>() {
               Ok(value) => Ok(Self::new(value)),
               Err(error) => Err(error),
@@ -440,8 +414,6 @@ Write code that minimizes losses:
 - Never use traits: `core::ops::{Index, IndexMut}`.
 - If you are sure that `get` or `get_mut` will never panic, use `expect` with proof msg (as described in [Fns](#fns)).
 
-Note: index access operators and traits are banned because they may panic.
-
 #### Test fn
 
 Fn marked with `#[test]` or `#[tokio::test]`.
@@ -453,7 +425,6 @@ Fn marked with `#[test]` or `#[tokio::test]`.
 
 #### Macros
 
-- Write `macro_rules!` macros to reduce boilerplate.
 - In `macro_rules!` expansions:
   - Use full paths without leading `::` for foreign types (e.g.: `std::sync::Arc`), except those in standard prelude.
   - Use `$crate` paths for types defined in this crate (e.g.: `$crate::MyType`).
@@ -488,8 +459,6 @@ Fn marked with `#[test]` or `#[tokio::test]`.
 
 #### Code style
 
-- For each agent doc edit:
-  - Follow `.agents/writing.md`.
 - Don't enforce line len limit when writing code, comments, docs.
 
 #### Chat thread id
@@ -538,21 +507,18 @@ Package that has remote whose name contains `public` or `pre-public` and ends wi
 
 #### Objectives
 
-- Minimize token count subject to preserved meaning.
+- Minimize token count.
 - Prioritize precision, disambiguation, uniformity, technicality over prose fluency.
-- Preserve obligations, permissions, negations, quantifiers, ordering, referents.
 
 #### Statements
 
-- Omit guidance that restates default agent behavior.
-- Don't add precautionary preservation rules.
+- Omit default-behavior reminders (e.g.: preservation, safety).
 - Use one statement per list item.
 - Use homogeneous lists.
 - End statements with periods.
 - End list labels with colons.
 - Omit `the following`.
 - Omit final `and`, `or` from enumerations.
-- Preserve `and`, `or` when they encode Bool logic.
 - Separate example labels from contents with colons: `for example: ...`, `e.g.: ...`.
 
 #### Control flow
@@ -560,7 +526,6 @@ Package that has remote whose name contains `public` or `pre-public` and ends wi
 - If then-branch contains one statement, use `If {condition}, {statement}.`.
 - If both branches contain one statement, use `If {condition}, {statement}; else: {statement}.`.
 - For compound branches, use nested `If:` / `Then:` / `Else:` lists.
-- Omit `Else` when no alternative is specified.
 - Encode iteration as:
   ```markdown
   - For each {item} in {collection}:
@@ -571,9 +536,6 @@ Package that has remote whose name contains `public` or `pre-public` and ends wi
 
 - Omit articles (`a`, `an`, `the`) before nouns.
 - Use CS vernacular (e.g.: struct, ident, impl, spec, dir, fn, arg, param, config, doc, attr, dep, pref, db, op).
-- Apply equiv plural forms.
-- Preserve code, literal values, paths, URLs.
-- Update links, section-name refs when headings change.
 
 ### Guidelines for `subtype`
 

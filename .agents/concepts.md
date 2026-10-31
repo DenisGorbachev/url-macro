@@ -39,13 +39,6 @@ Allowances:
 - May start with name of concept being defined.
 - May be multiline string.
 
-Notes:
-
-- Def is optional because some concepts have obvious defs that can be omitted.
-  - Examples:
-    - `fn main`.
-    - `Cargo.toml`.
-
 ## Aliases
 
 Optional list of strings that represent alternative names for concept.
@@ -84,10 +77,6 @@ Optional [listmap](#listmap) of [prefs](#pref).
 Optional list of [ctors](#ctor) that contains all possible ctors of concept.
 
 Aliases: "One of".
-
-Reqs:
-
-- Must be exhaustive.
 
 ## Properties
 
@@ -219,11 +208,6 @@ Stringtree is struct with fields:
         - "Text" field must be rendered as top-level list item.
         - "Children" field must be rendered as child list items.
 
-Notes:
-
-- In Markdown, stringtree is just nested list.
-- In this doc, every "Notes", "Reqs", "Prefs" section contains examples of stringtrees as nested lists.
-
 ## Representation
 
 String that passes [association test](#association-test) evaluated by specific list of [agents](#agent).
@@ -256,10 +240,6 @@ Notes:
 ## Agent
 
 Entity whose goal is to prevent its own termination.
-
-Notes:
-
-- Agent can be artificial or natural (LLM or human).
 
 ## Dependently typed language
 

@@ -25,18 +25,12 @@ String that represents some informal knowledge about external system.
 
 Notes:
 
-- Some informal knowledge may be formatted as Markdown (example: technical docs page).
-- Some informal knowledge may be formatted as images (example: diagram).
-- Some informal knowledge may be formatted as PDF (example: device manual).
+- Formats: Markdown, images, PDF.
 - Some informal knowledge may contain contradictions.
 - Some informal knowledge may contradict experimental knowledge.
 - This kind of knowledge is called "informal" because it doesn't have unique representation in any formal language.
   - Informal knowledge has multiple potential representations in any formal language.
   - Informal knowledge is inherently ambiguous (it must be disambiguated during [formalization](#formalization)).
-- Some informal knowledge files have internal tree.
-  - Examples:
-    - Every valid source code file has internal tree.
-    - Every valid Markdown file has internal tree.
 - Some informal knowledge files may have [divergent content and extension](#divergent-file-content-and-file-extension-for-specific-validator-map).
 
 ## Lore dir
@@ -127,10 +121,6 @@ Examples:
 - `/markets` endpoint of Polymarket API returns array of markets with max len of 1000.
 - In complete set of markets obtained from `/markets` endpoint, `market_slug` field has unique values.
 - Some markets have `question_id` set to empty string.
-
-Notes:
-
-- Some knowledge can be obtained only through experiments.
 
 ## Formalization
 

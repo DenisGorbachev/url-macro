@@ -8,7 +8,6 @@ Examples:
 
 - Rust example:
   - ```rust
-    //! In this example, all types are in the same file. In real code, the types must be in their own files according to project guidelines.
 
     use std::io::stdout;
     use clap::{Parser, Subcommand};
@@ -220,10 +219,6 @@ Reqs:
 - Must have fields for all inputs needed to construct target type.
 - Must construct instance of target type.
 - Must pass constructed instance of target type to selected child cmd.
-
-Notes:
-
-- Parent cmd isolates CLI parsing from domain logic.
 
 ## Child cmd
 

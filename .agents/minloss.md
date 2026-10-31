@@ -15,10 +15,6 @@ Examples:
 - Count of CLI options.
 - Count of lines of code.
 
-Notes:
-
-- Set of metrics depends on object type.
-
 ## Project metric
 
 [metric](#metric) of [project](#project).
@@ -215,16 +211,6 @@ Examples:
 
 Rust fn whose effect can be reversed.
 
-Properties:
-
-- Some fns that take args only by ref are irreversible.
-  - Example:
-    - `remove_file` that takes `&Path` and removes file.
-- Some reversible fns call irreversible fns.
-  - Example:
-    - `remove_file_with_backup` that makes backup of file before removing it.
-- Every read-only fn is reversible because it has no effects.
-
 Notes:
 
 - Formal def: Rust fn `f` is reversible if there exists Rust fn `g` that takes output of `f` as input so that when `f` and `g` are executed sequentially, [extended state](#extended-state) of program is not modified.
@@ -258,7 +244,7 @@ Reqs:
 
 - Must enforce validation:
   - Must not have `pub` fields.
-  - Must implement `TryFrom` instead of `From` (must not implement `From`).
+  - Must implement `TryFrom` instead of `From`.
   - If it has `#[derive(Deserialize)]`, must have `#[serde(try_from = ...)]` to enforce validation during deserialization.
 
 Prefs:
@@ -308,12 +294,6 @@ Examples:
 
 Entity that is assumed to be working towards specific goal.
 
-Notes:
-
-- This def is intentionally broad.
-- This def includes both humans and programs.
-- Distinction between "active" and "passive" programs is false dichotomy: even operating system can be seen as passive program that responds to external input from internal hardware clock.
-
 ## User time loss expectation
 
 Mathematical expectation of amount of time that it takes user to reach specific desirable state.
@@ -325,13 +305,6 @@ Notes:
 TODO:
 
 - Make this def more precise.
-  - Notes:
-    - User loses some time initially because they need to read docs, then install and configure program.
-    - User saves time because program can execute certain actions faster (same actions that would be done by user manually).
-    - User saves time because program prevents undesirable actions which could have been executed by user (mistakes).
-    - User saves time because program prevents undesirable actions which could have been executed by other agents (hacks).
-      - Examples:
-        - ERC-20 contract prevents other actors from increasing token supply.
 
 ## Optimization hack
 
@@ -339,7 +312,7 @@ Optimization that relies on property that cannot be assumed to hold in future.
 
 Examples:
 
-- Optimization that relies on impl detail in dep (this property cannot be assumed to hold in future because impl details are not part of public interface and may change without notice).
+- Optimization that relies on impl detail in dep (impl details are not part of public interface).
 
 ## Monomial
 

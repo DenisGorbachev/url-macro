@@ -83,16 +83,16 @@ Type that meets one of:
 - Must meet [API interface type reqs](#api-interface-type-reqs).
 - Ident must end with "RequestRef".
 - Must derive `Copy`.
-- Every field must be immutable ref (not owned).
+- Every field must be immutable ref.
 
 ## Request own type reqs
 
 - Must meet [API interface type reqs](#api-interface-type-reqs).
 - Ident must end with "RequestOwn".
-- Every field must be owned (not ref).
+- Every field must be owned.
 
 ## Response type reqs
 
 - Must meet [API interface type reqs](#api-interface-type-reqs).
 - Ident must end with "Response".
-- Every field must be owned (not ref).
+- Every field must be owned.
