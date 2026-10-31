@@ -40,45 +40,75 @@ Write code that minimizes losses:
 
 #### Development workflow
 
+- If the user requests followup commits:
+  - Then:
+    - Commit other requested changes first.
+    - For each requested followup:
+      - Make a separate commit.
 - After finishing the initial implementation, improve the code:
   - Remove unnecessary code.
   - Remove unnecessary allocations.
   - Refactor code that converts between types into `From` / `Into` impls.
 - After finishing the task, run `mise run agent:on:stop` (this command runs the lints and tests).
-  - `mise run agent:on:stop` may modify `README.md`, `AGENTS.md`, and `Cargo.toml` (this is normal, don't mention it).
-  - `mise run agent:on:stop` includes `cargo fmt`, `cargo check`, `cargo clippy`, and `cargo nextest` (no need to run them separately).
+  - `mise run agent:on:stop` may modify `README.md`, `AGENTS.md`, `Cargo.toml` (this is normal, don't mention it).
+  - `mise run agent:on:stop` includes `cargo fmt`, `cargo check`, `cargo clippy`, `cargo nextest` (no need to run them separately).
 - Don't write tests.
 - Don't maintain backward compatibility.
 - Don't add comments.
 - Don't edit the files in `.agents`.
 - Don't run `git diff` or `git status` solely to review your own work at the end of a turn.
-- If a later instruction overrides an earlier instruction, follow the later instruction (the last override wins).
-- If I explicitly ask to update the code in a way that deviates from the spec, update both the code and the spec.
-- If you notice unexpected edits, keep them and don't mention them.
-- If you notice incorrect code, tell me.
-- If you have to apply a workaround, add a comment next to the workaround that explains why it is necessary, and also mention the workaround in your final report.
-- If the task can't be completed exactly as it is written (for example, due to limitations in the language or dependencies, or due to incorrect assumptions in the specification), mention it in your final message.
-- If unexpected behavior impedes your progress, but it's not a blocker (for example, a domain or program is unavailable, available memory or disk space is too low, or a command runs for an unexpectedly long time or consumes an unexpected amount of resources), mention it in your final message.
-- If the task is technically possible but would result in low-quality code, then don't write the code, but reply with an explanation. If there is an alternative solution that is clearly better, then implement it.
+- If a later instruction overrides an earlier instruction:
+  - Then: follow the later instruction.
+- If I explicitly ask to update the code in a way that deviates from the spec:
+  - Then: update the code, spec.
+- If you notice unexpected edits:
+  - Then:
+    - Keep them.
+    - Don't mention them.
+- If you notice incorrect code:
+  - Then: tell me.
+- If you have to apply a workaround:
+  - Then:
+    - Add a comment next to the workaround explaining why it is necessary.
+    - Mention the workaround in your final report.
+- If the task can't be completed exactly as written (for example: language limitations, dependency limitations, incorrect assumptions in the specification):
+  - Then: mention it in your final message.
+- If unexpected behavior impedes progress but is not a blocker (for example: domain is unavailable, program is unavailable, available memory or disk space is too low, command runs for an unexpectedly long time or consumes an unexpected amount of resources):
+  - Then: mention it in your final message.
+- If the task is technically possible but would result in low-quality code:
+  - Then:
+    - If there is a clearly better alternative:
+      - Then: implement it.
+      - Else: explain why the requested code should not be written.
   - Examples:
     - A task to write `impl From<Foo> for Bar` where `Foo` can't actually be infallibly converted to `Bar` (the conversion would require calling `unwrap`, which is bad) — in this case, you should write `impl TryFrom<Foo> for Bar` and reply with "Foo can't be infallibly converted to Bar, so I implemented a fallible conversion instead".
     - A task to write a trait impl that only returns an error — in this case, you should not write the trait impl but reply with "trait X can't be implemented for Foo because ..."
 - If a sentence starts with "Idea: ":
-  - Evaluate it thoroughly.
-  - If you agree:
-    - Then: implement it.
-    - Else: explain why you didn't implement it and brainstorm solutions.
+  - Then:
+    - Evaluate it thoroughly.
+    - If you agree:
+      - Then: implement it.
+      - Else: explain why you didn't implement it and brainstorm solutions.
 
 #### Review workflow
 
+- For each new commit until explicitly marked reviewed:
+  - Print one `git show` command per final reply.
 - Output a full list of [findings](#finding) (not a shortlist).
-- If there are no findings, then start your reply with "No findings".
-- If I reply to your review with an ordered list, process each item in the following way:
-  - "+" - "Think about this finding again, then apply the best fix according to your thinking process".
-  - "+ {number}" - "Apply the proposed fix at {number}".
-  - "-" - "Don't apply any fixes".
-  - Other: respond normally (keep the `ctid` in your response).
-- If there are no more actionable items in the thread identified by a specific `ctid`, drop this `ctid` from your response.
+- If there are no findings:
+  - Then: start your reply with "No findings".
+- For each item in an ordered reply to your review:
+  - If item is "+":
+    - Then: reconsider the finding, apply the best fix.
+    - Else:
+      - If item matches "+ {number}":
+        - Then: apply proposed fix {number}.
+        - Else:
+          - If item is "-":
+            - Then: don't apply fixes.
+            - Else: respond normally (keep the `ctid` in your response).
+- If no actionable items remain in the thread identified by a specific `ctid`:
+  - Then: drop this `ctid` from your response.
 
 #### Debugging workflow
 
@@ -96,7 +126,7 @@ Write code that minimizes losses:
 #### Commands
 
 - Use `fd` and `rg` instead of `find` and `grep`.
-- Set the command-execution tool call’s timeout parameter and `yield_time_ms` to at least 300000 ms for the following commands: `mise run agent:on:stop`, `cargo build`, `git commit`.
+- Set the command-execution tool call’s timeout parameter and `yield_time_ms` to at least 300000 ms for commands: `mise run agent:on:stop`, `cargo build`, `git commit`.
 
 #### Recommended crates
 
@@ -155,9 +185,11 @@ Write code that minimizes losses:
         Sell,
     }
     ```
-- If you need error and result types from `std`, prefer short paths:
-  - `use std::io;` and `io::Result`, `io::Error`.
-  - `use std::fmt;` and `fmt::Result`, `fmt::Error`.
+- If you need error and result types from `std`:
+  - Then: prefer short paths.
+  - Examples:
+    - `use std::io;`: `io::Result`, `io::Error`.
+    - `use std::fmt;`: `fmt::Result`, `fmt::Error`.
 
 #### Visibility
 
@@ -165,7 +197,9 @@ Write code that minimizes losses:
   - Prefer `pub` visibility over `pub(crate)` or private visibility.
 - Fields:
   - If a struct is a refinement of its fields:
-    - Then: its fields must be private, and the functions that construct or deserialize the struct or mutate its fields must preserve the invariant.
+    - Then:
+      - Fields must be private.
+      - Functions that construct or deserialize the struct or mutate its fields must preserve the invariant.
     - Else: its fields must be `pub`.
 
 #### Constants
@@ -183,8 +217,9 @@ Write code that minimizes losses:
     - Use types from the `email_address` crate instead of `String` for email-related values.
     - Use types from the `core::num` module that are prefixed with `NonZero` for values that must be non-zero.
   - Search for other existing crates if you need specific types.
-  - If you can't find existing crates, define newtypes using macros from the `subtype` crate.
-- Every `struct`, `enum`, or `union` must be in a separate file (except for error types that implement `Error`).
+  - If you can't find existing crates:
+    - Then: define newtypes using macros from the `subtype` crate.
+- Every `struct`, `enum`, `union` must be in a separate file (except for error types that implement `Error`).
   - Error types that implement `Error` must be in the same files as the functions that return them.
 - Prefer attaching the types as child modules to `src/types.rs`.
 
@@ -199,7 +234,7 @@ Write code that minimizes losses:
       - Then: prefer taking a specific collection type as input.
       - Else: prefer taking an `impl Stream` or `impl IntoIterator` as input.
   - Guidelines for outputs:
-    - If the function return type is naturally an iterator (for example, the function returns the output of a `map` or `filter`):
+    - If the function return type is naturally an iterator (for example: the function returns the output of a `map` or `filter`):
       - Then: prefer returning an `impl Iterator` as output (there's no need to collect into `Vec`).
       - Else: prefer returning a specific collection type as output.
   - Examples:
@@ -231,7 +266,7 @@ Write code that minimizes losses:
       pub fn bar(inputs: Vec<String>) -> Vec<String> {}
       ```
 - Prefer implementing and using `From` or `TryFrom` for conversions between types (instead of converting in-place).
-- Don't use early-return fast-path guards for empty vectors, iterators, or streams (i.e., don't use `if items.is_empty() { return ...; }`).
+- Don't use early-return fast-path guards for empty vectors, iterators, streams (i.e.: don't use `if items.is_empty() { return ...; }`).
 - Use destructuring assignment for tuple arguments, for example: `fn try_from((name, parent_key): (&str, GroupKey)) -> ...`.
 - Use iterators instead of for loops. For example:
   - Good:
@@ -305,7 +340,7 @@ Write code that minimizes losses:
     /// This is bad because the caller may have to call `.into()` when passing the input argument
     pub fn foo(input: String) {}
     ```
-- Provide additional flexibility at call sites by accepting `&impl AsRef` or `&mut impl AsMut` (e.g., both `PathBuf` and `Config` may implement `AsRef<Path>`). For example:
+- Provide additional flexibility at call sites by accepting `&impl AsRef` or `&mut impl AsMut` (e.g.: both `PathBuf` and `Config` may implement `AsRef<Path>`). For example:
   - Good:
     ```rust
     pub fn bar(input: &mut impl AsMut<String>) {
@@ -383,22 +418,28 @@ Write code that minimizes losses:
 - Prefer short method syntax over long trait-path syntax (prefer `value.method(arg)` over `Trait::method(value, arg)`).
 - Generic helper functions must be in `src/functions` (one file per function).
 - If Clippy reports `too_many_arguments`:
-  - Don't use tuples to silence the lint.
-  - Consider refactoring the code for better separation of concerns.
+  - Then:
+    - Don't use tuples to silence the lint.
+    - Consider refactoring the code for better separation of concerns.
 
 #### Struct derives
 
 - Derive `new` from the `derive_new` crate for types that need `fn new`.
-- If the struct derives `Getters`, then each field whose type implements `Copy` must have a `#[getter(copy)]` annotation. For example:
-  - Good (`username` has no `#[getter(copy)]` because `String` doesn't implement `Copy`, but `age` has it because `u64` implements `Copy`):
-    ```rust
-    #[derive(Getters, Into, Serialize, Deserialize, Eq, PartialEq, Clone, Debug)]
-    pub struct User {
-      username: String,
-      #[getter(copy)]
-      age: u64,
-    }
-    ```
+- If the struct derives `Getters`:
+  - Then:
+    - For each field:
+      - If its type implements `Copy`:
+        - Then: it must have a `#[getter(copy)]` annotation.
+  - Examples:
+    - Good (`username` has no `#[getter(copy)]` because `String` doesn't implement `Copy`, but `age` has it because `u64` implements `Copy`):
+      ```rust
+      #[derive(Getters, Into, Serialize, Deserialize, Eq, PartialEq, Clone, Debug)]
+      pub struct User {
+        username: String,
+        #[getter(copy)]
+        age: u64,
+      }
+      ```
 
 #### Setters
 
@@ -413,14 +454,15 @@ Write code that minimizes losses:
 - Don't use the impls of traits `core::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Rem, RemAssign, Neg, Shl, ShlAssign, Shr, ShrAssign}` or their operators unless they don't panic or silently overflow.
 - Write and use arithmetic trait impls that don't panic or silently overflow.
 - Prefer `checked` versions of arithmetic operations.
-- Every call to an `overflowing`, `saturating`, or `wrapping` version must have a single-line comment above it that starts with "SAFETY: " and describes why calling this version is safe in this specific case.
-- Use items from the `num` crate if necessary (for example, to implement a function that calls arithmetic methods on a generic type).
+- Every call to an `overflowing`, `saturating`, `wrapping` version must have a single-line comment above it that starts with "SAFETY: " and describes why calling this version is safe in this specific case.
+- Use items from the `num` crate if necessary (for example: to implement a function that calls arithmetic methods on a generic type).
 
 #### Index access
 
-- Never use the following operators: `[], []=`.
-- Never use the following traits: `core::ops::{Index, IndexMut}`.
-- If you are sure that `get` or `get_mut` will never panic, use `expect` with a proof message (as described in [Functions](#functions)).
+- Never use operators: `[], []=`.
+- Never use traits: `core::ops::{Index, IndexMut}`.
+- If you are sure that `get` or `get_mut` will never panic:
+  - Then: use `expect` with a proof message (as described in [Functions](#functions)).
 
 Note: the index access operators and traits are banned because they may panic.
 
@@ -431,16 +473,17 @@ A function marked with `#[test]` or `#[tokio::test]`.
 - Must return a `Result`.
 - Must implement proper error handling via the `errgonomic` crate.
 - Should use macros from the `assertables` crate.
-  - Should use `assert_infix` instead of `assert_gt`, `assert_ge`, `assert_lt`, `assert_le`, or `assert_eq`.
+  - Should use `assert_infix` instead of `assert_gt`, `assert_ge`, `assert_lt`, `assert_le`, `assert_eq`.
 
 #### Macros
 
 - Write `macro_rules!` macros to reduce boilerplate.
 - In `macro_rules!` expansions:
-  - Use full paths without a leading `::` for foreign types (e.g., `std::sync::Arc`), except those in the standard prelude.
-  - Use `$crate` paths for types defined in this crate (e.g., `$crate::MyType`).
-- If you see similar code in different places, write a macro and replace the similar code with a macro call.
-- If the last argument of a macro arm is variadic (e.g., `$($item:ident),*`):
+  - Use full paths without a leading `::` for foreign types (e.g.: `std::sync::Arc`), except those in the standard prelude.
+  - Use `$crate` paths for types defined in this crate (e.g.: `$crate::MyType`).
+- If you see similar code in different places:
+  - Then: replace similar code with a shared macro.
+- If the last argument of a macro arm is variadic (e.g.: `$($item:ident),*`):
   - Then: add a trailing `$(,)?`.
   - Else: don't add a trailing `$(,)?`.
 
@@ -459,8 +502,9 @@ A function marked with `#[test]` or `#[tokio::test]`.
         - The patch component of `{version}` must be 0.
       - Try `cargo update -p {dependency} --precise {version}` to lock that exact version.
         - If dependency constraints prevent locking that version:
-          - Keep the version resolved by Cargo.
-          - Add a comment in `Cargo.toml` explaining the constraints.
+          - Then:
+            - Keep the version resolved by Cargo.
+            - Add a comment in `Cargo.toml` explaining the constraints.
     - Else:
       - Run `cargo add {dependency}` without `{version}`.
 - When adding a dependency in a workspace:
@@ -471,7 +515,9 @@ A function marked with `#[test]` or `#[tokio::test]`.
 
 #### Code style
 
-- Don't enforce a line length limit when writing code, comments, or documentation.
+- For each agent doc edit:
+  - Follow `.agents/spec.spec.md`.
+- Don't enforce a line length limit when writing code, comments, documentation.
 
 #### Chat thread id
 
@@ -508,7 +554,7 @@ Examples:
   - `reference` must be formatted as `{path}:{line}`.
   - `path` must be a file path relative to your working directory.
   - `line` must be the first line of the relevant code or text block.
-  - `fixes` must be one of the following:
+  - `fixes` must be one of:
     - If there is at least one proposed fix:
       - Then: "\n\n" and a nested Markdown list of fixes where each fix must have the format `{number}. {description}` (the numbers should start from 1 for each list of fixes).
       - Else: the exact text "none."
@@ -520,7 +566,7 @@ A package that has a remote whose name contains `public` or `pre-public` and end
 ### Guidelines for `subtype`
 
 - Define newtypes as ordinary structs with explicit `From` / `TryFrom` impls.
-- The macro calls that begin with `subtype` (for example, `subtype!` and `subtype_string!`) are legacy APIs that expand to newtypes.
+- The macro calls that begin with `subtype` (for example: `subtype!` and `subtype_string!`) are legacy APIs that expand to newtypes.
   - Don't use them in new code because their checker and preprocessor concepts have been superseded by explicit conversion impls.
 - Use the `SerializeTransparent` derive for a refined newtype that must serialize identically to its inner field while using Serde's `try_from` container attribute for validated deserialization.
 

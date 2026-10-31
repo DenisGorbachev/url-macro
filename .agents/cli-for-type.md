@@ -231,7 +231,8 @@ A subcommand that wraps one target-type method and maps CLI arguments to that me
 
 Requirements:
 
-- Must have a field for each argument of the wrapped method.
+- For each argument of the wrapped method:
+  - Must have a corresponding field.
 - Must call the wrapped method in its `run` implementation.
 - Must return an error type that wraps the method's error and the relevant argument values.
 - Must write the results to stdout efficiently:

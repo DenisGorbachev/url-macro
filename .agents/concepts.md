@@ -2,7 +2,7 @@
 
 ## Concept
 
-A structure with the following fields:
+A structure with fields:
 
 - [Name](#name).
 - [Definition](#definition).
@@ -35,7 +35,7 @@ Preferences:
 
 Allowances:
 
-- May start with an article ("A", "An", or "The").
+- May start with an article ("A", "An", "The").
 - May start with the name of the concept being defined.
 - May be a multiline string.
 
@@ -56,7 +56,9 @@ An optional [listmap](#listmap) of [examples](#example).
 
 Preferences:
 
-- Should be non-exhaustive (if the listmap is exhaustive: move it to "[Constructors](#constructors)").
+- Should be non-exhaustive.
+- If the listmap is exhaustive:
+  - Then: move it to "[Constructors](#constructors)".
 
 Notes:
 
@@ -115,7 +117,8 @@ A [stringtree](#stringtree) that [represents](#representation) a boolean test of
 Notes:
 
 - Corresponds to a predicate in a [dependently typed language](#dependently-typed-language).
-- If an input doesn't pass the requirement test, then it is not an instance of a parent object.
+- If an input doesn't pass the requirement test:
+  - Then: it is not an instance of a parent object.
 
 ## Allowance
 
@@ -154,7 +157,7 @@ A [stringtree](#stringtree) that [represents](#representation) additional inform
 
 ## Method specification
 
-A structure with the following fields:
+A structure with fields:
 
 - [Name](#name).
 - Requirements (optional [listmap](#listmap) of [requirements](#requirement)).
@@ -168,7 +171,7 @@ A structure with the following fields:
 
 ## Concepts document
 
-A Markdown document that presents a list of [concepts](#concept) with the following elements:
+A Markdown document that presents a list of [concepts](#concept) with elements:
 
 - Heading level 1: document name that starts with "Concepts".
 - For each concept:
@@ -177,13 +180,16 @@ A Markdown document that presents a list of [concepts](#concept) with the follow
   - Other fields:
     - Paragraph that is exactly equal to the field name with ":" at the end.
     - Field value:
-      - If the field type has a `to_markdown` method, then call it; otherwise, render the most direct representation (e.g., render strings directly).
+      - If the field type has a `to_markdown` method:
+        - Then: call it.
+        - Else: render the most direct representation (e.g.: render strings directly).
 
 Requirements:
 
 - The order of other fields in the document must match the order of other fields in the definition of [concept](#concept).
 - A field must not appear twice.
-- If the field is empty, it must not be rendered.
+- If the field is empty:
+  - Then: it must not be rendered.
 - Every code item name and single-line code snippet must be rendered in single backticks.
   - Examples: `u64`, `PrintCommand`, `to_markdown`, `impl From<A> for B`.
 
@@ -199,16 +205,18 @@ Requirements:
 - Must have methods:
   - `to_markdown`:
     - Requirements:
-      - If the value is a list: must output a Markdown list.
-      - If the value is a map: must output a Markdown list where each item is rendered as `{key}: {value}`.
+      - If the value is a list:
+        - Then: must output a Markdown list.
+        - Else: must output a Markdown list where each item is rendered as `{key}: {value}`.
 
 Notes:
 
-- If a listmap is a map, its iteration order is the insertion order of keys as they appear in the source text.
+- If a listmap is a map:
+  - Then: its iteration order is the insertion order of keys as they appear in the source text.
 
 ## Stringtree
 
-A stringtree is a structure with the following fields:
+A stringtree is a structure with fields:
 
 - Text (string).
 - Children (a list of stringtrees).
@@ -222,7 +230,7 @@ A stringtree is a structure with the following fields:
 Notes:
 
 - In Markdown, a stringtree is just a nested list.
-- In this document, every "Notes", "Requirements", and "Preferences" section contains examples of stringtrees as nested lists.
+- In this document, every "Notes", "Requirements", "Preferences" section contains examples of stringtrees as nested lists.
 
 ## Representation
 

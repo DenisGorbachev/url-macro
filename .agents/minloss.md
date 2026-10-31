@@ -59,7 +59,7 @@ Examples:
 
 ## High-level specification
 
-A string that can be interpreted as a struct with the following fields:
+A string that can be interpreted as a struct with fields:
 
 - `frontends` (a list of [frontend APIs](#frontend-api)).
 - `backends` (a list of [backend APIs](#backend-api)).
@@ -68,7 +68,7 @@ A string that can be interpreted as a struct with the following fields:
 Examples:
 
 - "A Fjall database CLI for developers":
-  - `frontends` includes the stdio API (stdin, stdout, stderr) and the shell API (e.g., escape codes).
+  - `frontends` includes the stdio API (stdin, stdout, stderr) and the shell API (e.g.: escape codes).
   - `backends` includes the Fjall API and the filesystem API.
   - `audience` includes developers.
 
@@ -161,7 +161,11 @@ A struct that contains configuration parameters.
 Requirements:
 
 - Must have a `Default` impl.
-  - If some parameters can't have a default value, then these parameters must not be in the config struct; they must be accepted as required arguments.
+  - For each parameter:
+    - If it can't have a default value:
+      - Then:
+        - Must not be in the config struct.
+        - Must be accepted as a required argument.
 - Must implement `Serialize` and `Deserialize` from `serde`.
 
 Preferences:
@@ -179,7 +183,8 @@ Preferences:
     - `FileDeleteCommand::run` (the user explicitly types "delete" when invoking this command).
   - Examples of fns that are expected to be reversible:
     - `FileShowCommand::run` (the user does not type any destructive words when invoking this command).
-- If it is irreversible: should be [atomic](#atomic-fn).
+- If it is irreversible:
+  - Then: should be [atomic](#atomic-fn).
 
 ## Internal fn
 
@@ -257,7 +262,8 @@ Requirements:
 - Must enforce validation:
   - Must not have `pub` fields.
   - Must implement `TryFrom` instead of `From` (must not implement `From`).
-  - If it has `#[derive(Deserialize)]`: must have `#[serde(try_from = ...)]` to enforce validation during deserialization.
+  - If it has `#[derive(Deserialize)]`:
+    - Then: must have `#[serde(try_from = ...)]` to enforce validation during deserialization.
 
 Preferences:
 
@@ -318,7 +324,8 @@ A mathematical expectation of the amount of time that it takes the user to reach
 
 Notes:
 
-- If the product is a program: this amount of time includes the execution time of the program itself and also the time it takes to launch it (e.g., type the arguments in a CLI or fill out the form in a GUI).
+- If the product is a program:
+  - Then: this amount of time includes execution time plus launch time (e.g.: typing CLI arguments, filling GUI forms).
 
 TODO:
 

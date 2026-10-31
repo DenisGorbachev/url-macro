@@ -11,9 +11,13 @@ Requirements:
   - Create the temp path in the same parent directory as `path` (suffix: ".new") (the same filesystem is required for an atomic rename).
   - Build the new contents fully inside the temp path.
   - Fsync files and the temp path on a best-effort basis where supported.
-  - If `path` exists, rename it to a backup name in the same parent directory (suffix: ".old").
+  - If `path` exists:
+    - Then: rename it to a backup name in the same parent directory (suffix: ".old").
   - Rename the temp path to `path` (atomic on POSIX and Windows when both paths are on the same filesystem).
-  - If the final rename fails, attempt to restore the backup and keep the temp path for debugging.
+  - If the final rename fails:
+    - Then:
+      - Attempt to restore the backup.
+      - Keep the temp path for debugging.
   - After a successful replacement, remove the backup path.
 
 ## Lore
