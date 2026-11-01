@@ -2,13 +2,12 @@
 
 ## Target type
 
-The type whose methods are exposed through a CLI and invoked by child commands.
+Type whose methods are exposed through a CLI and invoked by child cmds.
 
 Examples:
 
-- Rust example.
+- Rust example:
   - ```rust
-    //! In this example, all types are in the same file. In real code, the types must be in their own files according to project guidelines.
 
     use std::io::stdout;
     use clap::{Parser, Subcommand};
@@ -202,42 +201,39 @@ Examples:
     }
     ```
 
-Requirements:
+Reqs:
 
-- Must be constructible by the parent command.
-- Must expose at least one public method that can be invoked by a child command.
-
-Notes:
-
-- The target type should not parse CLI arguments itself.
-
-## Parent command
-
-The command that constructs the target type and delegates execution to the selected child command.
-
-Requirements:
-
-- Must have fields for all inputs needed to construct the target type.
-- Must construct an instance of the target type.
-- Must pass the constructed instance of the target type to the selected child command.
+- Must be constructible by parent cmd.
+- Must expose at least one public method that can be invoked by a child cmd.
 
 Notes:
 
-- The parent command isolates CLI parsing from domain logic.
+- Target type should not parse CLI args itself.
 
-## Child command
+## Parent cmd
 
-A subcommand that wraps one target-type method and maps CLI arguments to that method.
+Cmd that constructs target type and delegates execution to selected child cmd.
 
-Requirements:
+Reqs:
 
-- Must have a field for each argument of the wrapped method.
-- Must call the wrapped method in its run implementation.
-- Must return an error type that wraps the method error and the relevant argument values.
-- Must write the results to stdout in an efficient way:
-  - Must serialize the results using `serde_json`
-  - Must use `serde_json::to_writer_pretty`
+- Must have fields for all inputs needed to construct target type.
+- Must construct an instance of target type.
+- Must pass constructed instance of target type to selected child cmd.
+
+## Child cmd
+
+A subcmd that wraps one target-type method and maps CLI args to that method.
+
+Reqs:
+
+- For each arg of wrapped method:
+  - Must have a corresponding field.
+- Must call wrapped method in its `run` impl.
+- Must return an error type that wraps method's error and relevant arg values.
+- Must write results to stdout efficiently:
+  - Must serialize results using `serde_json`.
+  - Must use `serde_json::to_writer_pretty`.
 
 Notes:
 
-- Child commands should not construct the target type themselves.
+- Child cmds should not construct target type themselves.
