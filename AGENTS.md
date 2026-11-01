@@ -40,13 +40,9 @@ Write code that minimizes losses:
 
 #### Development workflow
 
-- If user requests followup commits:
-  - Then:
-    - Commit other requested changes first.
-    - For each requested followup:
-      - Make a separate commit.
-- After finishing task, run `mise run agent:on:stop`.
-  - `mise run agent:on:stop` may modify `README.md`, `AGENTS.md`, `Cargo.toml` (this is normal, don't mention it).
+- Before every commit:
+  - Run `mise run agent:on:stop`.
+    - It may auto-fix files (this is normal, don't mention it).
 - Don't maintain backward compatibility.
 - Don't add comments.
 - Don't edit files in `.agents`.
@@ -512,39 +508,6 @@ Examples:
 #### Publishable pkg
 
 A pkg that has a remote whose name contains `public` or `pre-public` and ends with `template`.
-
-### Writing
-
-#### Objectives
-
-- Minimize token count.
-- Prioritize precision, disambiguation, uniformity, technicality over prose fluency.
-
-#### Statements
-
-- End statements with periods.
-- End list labels with colons.
-- Omit `the following`.
-- Omit final `and`, `or` from enumerations.
-- Separate example labels from contents with colons: `for example: ...`, `e.g.: ...`.
-- Prefix example explanations with `Good:`, `Bad:`.
-
-#### Control flow
-
-- If then-branch contains one statement, use `If {condition}, {statement}.`.
-- If both branches contain one statement, use `If {condition}, {statement}; else: {statement}.`.
-- For compound branches, use nested `If:` / `Then:` / `Else:` lists.
-- Encode iteration as:
-  ```markdown
-  - For each {item} in {collection}:
-    - {statement}.
-  ```
-
-#### Compression
-
-- Omit `the` before nouns.
-- Retain indefinite articles (`a`, `an`).
-- Prefer CS shorthands (e.g.: struct, ident, impl, spec, dir, fn, arg, param, config, doc, attr, dep, pref, db, op, pkg, lang, cmd, exec, eval, req, res) (disambiguated by context).
 
 ### Guidelines for `subtype`
 
