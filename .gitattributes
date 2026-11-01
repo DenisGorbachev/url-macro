@@ -12,12 +12,7 @@
 #
 README.md merge=ours
 AGENTS.md merge=ours
-Cargo.lock merge=ours
-
-# Rationale for `Cargo.lock merge=ours`:
-# - Cargo.lock will be equal between branches
-# - New dependencies will be recorded in Cargo.toml, which would trigger a regeneration of Cargo.lock
-# - A vulnerability monitoring tool (e.g. Dependabot) will continue flagging vulnerable deps
+Cargo.lock merge=mergiraf mergiraf.language=TOML
 
 # The following lines require `hidden` diff driver
 # To define `hidden` diff driver, run `git config --global diff.hidden.binary true`
