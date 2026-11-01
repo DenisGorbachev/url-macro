@@ -38,13 +38,9 @@ Write code that minimizes losses:
 
 ## Development workflow
 
-- If user requests followup commits:
-  - Then:
-    - Commit other requested changes first.
-    - For each requested followup:
-      - Make a separate commit.
-- After finishing task, run `mise run agent:on:stop`.
-  - `mise run agent:on:stop` may modify `README.md`, `AGENTS.md`, `Cargo.toml` (this is normal, don't mention it).
+- Before every commit:
+  - Run `mise run agent:on:stop`.
+    - It may auto-fix files (this is normal, don't mention it).
 - Don't maintain backward compatibility.
 - Don't add comments.
 - Don't edit files in `.agents`.
