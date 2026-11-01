@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-mise install
+MISE_LOG_LEVEL=warn mise --cd "$PWD" install
