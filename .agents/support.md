@@ -45,7 +45,6 @@
 
 ## AGENTS.ts
 
-- Must include `.agents/writing.md`.
 - Must preserve `renderXmlFile`, `runAgentDocsList`, `includeAgentDocs`, `includeAllFiles`.
 - If `.agents/project.md` is present, must include it.
 - Must use `cargo metadata` to:
