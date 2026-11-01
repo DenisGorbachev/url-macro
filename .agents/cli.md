@@ -1,18 +1,18 @@
 # CLI guidelines
 
-## Dependencies
+## Deps
 
-- `clap` (features: at least "derive", "env")
-- `tokio` (features: at least "macros", "rt", "rt-multi-thread")
-- `errgonomic`
-- `thiserror`
+- `clap` (features: at least "derive", "env").
+- `tokio` (features: at least "macros", "rt", "rt-multi-thread").
+- `errgonomic`.
+- `thiserror`.
 
 ## File layout and required items
 
 ### File `src/main.rs`
 
-- Must define a `main` entrypoint
-- Must define a `verify_cli` test for the top-level command exactly as in the example below (with `debug_assert`)
+- Must define a `main` entry point.
+- Must define a `verify_cli` test for top-level command exactly as in example below (with `debug_assert`).
 
 Example:
 
@@ -38,10 +38,10 @@ fn verify_cli() {
 
 ### File `src/command.rs`
 
-- Must define a [command-like struct](#command-like-struct) named `Command`
-  - Must have attributes:
-    - `#[command(author, version, about, propagate_version = true, flatten_help = true, disable_help_subcommand = true)]`
-- Must define a [subcommand-like enum](#subcommand-like-enum) named `Subcommand`
+- Must define a [command-like struct](#command-like-struct) named `Command`.
+  - Must have attr:
+    - `#[command(author, version, about, propagate_version = true, flatten_help = true, disable_help_subcommand = true)]`.
+- Must define a [subcommand-like enum](#subcommand-like-enum) named `Subcommand`.
 
 Example:
 
@@ -86,50 +86,50 @@ mod print_command;
 pub use print_command::*;
 ```
 
-## Definitions
+## Defs
 
 ### Command-like struct
 
-A struct that contains fields for CLI arguments.
+A struct that contains fields for CLI args.
 
-- Must have a name that is a concatenation of all command names leading up to and including this command name, and ends with `Command` (see example above)
-- Must have at least the following attributes:
-  - `derive`
+- Must have a name formed by concatenating all command names leading up to and including this command, followed by `Command` (see example above).
+- Must have at least attrs:
+  - `derive`:
     - Must contain at least:
-      - `Parser` (`use clap::Parser`)
-  - `command`
+      - `Parser` (`use clap::Parser`).
+  - `command`:
     - Must contain at least:
-      - `flatten_help = true`
-- Must be attached to a parent module: if it's a top-level command: `src/lib.rs`, else: `src/command.rs`
+      - `flatten_help = true`.
+- If it is a top-level command, must be attached to `src/lib.rs`; else: must be attached to `src/command.rs`.
 - For each field:
-  - If the field has a collection type (e.g. `Vec`), then it must have attribute `num_args = 1..`
-- May contain a `subcommand` field annotated with `#[command(subcommand)]`
-- Must have a `pub async fn run`
-  - Must return a `Result` with `ExitCode`
-  - If it contains a `subcommand` field: must match on `subcommand` and call `run` of each command
+  - If field has a collection type (e.g.: `Vec`), it must have attr `num_args = 1..`.
+- May contain a `subcommand` field annotated with `#[command(subcommand)]`.
+- Must have a `pub async fn run` method.
+  - Must return a `Result` with an `ExitCode` success value.
+  - If struct contains a `subcommand` field, this method must match on `subcommand` and call selected command's `run` method.
 
 Command example:
 
-- Name: `DbDownloadYcombinatorStartupsCommand`
-- File: `src/command/db_download_ycombinator_startups_command.rs` (attached to `src/command.rs`)
-- Shell command: `cargo run -- db download ycombinator-startups`
+- Name: `DbDownloadYcombinatorStartupsCommand`.
+- File: `src/command/db_download_ycombinator_startups_command.rs` (attached to `src/command.rs`).
+- Shell command: `cargo run -- db download ycombinator-startups`.
 
 ### Subcommand-like enum
 
 An enum that contains variants for CLI subcommands.
 
-- Must have a name that is a concatenation of all command names leading up to and including this command name, and ends with `Subcommand` (see example above)
-- Must have at least the following attributes:
-  - `derive`
+- Must have a name formed by concatenating all command names leading up to and including this command, followed by `Subcommand` (see example above).
+- Must have at least attrs:
+  - `derive`:
     - Must contain at least:
-      - `Subcommand` (`use clap::Subcommand`)
-- Must be located in the same file as its parent command struct
-- Each variant must be a tuple variant containing exactly one command
+      - `Subcommand` (`use clap::Subcommand`).
+- Must be located in same file as its parent command struct.
+- Each variant must be a tuple variant containing exactly one command.
 
 Subcommand example:
 
-- Name: `DbDownloadSubcommand`
-- File: `src/cli/db_command/db_download_command.rs` (same file as its parent `DbDownloadCommand`)
+- Name: `DbDownloadSubcommand`.
+- File: `src/cli/db_command/db_download_command.rs` (same file as its parent `DbDownloadCommand`).
 
 ### Proxy command-like struct
 
@@ -137,5 +137,5 @@ A [command-like struct](#command-like-struct) that has a `subcommand` field and 
 
 Proxy command example:
 
-- Name: `DbCommand`
-- File: `src/command/db_command.rs` (attached to `src/command.rs`)
+- Name: `DbCommand`.
+- File: `src/command/db_command.rs` (attached to `src/command.rs`).

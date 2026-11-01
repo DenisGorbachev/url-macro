@@ -58,6 +58,8 @@ fnox_toml="$dir/fnox.toml"
   tomli set --filepath "$fnox_toml" --in-place "providers.keychain.service" "$repo_name"
   tomli set --filepath "$fnox_toml" --in-place "providers.pass.prefix" "$repo_name/"
 
+  # `cargo update` is necessary because the followup `cargo upgrade` runs `cargo update --offline`, which causes it to fail for Git dependencies
+  cargo update
   cargo upgrade --incompatible
   mise run gen:readme
   cargo fmt --all
@@ -65,5 +67,13 @@ fnox_toml="$dir/fnox.toml"
   mise run test
 
   git add .
-  git commit -m "chore: update project details"
+
+  # staged_diff_status is required because git commit fails on unchanged reruns, and git diff errors must propagate.
+  staged_diff_status=0
+  git diff --cached --quiet || staged_diff_status=$?
+  case "$staged_diff_status" in
+  0) ;;
+  1) git commit -m "chore: update project details" ;;
+  *) exit "$staged_diff_status" ;;
+  esac
 )
