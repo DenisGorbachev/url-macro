@@ -153,7 +153,7 @@ const readCargoMetadata = async (): Promise<CargoMetadata> => {
 let cargoMetadataPromise: Promise<CargoMetadata> | undefined
 const getCargoMetadata = () => cargoMetadataPromise ??= readCargoMetadata()
 
-const includeAllCargoFiles = async (relativePaths: string[], headingLevel: number) => {
+const includeAllCargoFilesIfExists = async (relativePaths: string[], headingLevel: number) => {
   const metadata = await getCargoMetadata()
   const fullPaths = new Set(
     selectWorkspacePackages(metadata)
@@ -181,16 +181,17 @@ const parseSemVer = (value: string) => {
 }
 
 const getDirectDependencies = (metadata: CargoMetadata, dependencyName: string) => {
+  if (!metadata.resolve) throw new Error(`cargo metadata is missing the dependency graph required to find '${dependencyName}'`)
   const workspaceMembers = new Set(metadata.workspace_members)
   const matchingPackages = new Set(
     metadata.packages.filter((pkg) => pkg.name === dependencyName).map((pkg) => pkg.id),
   )
   const dependencyPackageIds = new Set(
-    metadata.resolve?.nodes
+    metadata.resolve.nodes
       .filter((node) => workspaceMembers.has(node.id))
       .flatMap((node) => node.deps
         .filter((dependency) => dependency.name === dependencyName || matchingPackages.has(dependency.pkg))
-        .map((dependency) => dependency.pkg)) ?? [],
+        .map((dependency) => dependency.pkg)),
   )
   return metadata.packages.filter((pkg) => dependencyPackageIds.has(pkg.id))
 }
@@ -273,8 +274,8 @@ const parts = (await Promise.all([
       includeFile("mise.toml"),
       includeFile("fnox.toml"),
       includeFileIfExists(join(homePath, ".cargo", "config.toml")),
-      includeAllCargoFiles(["Cargo.toml"], 3),
-      includeAllCargoFiles(["src/lib.rs", "src/main.rs"], 3),
+      includeAllCargoFilesIfExists(["Cargo.toml"], 3),
+      includeAllCargoFilesIfExists(["src/lib.rs", "src/main.rs"], 3),
     ],
   ),
 ])).filter((part): part is string => !!part)
