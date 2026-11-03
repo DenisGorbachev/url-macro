@@ -1,7 +1,3 @@
 [profile.default]
 # integration_tests must be run sequentially (--test-threads 1)
-# slow_tests may be run in parallel
-default-filter = """
-    not test(/integration_tests::/)
-    and not test(/slow_tests::/)
-"""
+default-filter = "not test(/integration_tests::/)"
