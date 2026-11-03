@@ -101,7 +101,7 @@ Write code that minimizes losses:
 
 - `errgonomic` for error handling.
 - `strum` for enum derives.
-- `subtype` for defining newtypes.
+- `subtype` for newtypes.
 - `tempfile` for creating temp dirs or files.
 
 #### Files
@@ -185,7 +185,7 @@ Write code that minimizes losses:
     - Use types from `email_address` crate instead of `String` for email-related values.
     - Use types from `core::num` module that are prefixed with `NonZero` for values that must be non-zero.
   - Search for other existing crates if you need specific types.
-  - If you can't find existing crates, define newtypes using macros from `subtype` crate.
+  - If you can't find existing crates, define newtypes.
 - Every `struct`, `enum`, `union` must be in a separate file (except for error types that implement `Error`).
   - Error types that implement `Error` must be in same files as fns that return them.
 - Prefer attaching types as child modules to `src/types.rs`.
@@ -511,10 +511,10 @@ A pkg that has a remote whose name contains `public` or `pre-public` and ends wi
 
 ### Guidelines for `subtype`
 
-- Define newtypes as ordinary structs with explicit `From` / `TryFrom` impls.
+- Define newtypes as ordinary tuple structs with explicit `From` / `TryFrom` impls.
+- Use `SerializeTransparent` derive from `subtype` for a refined newtype that must serialize identically to its inner field while using Serde's `try_from` container attr for validated deserialization.
 - Macro calls that begin with `subtype` (for example: `subtype!` and `subtype_string!`) are legacy APIs that expand to newtypes.
   - Don't use them in new code because their checker and preprocessor concepts have been superseded by explicit conversion impls.
-- Use `SerializeTransparent` derive for a refined newtype that must serialize identically to its inner field while using Serde's `try_from` container attr for validated deserialization.
 
 ### Error handling
 
