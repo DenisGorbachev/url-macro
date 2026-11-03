@@ -118,7 +118,7 @@ const parsePackageManifest = async (cargoPackage: CargoPackage) => {
 
 const [cargoMetadataOutput, originUrlOutput, workspaceManifest] = await Promise.all([
   $`cargo metadata --locked --format-version 1 --no-deps --manifest-path ${rootManifestPath}`,
-  $`git remote get-url origin`,
+  $`git config --get remote.origin.url`,
   parseTomlFile(rootManifestPath, WorkspaceManifestSchema, "Workspace manifest is invalid"),
 ])
 
