@@ -3,4 +3,4 @@
 
 set -euo pipefail
 
-mise --cd "$MISE_PROJECT_ROOT" run --output interleave gen:readme
+mise run --output interleave gen:readme
