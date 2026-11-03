@@ -40,7 +40,7 @@ run = [{ tasks = ["lint", "test"] }]
 depends = ["test:code", "test:docs"]
 
 [tasks."lint"]
-depends = ["lint:name", "lint:configs", "lint:code", "lint:code:style", "lint:shell", "lint:docs", "lint:reports"]
+depends = ["lint:name", "lint:configs", "lint:code", "lint:code:style", "lint:shell", "lint:docs", "lint:generated", "lint:reports"]
 
 [tasks."lint:name"]
 run = [{ task = "fix:name", args = ["--check"] }]
@@ -66,6 +66,9 @@ run = '''shuck --config "lint.source-paths = ['$HOME']" check --extend-exclude '
 
 [tasks."lint:docs"]
 run = "rumdl check"
+
+[tasks."lint:generated"]
+run = ["./AGENTS.ts", "./README.ts"]
 
 [tasks."test:code"]
 run = "fnox --profile test exec --replace -- cargo nextest run --locked --workspace --all-features --no-tests warn"
@@ -131,10 +134,10 @@ depends = ["fix:name", "fix:configs", "fix:code"]
 run = [{ task = "gen:agents" }]
 
 [tasks."gen:readme"]
-run = "./README.ts"
+run = "./README.ts --fix"
 
 [tasks."gen:agents"]
-run = "./AGENTS.ts"
+run = "./AGENTS.ts --fix"
 
 [tasks."commitlint"]
 run = "commitlint --extends \"$(mise where npm:@commitlint/config-conventional)/node_modules/@commitlint/config-conventional/lib/index.js\""

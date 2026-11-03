@@ -2,6 +2,7 @@
 
 // NOTE: Pin the versions of the packages because the script runs without a lock file
 import {CargoMetadataSchema as CargoMetadataBaseSchema, CargoPackageSchema as CargoPackageBaseSchema, PackageMetadataSchema, ReadmeSchema, selectWorkspacePackages, z,} from "./CargoMetadata.ts"
+import {checkGeneratedFile, fix} from "./GeneratedFile.ts"
 import * as zx from "npm:zx@8.3.2"
 import {ProcessPromise, Shell} from "npm:zx@8.3.2"
 import {assert, assertEquals} from "jsr:@std/assert@1.0.0"
@@ -116,8 +117,8 @@ const parsePackageManifest = async (cargoPackage: CargoPackage) => {
 }
 
 const [cargoMetadataOutput, originUrlOutput, workspaceManifest] = await Promise.all([
-  $`cargo metadata --format-version 1 --no-deps --manifest-path ${rootManifestPath}`,
-  $`git remote get-url origin`,
+  $`cargo metadata --locked --format-version 1 --no-deps --manifest-path ${rootManifestPath}`,
+  $`git config --get remote.origin.url`,
   parseTomlFile(rootManifestPath, WorkspaceManifestSchema, "Workspace manifest is invalid"),
 ])
 
@@ -174,7 +175,7 @@ type RenderedReadme = Record<"destinationPath" | "temporaryPath", string>
 
 const writeTemporaryReadme = async (destinationPath: string, content: string) => {
   const temporaryPath = await Deno.makeTempFile({
-    dir: dirname(destinationPath),
+    ...(fix ? {dir: dirname(destinationPath)} : {}),
     prefix: ".README.",
     suffix: ".tmp",
   })
@@ -198,7 +199,7 @@ const renderPackageReadme = async (cargoPackage: CargoPackage, isPublicGitHubRep
     )
     const docsUrl = `https://docs.rs/${name}`
     const docsUrlPromise = fetch(docsUrl, {method: "HEAD"})
-    const helpPromise = primaryBinTarget ? $`cargo run --quiet --manifest-path ${cargoPackage.manifest_path} --package ${name} --bin ${primaryBinTarget.name} -- --help` : undefined
+    const helpPromise = primaryBinTarget ? $`cargo run --locked --quiet --manifest-path ${cargoPackage.manifest_path} --package ${name} --bin ${primaryBinTarget.name} -- --help` : undefined
 
     const docsUrlHead = await docsUrlPromise
     const badges: Badge[] = []
@@ -312,8 +313,12 @@ try {
 
   const renderedReadmes = results.flatMap((result) => result.status === "fulfilled" ? [result.value] : [])
   assertEquals(new Set(renderedReadmes.map((target) => target.destinationPath)).size, renderedReadmes.length)
-  // There is a minor risk of partial README replacement failure. This is acceptable because files will be regenerated during the next successful run of fix:readme.
-  await Promise.all(renderedReadmes.map(replaceReadme))
+  const updates = await Promise.allSettled(renderedReadmes.map(async (target) => {
+    if (fix) await replaceReadme(target)
+    else await checkGeneratedFile(target.destinationPath, await Deno.readTextFile(target.temporaryPath))
+  }))
+  const errors = updates.flatMap((result) => result.status === "rejected" ? [result.reason] : [])
+  if (errors.length > 0) throw new AggregateError(errors, `Failed to ${fix ? "update" : "check"} ${errors.length} generated README file(s)`)
 } finally {
   await Promise.all([...temporaryPaths].map(removeTemporaryReadme))
 }
