@@ -99,7 +99,7 @@ Write code that minimizes losses:
 
 - `errgonomic` for error handling.
 - `strum` for enum derives.
-- `subtype` for defining newtypes.
+- `subtype` for newtypes.
 - `tempfile` for creating temp dirs or files.
 
 ## Files
@@ -183,7 +183,7 @@ Write code that minimizes losses:
     - Use types from `email_address` crate instead of `String` for email-related values.
     - Use types from `core::num` module that are prefixed with `NonZero` for values that must be non-zero.
   - Search for other existing crates if you need specific types.
-  - If you can't find existing crates, define newtypes using macros from `subtype` crate.
+  - If you can't find existing crates, define newtypes.
 - Every `struct`, `enum`, `union` must be in a separate file (except for error types that implement `Error`).
   - Error types that implement `Error` must be in same files as fns that return them.
 - Prefer attaching types as child modules to `src/types.rs`.
