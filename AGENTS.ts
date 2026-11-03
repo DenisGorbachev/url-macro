@@ -2,6 +2,7 @@
 
 import type {CargoMetadata, CargoPackage} from "./CargoMetadata.ts"
 import {CargoMetadataSchema, PackageMetadataSchema, selectWorkspacePackages} from "./CargoMetadata.ts"
+import {checkGeneratedFile, fix} from "./GeneratedFile.ts"
 import {compare, parse} from "jsr:@std/semver@1.0.0"
 import {stringify} from "jsr:@libs/xml@7.0.3"
 import remarkParse from "npm:remark-parse@11.0.0"
@@ -119,16 +120,11 @@ export const renderXmlFile = (path: string, contents: string) =>
 
 const includeFile = async (path: string, headingLevel = 3) => renderFileContents(path, await Deno.readTextFile(resolvePath(path)), renderPath(path), headingLevel)
 
-const includeCommand = async (command: string, args: string[], headingLevel = 3) => {
-  const stdout = await runCommand(command, args)
-  return renderCodeSection(`\`${renderCommand(command, args)}\``, stdout, "shell", headingLevel)
-}
-
 const renderFileContents = (path: string, contents: string, pathToRender: string, headingLevel: number) => isMarkdownPath(path) ? shiftHeadings(contents, headingLevel) : renderCodeFile(pathToRender, contents, headingLevel)
 
 export const runAgentDocsList = async (): Promise<string[]> => {
   const stdout = await runCommand("mise", ["run", "agent:docs:list"])
-  return stdout ? stdout.split(/\r?\n/).filter((line) => line.length > 0) : []
+  return stdout ? stdout.split(/\r?\n/).filter((line) => line.length > 0).sort() : []
 }
 
 export const includeAgentDocs = async () => {
@@ -142,7 +138,7 @@ ${files.map((file) => `* ${file}`).join("\n")}`.trim()
 }
 
 const readCargoMetadata = async (): Promise<CargoMetadata> => {
-  const stdout = await runCommand("cargo", ["metadata", "--format-version=1"])
+  const stdout = await runCommand("cargo", ["metadata", "--locked", "--format-version=1"])
   try {
     return CargoMetadataSchema.parse(JSON.parse(stdout))
   } catch (cause) {
@@ -263,24 +259,17 @@ const parts = (await Promise.all([
   ),
   includeAgentDocs(),
   renderSection(
-    "## Project info",
-    [
-      includeCommand("git", ["remote"]),
-    ],
-  ),
-  renderSection(
     "## Project files",
     [
       includeFile("mise.toml"),
       includeFile("fnox.toml"),
-      includeFileIfExists(join(homePath, ".cargo", "config.toml")),
       includeAllCargoFilesIfExists(["Cargo.toml"], 3),
       includeAllCargoFilesIfExists(["src/lib.rs", "src/main.rs"], 3),
     ],
   ),
 ])).filter((part): part is string => !!part)
 
-const content = parts.join("\n\n")
+const content = `${parts.join("\n\n")}\n`
 
 const removeTemporaryAgents = async (path: string) => {
   try {
@@ -291,16 +280,15 @@ const removeTemporaryAgents = async (path: string) => {
 }
 
 const destinationPath = join(rootPath, `${basename(sourcePath, extname(sourcePath))}.md`)
-const temporaryPath = await Deno.makeTempFile({
-  dir: rootPath,
-  prefix: ".AGENTS.",
-  suffix: ".tmp",
-})
-try {
-  // The file must be writable by the `agent` user in the sandbox (not read-only)
-  await Deno.writeTextFile(temporaryPath, `${content}\n`)
-  await Deno.chmod(temporaryPath, 0o644)
-  await Deno.rename(temporaryPath, destinationPath)
-} finally {
-  await removeTemporaryAgents(temporaryPath)
+if (fix) {
+  const temporaryPath = await Deno.makeTempFile({dir: rootPath, prefix: ".AGENTS.", suffix: ".tmp"})
+  try {
+    await Deno.writeTextFile(temporaryPath, content)
+    await Deno.chmod(temporaryPath, 0o644)
+    await Deno.rename(temporaryPath, destinationPath)
+  } finally {
+    await removeTemporaryAgents(temporaryPath)
+  }
+} else {
+  await checkGeneratedFile(destinationPath, content)
 }
