@@ -38,9 +38,7 @@ Write code that minimizes losses:
 
 ## Development workflow
 
-- Before every commit:
-  - Run `mise run agent:on:stop`.
-    - It may auto-fix files (this is normal, don't mention it).
+- Run `mise run fix` before every commit.
 - Don't maintain backward compatibility.
 - Don't add comments.
 - Don't edit files in `.agents`.
@@ -93,7 +91,7 @@ Write code that minimizes losses:
 ## Cmds
 
 - Use `fd` and `rg` instead of `find` and `grep`.
-- Set cmd-execution tool call’s timeout param and `yield_time_ms` to at least 300000 ms for cmds: `mise run agent:on:stop`, `cargo build`, `git commit`.
+- Set cmd-execution tool call’s timeout param and `yield_time_ms` to at least 300000 ms for cmds: `mise run fix`, `cargo build`, `git commit`.
 
 ## Recommended crates
 
