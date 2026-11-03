@@ -3,4 +3,4 @@
 set -euo pipefail
 
 # `mise install` must be executed in post-merge.sh, too, because fast-forward merges skip pre-commit.sh
-MISE_LOG_LEVEL=warn mise --cd "$PWD" install
+MISE_LOG_LEVEL=warn mise install
