@@ -71,14 +71,14 @@ run = "rumdl check"
 run = ["./AGENTS.ts", "./README.ts"]
 
 [tasks."test:code"]
-depends = ["test:code:normal", "test:code:integration"]
+depends = ["test:code:regular", "test:code:integration"]
 
-[tasks."test:code:normal"]
-run = "fnox --profile test exec --replace -- cargo nextest run --locked --workspace --all-features --no-tests warn"
+[tasks."test:code:regular"]
+run = "fnox --profile test exec --replace -- cargo nextest run --locked --workspace --all-features --no-tests warn --cargo-quiet --show-progress none --no-input-handler --status-level fail --final-status-level flaky --no-fail-fast"
 
 [tasks."test:code:integration"]
 # `--test-threads 1` because integration tests must be run sequentially
-run = [{ task = "test:code:normal", args = ["--ignore-default-filter", "--max-fail", "1", "--test-threads", "1", "integration_tests::"] }]
+run = [{ task = "test:code:regular", args = ["--ignore-default-filter", "--test-threads", "1", "integration_tests::"] }]
 
 [tasks."test:docs"]
 env = { RUSTDOCFLAGS = "-D warnings" }
