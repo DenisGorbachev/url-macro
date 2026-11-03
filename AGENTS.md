@@ -40,9 +40,7 @@ Write code that minimizes losses:
 
 #### Development workflow
 
-- Before every commit:
-  - Run `mise run agent:on:stop`.
-    - It may auto-fix files (this is normal, don't mention it).
+- Run `mise run fix` before every commit.
 - Don't maintain backward compatibility.
 - Don't add comments.
 - Don't edit files in `.agents`.
@@ -95,7 +93,7 @@ Write code that minimizes losses:
 #### Cmds
 
 - Use `fd` and `rg` instead of `find` and `grep`.
-- Set cmd-execution tool call’s timeout param and `yield_time_ms` to at least 300000 ms for cmds: `mise run agent:on:stop`, `cargo build`, `git commit`.
+- Set cmd-execution tool call’s timeout param and `yield_time_ms` to at least 300000 ms for cmds: `mise run fix`, `cargo build`, `git commit`.
 
 #### Recommended crates
 
@@ -1299,17 +1297,14 @@ run = "rumdl check"
 run = ["./AGENTS.ts", "./README.ts"]
 
 [tasks."test:code"]
+depends = ["test:code:normal", "test:code:integration"]
+
+[tasks."test:code:normal"]
 run = "fnox --profile test exec --replace -- cargo nextest run --locked --workspace --all-features --no-tests warn"
 
 [tasks."test:code:integration"]
-# see also: "agent:test:code:integration"
 # `--test-threads 1` because integration tests must be run sequentially
-run = [{ task = "test:code", args = ["--ignore-default-filter", "--max-fail", "1", "--test-threads", "1", "integration_tests::"] }]
-
-[tasks."test:code:slow"]
-# see also: "agent:test:code:slow"
-# `--test-threads` is omitted because slow tests may be run in parallel
-run = [{ task = "test:code", args = ["--ignore-default-filter", "--max-fail", "1", "slow_tests::"] }]
+run = [{ task = "test:code:normal", args = ["--ignore-default-filter", "--max-fail", "1", "--test-threads", "1", "integration_tests::"] }]
 
 [tasks."test:docs"]
 env = { RUSTDOCFLAGS = "-D warnings" }
@@ -1323,7 +1318,8 @@ run = [{ task = "git:validate-commit" }]
 run = 'mise run --output interleave commitlint -- --edit "$@"'
 
 [tasks."fix"]
-depends = ["fix:code", "fix:aux"]
+depends = ["cargo:validate-config"]
+run = [{ task = "fix:aux" }]
 
 [tasks."fix:aux"]
 depends = ["fix:configs", "fix:docs", "fix:agents", "fix:readme"]
@@ -1374,28 +1370,6 @@ run = "commitlint --extends \"$(mise where npm:@commitlint/config-conventional)/
 run = "[ -d .agents/docs ] && find .agents/docs -type f -print || true"
 output = "interleave"
 quiet = true
-
-[tasks."agent:on:stop"]
-depends = ["cargo:validate-config", "fix:shell"]
-run = [{ task = "fix" }, { task = "agent:test" }]
-
-[tasks."agent:test"]
-depends = ["agent:test:code", "agent:test:code:integration", "agent:test:code:slow", "test:docs"]
-
-[tasks."agent:test:code"]
-# don't include `--fail-fast` because it's better to let the agent see all failures
-# reduce output to save tokens
-run = [{ task = "test:code", args = ["--cargo-quiet", "--show-progress", "none", "--no-input-handler", "--status-level", "fail", "--final-status-level", "flaky", "--no-fail-fast"] }]
-
-[tasks."agent:test:code:integration"]
-# see also: "test:code:integration"
-# `--test-threads 1` because integration tests must be run sequentially
-run = [{ task = "test:code", args = ["--cargo-quiet", "--show-progress", "none", "--no-input-handler", "--status-level", "fail", "--final-status-level", "flaky", "--ignore-default-filter", "--max-fail", "1", "--test-threads", "1", "integration_tests::"] }]
-
-[tasks."agent:test:code:slow"]
-# see also: "test:code:slow"
-# `--test-threads` is omitted because slow tests may be run in parallel
-run = [{ task = "test:code", args = ["--cargo-quiet", "--show-progress", "none", "--no-input-handler", "--status-level", "fail", "--final-status-level", "flaky", "--ignore-default-filter", "--max-fail", "1", "slow_tests::"] }]
 ```
 
 ### fnox.toml
