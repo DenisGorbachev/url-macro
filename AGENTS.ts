@@ -254,7 +254,7 @@ const parts = (await Promise.all([
       includeFileIfPackageProfileIsEnabled("api-client", ".agents/api.md"),
       includeFileIfExists(".agents/gotchas.md"),
       includeFileFromCargoDependencyIfCargoDependencyExists("errgonomic", "internal/guidelines.md"),
-      includeFileFromCargoDependencyIfCargoDependencyExists("errgonomic", "internal/repomix.md", 4),
+      includeFileFromCargoDependencyIfCargoDependencyExists("errgonomic", "src/macros.rs", 4),
     ],
   ),
   includeAgentDocs(),
