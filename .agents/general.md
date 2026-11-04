@@ -437,6 +437,10 @@ A fn marked with `#[test]` or `#[tokio::test]`.
 
 - Prefer short options for cmds used in tool calls.
 
+## mise.toml
+
+- `env` map values should be maps with `default` key (e.g. `PORT = { default = "3000" }`)
+
 ## Cargo.toml
 
 - Don't define pkg features with only a single optional dep (such features are already defined by Cargo automatically).
