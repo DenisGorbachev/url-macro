@@ -314,8 +314,11 @@ try {
   const renderedReadmes = results.flatMap((result) => result.status === "fulfilled" ? [result.value] : [])
   assertEquals(new Set(renderedReadmes.map((target) => target.destinationPath)).size, renderedReadmes.length)
   const updates = await Promise.allSettled(renderedReadmes.map(async (target) => {
-    if (fix) await replaceReadme(target)
-    else await checkGeneratedFile(target.destinationPath, await Deno.readTextFile(target.temporaryPath))
+    const formatted = await $`rumdl check --fix --stdin --stdin-filename ${target.destinationPath} < ${target.temporaryPath}`
+    if (fix) {
+      await Deno.writeTextFile(target.temporaryPath, formatted.stdout)
+      await replaceReadme(target)
+    } else await checkGeneratedFile(target.destinationPath, formatted.stdout)
   }))
   const errors = updates.flatMap((result) => result.status === "rejected" ? [result.reason] : [])
   if (errors.length > 0) throw new AggregateError(errors, `Failed to ${fix ? "update" : "check"} ${errors.length} generated README file(s)`)
