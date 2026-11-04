@@ -441,7 +441,10 @@ A fn marked with `#[test]` or `#[tokio::test]`.
 
 #### mise.toml
 
-- `env` map values should be maps with `default` key (e.g. `PORT = { default = "3000" }`)
+- Each `env` map value:
+  - If it should be overridable by the user:
+    - Then: it must be a map with `default` key (e.g. `PORT = { default = "3000" }`)
+    - Else: it must be a specific value (e.g. `SHUCK_CACHE_DIR = "{{config_root}}/.cache"`)
 
 #### Cargo.toml
 
