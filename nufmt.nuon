@@ -1,0 +1,4 @@
+{
+    # nufmt requires a positive width; the largest Nu integer avoids width-based wrapping.
+    line_length: 9223372036854775807
+}

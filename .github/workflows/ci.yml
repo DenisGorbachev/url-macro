@@ -44,10 +44,9 @@ jobs:
       - run: fnox --profile test ci-redact
         env:
           FNOX_AGE_KEY: ${{ secrets.FNOX_AGE_KEY }}
-      - run: mise run check
+      - run: mise run check:ci
         env:
           FNOX_AGE_KEY: ${{ secrets.FNOX_AGE_KEY }}
-      - run: "cargo hack test --locked --workspace --feature-powerset -- --skip integration_tests::"
       - uses: wagoid/commitlint-github-action@b948419dd99f3fd78a6548d48f94e3df7f6bf3ed # v6.2.1
         with:
           failOnWarnings: true
