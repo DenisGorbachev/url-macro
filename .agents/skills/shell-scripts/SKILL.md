@@ -1,6 +1,6 @@
 ---
 name: shell-scripts
-description: Use when editing or reviewing files that contain shell code. Does not apply to commands used in tool calls.
+description: Use when reading or writing Bash/Zsh scripts. Does not apply to commands used in tool calls.
 ---
 
 # Shell scripts

@@ -10,6 +10,10 @@ deno = "1.46.1"
 fnox = "1.33.1"
 fd = "10.4.2"
 "github:ewhauser/shuck" = "0.2.2"
+"aqua:nushell/nushell" = "0.116.1"
+# nu-lint's dependencies require a newer compiler than this project's toolchain.
+"cargo:nu-lint" = { version = "1.8.0", install_env = { RUSTUP_TOOLCHAIN = "1.99.1" } }
+"github:nushell/nufmt" = "0.1.6"
 "aqua:rvben/rumdl" = "0.3.0"
 "npm:@commitlint/config-conventional" = "19.6.0"
 "npm:@commitlint/cli" = "19.6.0"
@@ -36,11 +40,15 @@ run = "cargo build --workspace"
 depends = ["cargo:validate-config"]
 run = [{ tasks = ["lint", "test"] }]
 
+[tasks."check:ci"]
+depends = ["cargo:validate-config"]
+run = [{ tasks = ["lint", "test:ci"] }]
+
 [tasks."test"]
 depends = ["test:code", "test:docs"]
 
 [tasks."lint"]
-depends = ["lint:name", "lint:configs", "lint:code", "lint:code:style", "lint:shell", "lint:docs", "lint:reports"]
+depends = ["lint:name", "lint:configs", "lint:code", "lint:code:style", "lint:shell", "lint:nu", "lint:docs", "lint:generated", "lint:reports"]
 
 [tasks."lint:name"]
 run = [{ task = "fix:name", args = ["--check"] }]
@@ -67,22 +75,26 @@ run = '''shuck --config "lint.source-paths = ['$HOME']" check --extend-exclude '
 [tasks."lint:docs"]
 run = "rumdl check"
 
+[tasks."lint:generated"]
+run = ["./AGENTS.ts", "./README.ts"]
+
 [tasks."test:code"]
-run = "fnox --profile test exec --replace -- cargo nextest run --locked --workspace --all-features --no-tests warn"
+depends = ["test:code:regular", "test:code:integration"]
+
+[tasks."test:code:regular"]
+run = "fnox --profile test exec --replace -- cargo nextest run --locked --workspace --all-features --no-tests warn --cargo-quiet --show-progress none --no-input-handler --status-level fail --final-status-level flaky --no-fail-fast"
 
 [tasks."test:code:integration"]
-# see also: "agent:test:code:integration"
 # `--test-threads 1` because integration tests must be run sequentially
-run = [{ task = "test:code", args = ["--ignore-default-filter", "--max-fail", "1", "--test-threads", "1", "integration_tests::"] }]
-
-[tasks."test:code:slow"]
-# see also: "agent:test:code:slow"
-# `--test-threads` is omitted because slow tests may be run in parallel
-run = [{ task = "test:code", args = ["--ignore-default-filter", "--max-fail", "1", "slow_tests::"] }]
+run = [{ task = "test:code:regular", args = ["--ignore-default-filter", "--test-threads", "1", "integration_tests::"] }]
 
 [tasks."test:docs"]
 env = { RUSTDOCFLAGS = "-D warnings" }
 run = "cargo test --locked --workspace --doc --all-features --no-fail-fast --quiet"
+
+[tasks."test:ci"]
+env = { RUSTDOCFLAGS = "-D warnings" }
+run = "fnox --profile test exec --replace -- cargo hack test --locked --workspace --feature-powerset --keep-going --no-fail-fast --quiet -- --skip integration_tests::"
 
 [tasks."pre-commit"]
 alias = "pre-merge-commit"
@@ -92,7 +104,8 @@ run = [{ task = "git:validate-commit" }]
 run = 'mise run --output interleave commitlint -- --edit "$@"'
 
 [tasks."fix"]
-depends = ["fix:code", "fix:aux"]
+depends = ["cargo:validate-config"]
+run = [{ task = "fix:aux" }]
 
 [tasks."fix:aux"]
 depends = ["fix:configs", "fix:docs", "fix:agents", "fix:readme"]
@@ -101,7 +114,10 @@ depends = ["fix:configs", "fix:docs", "fix:agents", "fix:readme"]
 depends = ["fix:cargo", "fix:fnox"]
 
 [tasks."fix:code"]
-depends = ["fix:name", "fix:code:style", "fix:shell"]
+depends = ["fix:name", "fix:code:style", "fix:shell", "fix:nu"]
+
+[tasks."fix:nu"]
+run = [{ task = "nu", args = ["nufmt", "--shebang"] }]
 
 [tasks."fix:shell"]
 run = [{ task = "lint:shell", args = ["--fix"] }]
@@ -131,10 +147,10 @@ depends = ["fix:name", "fix:configs", "fix:code"]
 run = [{ task = "gen:agents" }]
 
 [tasks."gen:readme"]
-run = "./README.ts"
+run = "./README.ts --fix"
 
 [tasks."gen:agents"]
-run = "./AGENTS.ts"
+run = "./AGENTS.ts --fix"
 
 [tasks."commitlint"]
 run = "commitlint --extends \"$(mise where npm:@commitlint/config-conventional)/node_modules/@commitlint/config-conventional/lib/index.js\""
@@ -143,25 +159,3 @@ run = "commitlint --extends \"$(mise where npm:@commitlint/config-conventional)/
 run = "[ -d .agents/docs ] && find .agents/docs -type f -print || true"
 output = "interleave"
 quiet = true
-
-[tasks."agent:on:stop"]
-depends = ["cargo:validate-config", "fix:shell"]
-run = [{ task = "fix" }, { task = "agent:test" }]
-
-[tasks."agent:test"]
-depends = ["agent:test:code", "agent:test:code:integration", "agent:test:code:slow", "test:docs"]
-
-[tasks."agent:test:code"]
-# don't include `--fail-fast` because it's better to let the agent see all failures
-# reduce output to save tokens
-run = [{ task = "test:code", args = ["--cargo-quiet", "--show-progress", "none", "--no-input-handler", "--status-level", "fail", "--final-status-level", "flaky", "--no-fail-fast"] }]
-
-[tasks."agent:test:code:integration"]
-# see also: "test:code:integration"
-# `--test-threads 1` because integration tests must be run sequentially
-run = [{ task = "test:code", args = ["--cargo-quiet", "--show-progress", "none", "--no-input-handler", "--status-level", "fail", "--final-status-level", "flaky", "--ignore-default-filter", "--max-fail", "1", "--test-threads", "1", "integration_tests::"] }]
-
-[tasks."agent:test:code:slow"]
-# see also: "test:code:slow"
-# `--test-threads` is omitted because slow tests may be run in parallel
-run = [{ task = "test:code", args = ["--cargo-quiet", "--show-progress", "none", "--no-input-handler", "--status-level", "fail", "--final-status-level", "flaky", "--ignore-default-filter", "--max-fail", "1", "slow_tests::"] }]
