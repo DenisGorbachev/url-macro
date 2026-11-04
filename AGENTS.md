@@ -439,6 +439,13 @@ A fn marked with `#[test]` or `#[tokio::test]`.
 
 - Prefer short options for cmds used in tool calls.
 
+#### mise.toml
+
+- Each `env` map value:
+  - If it should be overridable by the user:
+    - Then: it must be a map with `default` key (e.g. `PORT = { default = "3000" }`)
+    - Else: it must be a specific value (e.g. `SHUCK_CACHE_DIR = "{{config_root}}/.cache"`)
+
 #### Cargo.toml
 
 - Don't define pkg features with only a single optional dep (such features are already defined by Cargo automatically).
@@ -524,6 +531,9 @@ deno = "1.46.1"
 fnox = "1.33.1"
 fd = "10.4.2"
 "github:ewhauser/shuck" = "0.2.2"
+"aqua:nushell/nushell" = "0.116.1"
+"cargo:nu-lint" = "1.8.0"
+"github:nushell/nufmt" = "0.1.6"
 "aqua:rvben/rumdl" = "0.3.0"
 "npm:@commitlint/config-conventional" = "19.6.0"
 "npm:@commitlint/cli" = "19.6.0"
@@ -550,11 +560,15 @@ run = "cargo build --workspace"
 depends = ["cargo:validate-config"]
 run = [{ tasks = ["lint", "test"] }]
 
+[tasks."check:ci"]
+depends = ["cargo:validate-config"]
+run = [{ tasks = ["lint", "test:ci"] }]
+
 [tasks."test"]
 depends = ["test:code", "test:docs"]
 
 [tasks."lint"]
-depends = ["lint:name", "lint:configs", "lint:code", "lint:code:style", "lint:shell", "lint:docs", "lint:generated", "lint:reports"]
+depends = ["lint:name", "lint:configs", "lint:code", "lint:code:style", "lint:shell", "lint:nu", "lint:docs", "lint:generated", "lint:reports"]
 
 [tasks."lint:name"]
 run = [{ task = "fix:name", args = ["--check"] }]
@@ -598,6 +612,10 @@ run = [{ task = "test:code:regular", args = ["--ignore-default-filter", "--test-
 env = { RUSTDOCFLAGS = "-D warnings" }
 run = "cargo test --locked --workspace --doc --all-features --no-fail-fast --quiet"
 
+[tasks."test:ci"]
+env = { RUSTDOCFLAGS = "-D warnings" }
+run = "fnox --profile test exec --replace -- cargo hack test --locked --workspace --feature-powerset --keep-going --no-fail-fast --quiet -- --skip integration_tests::"
+
 [tasks."pre-commit"]
 alias = "pre-merge-commit"
 run = [{ task = "git:validate-commit" }]
@@ -616,7 +634,10 @@ depends = ["fix:configs", "fix:docs", "fix:agents", "fix:readme"]
 depends = ["fix:cargo", "fix:fnox"]
 
 [tasks."fix:code"]
-depends = ["fix:name", "fix:code:style", "fix:shell"]
+depends = ["fix:name", "fix:code:style", "fix:shell", "fix:nu"]
+
+[tasks."fix:nu"]
+run = [{ task = "nu", args = ["nufmt", "--shebang"] }]
 
 [tasks."fix:shell"]
 run = [{ task = "lint:shell", args = ["--fix"] }]
@@ -708,6 +729,8 @@ exclude = [
     "commitlint.config.mjs",
     "fnox.toml",
     "mise.toml",
+    "nu-lint.toml",
+    "nufmt.nuon",
     "rumdl.toml",
     "shuck.toml",
     "rustfmt.toml",

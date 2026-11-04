@@ -437,6 +437,13 @@ A fn marked with `#[test]` or `#[tokio::test]`.
 
 - Prefer short options for cmds used in tool calls.
 
+## mise.toml
+
+- Each `env` map value:
+  - If it should be overridable by the user:
+    - Then: it must be a map with `default` key (e.g. `PORT = { default = "3000" }`)
+    - Else: it must be a specific value (e.g. `SHUCK_CACHE_DIR = "{{config_root}}/.cache"`)
+
 ## Cargo.toml
 
 - Don't define pkg features with only a single optional dep (such features are already defined by Cargo automatically).
