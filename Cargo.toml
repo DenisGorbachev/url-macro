@@ -25,6 +25,8 @@ exclude = [
     "commitlint.config.mjs",
     "fnox.toml",
     "mise.toml",
+    "nu-lint.toml",
+    "nufmt.nuon",
     "rumdl.toml",
     "shuck.toml",
     "rustfmt.toml",

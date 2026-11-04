@@ -1,0 +1,9 @@
+[rules]
+add_doc_comment_exported_fn = "off"
+catch_builtin_error_try = "off"
+explicit_long_flags = "off"
+main_positional_args_docs = "off"
+remove_hat_not_builtin = "off"
+string_may_be_bare = "off"
+unhandled_external_error = "off"
+where_closure_drop_parameter = "off"
