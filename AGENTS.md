@@ -51,7 +51,7 @@ Write code that minimizes losses:
   - Then:
     - Keep them.
     - Don't mention them.
-- If you notice incorrect code, tell me.
+- If you see a code item or spec requirement that is unnecessary or incorrect, tell me.
 - If you have to apply a workaround:
   - Then:
     - Add a comment next to workaround explaining why it is necessary.
@@ -597,7 +597,7 @@ run = '''shuck --config "lint.source-paths = ['$HOME']" check --extend-exclude '
 run = "rumdl check"
 
 [tasks."lint:generated"]
-run = ["./AGENTS.ts", "./README.ts"]
+run = [{ task = "md:gen", args = ["AGENTS.ts"] }, { task = "md:gen", args = ["README.ts"] }]
 
 [tasks."test:code"]
 depends = ["test:code:regular", "test:code:integration"]
@@ -660,7 +660,7 @@ run = "cargo fmt --all"
 [tasks."fix:docs"]
 depends = ["fix:agents", "fix:readme"]
 # use `rumdl check --fix` instead of `rumdl fmt` because `rumdl check --fix` exits with 1 if errors remain (since v0.1.0)
-run = "rumdl check --fix"
+run = [{ task = "lint:docs", args = ["--fix"] }]
 
 [tasks."fix:agents"]
 # "fix:agents" depends on "fix:code" because it reads the code files
@@ -668,10 +668,10 @@ depends = ["fix:name", "fix:configs", "fix:code"]
 run = [{ task = "gen:agents" }]
 
 [tasks."gen:readme"]
-run = "./README.ts --fix"
+run = [{ task = "md:gen", args = ["README.ts", "--fix"] }]
 
 [tasks."gen:agents"]
-run = "./AGENTS.ts --fix"
+run = [{ task = "md:gen", args = ["AGENTS.ts", "--fix"] }]
 
 [tasks."commitlint"]
 run = "commitlint --extends \"$(mise where npm:@commitlint/config-conventional)/node_modules/@commitlint/config-conventional/lib/index.js\""
@@ -721,7 +721,6 @@ exclude = [
     "specs",
     "AGENTS.ts",
     "CargoMetadata.ts",
-    "GeneratedFile.ts",
     "README.ts",
     "AGENTS*.md",
     "deno.lock",

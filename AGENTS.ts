@@ -1,8 +1,7 @@
-#!/usr/bin/env -S deno run --node-modules-dir=false --allow-read --allow-write --allow-run --allow-env=HOME --no-lock
+#!/usr/bin/env -S deno run --node-modules-dir=false --allow-read --allow-run --allow-env=HOME --no-lock
 
 import type {CargoMetadata, CargoPackage} from "./CargoMetadata.ts"
 import {CargoMetadataSchema, PackageMetadataSchema, selectWorkspacePackages} from "./CargoMetadata.ts"
-import {checkGeneratedFile, fix} from "./GeneratedFile.ts"
 import {compare, parse} from "jsr:@std/semver@1.0.0"
 import {stringify} from "jsr:@libs/xml@7.0.3"
 import remarkParse from "npm:remark-parse@11.0.0"
@@ -134,7 +133,7 @@ export const includeAgentDocs = async () => {
 
 Read the extra docs from the list below if they are relevant to your current task:
 
-${files.map((file) => `* ${file}`).join("\n")}`.trim()
+${files.map((file) => `- ${file}`).join("\n")}`.trim()
 }
 
 const readCargoMetadata = async (): Promise<CargoMetadata> => {
@@ -271,24 +270,5 @@ const parts = (await Promise.all([
 
 const content = `${parts.join("\n\n")}\n`
 
-const removeTemporaryAgents = async (path: string) => {
-  try {
-    await Deno.remove(path)
-  } catch (error) {
-    if (!(error instanceof Deno.errors.NotFound)) throw error
-  }
-}
-
-const destinationPath = join(rootPath, `${basename(sourcePath, extname(sourcePath))}.md`)
-if (fix) {
-  const temporaryPath = await Deno.makeTempFile({dir: rootPath, prefix: ".AGENTS.", suffix: ".tmp"})
-  try {
-    await Deno.writeTextFile(temporaryPath, content)
-    await Deno.chmod(temporaryPath, 0o644)
-    await Deno.rename(temporaryPath, destinationPath)
-  } finally {
-    await removeTemporaryAgents(temporaryPath)
-  }
-} else {
-  await checkGeneratedFile(destinationPath, content)
-}
+const path = join(rootPath, `${basename(sourcePath, extname(sourcePath))}.md`)
+console.log(JSON.stringify([{path, content}]))
