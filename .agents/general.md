@@ -49,7 +49,7 @@ Write code that minimizes losses:
   - Then:
     - Keep them.
     - Don't mention them.
-- If you notice incorrect code, tell me.
+- If you see a code item or spec requirement that is unnecessary or incorrect, tell me.
 - If you have to apply a workaround:
   - Then:
     - Add a comment next to workaround explaining why it is necessary.
