@@ -8,7 +8,7 @@ def main [
     let scratch = (mktemp --directory)
     try {
         let outputs: table<path: string, content: string> = (
-            with-env {MD_GEN_TMP_DIR: $scratch} { ^$generator } | from json
+            with-env {TMPDIR: $scratch} { ^$generator } | from json
         )
         let outputs = ($outputs | each {|output|
             let destination = $output.path | path expand
