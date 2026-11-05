@@ -1306,7 +1306,7 @@ run = "cargo fmt --all -- --check"
 run = '''shuck --config "lint.source-paths = ['$HOME']" check --extend-exclude '*.local.*' .'''
 
 [tasks."lint:docs"]
-run = "rumdl check --config rumdl.toml"
+run = "rumdl check"
 
 [tasks."lint:generated"]
 run = [{ task = "md:gen", args = ["AGENTS.ts"] }, { task = "md:gen", args = ["README.ts"] }]
