@@ -52,6 +52,9 @@
 - Included paths must be repo-relative and sorted.
 - If a requested path is absent, must skip it.
 - Must preserve Markdown heading shifts and collision-safe lang-tagged code fences.
+- Must rebase relative Markdown link and image destinations to repo root when source and normalized target paths are inside repo.
+- Must preserve link labels, titles, query strings, fragments, unrelated Markdown formatting.
+- Must leave absolute URLs, absolute paths, fragment-only links, undecodable paths, outside-repo sources and targets unchanged.
 - Must emit a JSON array containing one `{path, content}` record on stdout.
 
 ## .mise/tasks/md/gen.nu
