@@ -68,8 +68,6 @@ Write code that minimizes losses:
 
 ## Review workflow
 
-- For each new commit until explicitly marked reviewed:
-  - Print one `git show` cmd per final reply.
 - Output a full list of [findings](#finding) (not a shortlist).
 - If there are no findings, start your reply with "No findings".
 - For each item in an ordered reply to your review:

@@ -4,10 +4,13 @@ import type {CargoMetadata, CargoPackage} from "./CargoMetadata.ts"
 import {CargoMetadataSchema, PackageMetadataSchema, selectWorkspacePackages} from "./CargoMetadata.ts"
 import {compare, parse} from "jsr:@std/semver@1.0.0"
 import {stringify} from "jsr:@libs/xml@7.0.3"
+import {parse as parseMarkdown, postprocess, preprocess} from "npm:micromark@4.0.2"
+import {decodeString} from "npm:micromark-util-decode-string@2.0.1"
+import {normalizeUri} from "npm:micromark-util-sanitize-uri@2.0.1"
 import remarkParse from "npm:remark-parse@11.0.0"
 import {unified} from "npm:unified@11.0.5"
 import {visit} from "npm:unist-util-visit@5.0.0"
-import {basename, dirname, extname, fromFileUrl, isAbsolute, join, relative, resolve, SEPARATOR} from "jsr:@std/path@1.1.4"
+import {basename, dirname, extname, fromFileUrl, isAbsolute, join, relative, resolve, SEPARATOR, toFileUrl} from "jsr:@std/path@1.1.4"
 
 const sourcePath = fromFileUrl(import.meta.url)
 const rootPath = dirname(sourcePath)
@@ -54,8 +57,54 @@ const fileExists = async (path: string) => {
   }
 }
 
+type MarkdownEdit = {start: number; end: number; replacement: string}
+
+const applyMarkdownEdits = (markdown: string, edits: MarkdownEdit[]) => edits
+  .sort((left, right) => left.start - right.start)
+  .reduceRight((source, edit) => source.slice(0, edit.start) + edit.replacement + source.slice(edit.end), markdown)
+
+const isInsideRoot = (path: string) => {
+  const relativePath = relative(rootPath, path)
+  return !isAbsolute(relativePath) && relativePath !== ".." && !relativePath.startsWith(`..${SEPARATOR}`)
+}
+
+const rebaseLink = (destination: string, sourcePath: string) => {
+  if (!destination || /^(?:#|\/|\\|[a-z][a-z\d+.-]*:)/i.test(destination)) return destination
+  try {
+    const suffixStart = destination.search(/[?#]/)
+    const path = suffixStart < 0 ? destination : destination.slice(0, suffixStart)
+    const suffix = suffixStart < 0 ? "" : destination.slice(suffixStart)
+    const target = new URL(normalizeUri(path), toFileUrl(sourcePath))
+    const targetPath = fromFileUrl(target)
+    if (!isInsideRoot(targetPath)) return destination
+    const relativePath = posixPath(relative(rootPath, targetPath)).split("/").map(encodeURIComponent).join("/") || "."
+    return `${relativePath}${target.pathname.endsWith("/") ? "/" : ""}${normalizeUri(suffix)}`
+  } catch (cause) {
+    if (cause instanceof URIError) return destination
+    throw new Error(`Could not rebase link '${destination}' in '${renderPath(sourcePath)}'`, {cause})
+  }
+}
+
+const rebaseMarkdownLinks = (markdown: string, path: string) => {
+  const fullPath = resolvePath(path)
+  if (!isInsideRoot(fullPath)) return markdown
+  const events = postprocess(parseMarkdown().document().write(preprocess()(markdown, undefined, true)))
+  const edits = events.flatMap(([kind, token]): MarkdownEdit[] => {
+    if (kind !== "enter" || token.type !== "resourceDestinationString" && token.type !== "definitionDestinationString") return []
+    const destination = decodeString(markdown.slice(token.start.offset, token.end.offset))
+    const rebased = rebaseLink(destination, fullPath)
+    if (rebased === destination) return []
+    return [{
+      start: token.start.offset,
+      end: token.end.offset,
+      replacement: rebased.replaceAll("&", "&amp;").replace(/[\\()<>]/g, "\\$&"),
+    }]
+  })
+  return applyMarkdownEdits(markdown, edits)
+}
+
 const shiftHeadings = (markdown: string, headingLevel: number) => {
-  const edits: { start: number; end: number; replacement: string }[] = []
+  const edits: MarkdownEdit[] = []
   visit(unified().use(remarkParse).parse(markdown), "heading", (heading) => {
     const start = heading.position?.start
     const end = heading.position?.end
@@ -72,10 +121,7 @@ const shiftHeadings = (markdown: string, headingLevel: number) => {
     const contents = lines.map((line, index) => index === 0 ? line : line.slice(indentation)).join(" ")
     edits.push({start: start.offset, end: end.offset, replacement: `${"#".repeat(depth)} ${contents}`})
   })
-  return edits.reduceRight(
-    (source, edit) => source.slice(0, edit.start) + edit.replacement + source.slice(edit.end),
-    markdown,
-  ).trimEnd()
+  return applyMarkdownEdits(markdown, edits).trimEnd()
 }
 
 const renderCodeSection = (heading: string, contents: string, languageIdentifier: string, headingLevel: number) => {
@@ -119,7 +165,7 @@ export const renderXmlFile = (path: string, contents: string) =>
 
 const includeFile = async (path: string, headingLevel = 3) => renderFileContents(path, await Deno.readTextFile(resolvePath(path)), renderPath(path), headingLevel)
 
-const renderFileContents = (path: string, contents: string, pathToRender: string, headingLevel: number) => isMarkdownPath(path) ? shiftHeadings(contents, headingLevel) : renderCodeFile(pathToRender, contents, headingLevel)
+const renderFileContents = (path: string, contents: string, pathToRender: string, headingLevel: number) => isMarkdownPath(path) ? shiftHeadings(rebaseMarkdownLinks(contents, path), headingLevel) : renderCodeFile(pathToRender, contents, headingLevel)
 
 export const runAgentDocsList = async (): Promise<string[]> => {
   const stdout = await runCommand("mise", ["run", "agent:docs:list"])
@@ -223,7 +269,7 @@ const includeFileFromCargoDependencyIfCargoDependencyExists = async (dependencyN
   })
   const crateRoot = dirname(cargoPackage.manifest_path)
   const fullPath = join(crateRoot, path)
-  return renderFileContents(path, await Deno.readTextFile(fullPath), `${dependencyName}/${path}`, headingLevel)
+  return renderFileContents(fullPath, await Deno.readTextFile(fullPath), `${dependencyName}/${path}`, headingLevel)
 }
 
 const includeFileIfExists = async (path: string, headingLevel = 3) => {
