@@ -47,13 +47,13 @@ fnox_toml="$dir/fnox.toml"
 
   tomli set --filepath "$cargo_toml" --in-place "workspace.metadata.details.title" ""
   tomli delete --filepath "$cargo_toml" --in-place --if-exists "workspace.package.description"
-  for field in repository homepage; do
-    if [[ -n $repo_url ]]; then
-      tomli set --filepath "$cargo_toml" --in-place "workspace.package.$field" "$repo_url"
-    else
+  if [[ -n $repo_url ]]; then
+    tomli set --filepath "$cargo_toml" --in-place "workspace.package.repository" "$repo_url"
+  else
+    for field in repository homepage; do
       tomli delete --filepath "$cargo_toml" --in-place --if-exists "workspace.package.$field"
-    fi
-  done
+    done
+  fi
 
   tomli set --filepath "$fnox_toml" --in-place "providers.keychain.service" "$repo_name"
   tomli set --filepath "$fnox_toml" --in-place "providers.pass.prefix" "$repo_name/"
