@@ -20,3 +20,8 @@ Cargo.lock merge=mergiraf mergiraf.language=TOML
 README.md diff=hidden
 AGENTS.md diff=hidden
 Cargo.lock diff=hidden
+
+.mise/** linguist-detectable=false
+.repoconf/** linguist-detectable=false
+AGENTS.ts linguist-detectable=false
+CargoMetadata.ts linguist-detectable=false
