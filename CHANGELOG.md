@@ -6,6 +6,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.6](https://github.com/DenisGorbachev/url-macro/compare/v0.2.5...v0.2.6) - 2026-11-11
+
+### Fixed
+
+- validate generated files before commits
+- CLAUDE
+- Cargo
+- shuck
+- install-hooks
+
+### Other
+
+- remove redundant homepages
+- manage generated Markdown with Nushell
+- separate CI tests and validate Nushell
+- refresh errgonomic documentation
+- *(deps)* update errgonomic to 0.5.3
+
 ## [0.2.5](https://github.com/DenisGorbachev/url-macro/compare/v0.2.4...v0.2.5) - 2026-09-06
 
 ### Fixed
