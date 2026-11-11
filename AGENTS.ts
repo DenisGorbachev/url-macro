@@ -60,25 +60,24 @@ const fileExists = async (path: string) => {
 type MarkdownEdit = {start: number; end: number; replacement: string}
 
 const applyMarkdownEdits = (markdown: string, edits: MarkdownEdit[]) => edits
-  .sort((left, right) => left.start - right.start)
   .reduceRight((source, edit) => source.slice(0, edit.start) + edit.replacement + source.slice(edit.end), markdown)
 
-const isInsideRoot = (path: string) => {
+const relativePathInsideRoot = (path: string) => {
   const relativePath = relative(rootPath, path)
-  return !isAbsolute(relativePath) && relativePath !== ".." && !relativePath.startsWith(`..${SEPARATOR}`)
+  return isAbsolute(relativePath) || relativePath === ".." || relativePath.startsWith(`..${SEPARATOR}`) ? undefined : relativePath
 }
 
 const rebaseLink = (destination: string, sourcePath: string) => {
-  if (!destination || /^(?:#|\/|\\|[a-z][a-z\d+.-]*:)/i.test(destination)) return destination
+  if (/^(?:#|\/|\\|[a-z][a-z\d+.-]*:)/i.test(destination)) return destination
   try {
     const suffixStart = destination.search(/[?#]/)
     const path = suffixStart < 0 ? destination : destination.slice(0, suffixStart)
     const suffix = suffixStart < 0 ? "" : destination.slice(suffixStart)
     const target = new URL(normalizeUri(path), toFileUrl(sourcePath))
-    const targetPath = fromFileUrl(target)
-    if (!isInsideRoot(targetPath)) return destination
-    const relativePath = posixPath(relative(rootPath, targetPath)).split("/").map(encodeURIComponent).join("/") || "."
-    return `${relativePath}${target.pathname.endsWith("/") ? "/" : ""}${normalizeUri(suffix)}`
+    const relativePath = relativePathInsideRoot(fromFileUrl(target))
+    if (relativePath === undefined) return destination
+    const encodedPath = posixPath(relativePath).split("/").map(encodeURIComponent).join("/") || "."
+    return `${encodedPath}${target.pathname.endsWith("/") ? "/" : ""}${normalizeUri(suffix)}`
   } catch (cause) {
     if (cause instanceof URIError) return destination
     throw new Error(`Could not rebase link '${destination}' in '${renderPath(sourcePath)}'`, {cause})
@@ -87,7 +86,7 @@ const rebaseLink = (destination: string, sourcePath: string) => {
 
 const rebaseMarkdownLinks = (markdown: string, path: string) => {
   const fullPath = resolvePath(path)
-  if (!isInsideRoot(fullPath)) return markdown
+  if (relativePathInsideRoot(fullPath) === undefined) return markdown
   const events = postprocess(parseMarkdown().document().write(preprocess()(markdown, undefined, true)))
   const edits = events.flatMap(([kind, token]): MarkdownEdit[] => {
     if (kind !== "enter" || token.type !== "resourceDestinationString" && token.type !== "definitionDestinationString") return []
@@ -97,7 +96,7 @@ const rebaseMarkdownLinks = (markdown: string, path: string) => {
     return [{
       start: token.start.offset,
       end: token.end.offset,
-      replacement: rebased.replaceAll("&", "&amp;").replace(/[\\()<>]/g, "\\$&"),
+      replacement: rebased.replaceAll("&", "&amp;").replace(/[()]/g, "\\$&"),
     }]
   })
   return applyMarkdownEdits(markdown, edits)
