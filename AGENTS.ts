@@ -182,7 +182,7 @@ ${files.map((file) => `- ${file}`).join("\n")}`.trim()
 }
 
 const readCargoMetadata = async (): Promise<CargoMetadata> => {
-  const stdout = await runCommand("cargo", ["metadata", "--locked", "--format-version=1"])
+  const stdout = await runCommand("cargo", ["metadata", "--manifest-path", join(rootPath, "Cargo.toml"), "--locked", "--format-version=1"])
   try {
     return CargoMetadataSchema.parse(JSON.parse(stdout))
   } catch (cause) {
