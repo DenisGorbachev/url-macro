@@ -87,33 +87,6 @@ select_clipboard_tool() {
   exit 1
 }
 
-github_repo_from_origin() {
-  local origin=${1:?} repo
-  case "$origin" in
-  git@github.com:*)
-    repo=${origin#git@github.com:}
-    ;;
-  https://github.com/*)
-    repo=${origin#https://github.com/}
-    ;;
-  ssh://git@github.com/*)
-    repo=${origin#ssh://git@github.com/}
-    ;;
-  *)
-    echo "failed to extract a GitHub repository from origin: $origin" >&2
-    return 1
-    ;;
-  esac
-
-  repo=${repo%/}
-  repo=${repo%.git}
-  if [[ ! $repo =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
-    echo "failed to extract owner/repo from GitHub origin: $origin" >&2
-    return 1
-  fi
-  echo "$repo"
-}
-
 assert_safe_fnox_file() {
   local fnox_path=${1:?}
   if [[ -L $fnox_path ]]; then
@@ -292,7 +265,7 @@ if ! config_json=$(read_fnox_config "$fnox_toml"); then
 fi
 refuse_age_ciphertext "$config_json"
 
-if ! name_with_owner=$(github_repo_from_origin "$origin_url"); then
+if ! name_with_owner=$(mise --cd "$project_root" run git:repo-name -- --with-owner); then
   exit 1
 fi
 
