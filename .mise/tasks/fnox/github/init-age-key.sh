@@ -269,7 +269,7 @@ if [[ $repo_dir_name == *@* ]]; then
   exit 0
 fi
 
-if ! origin_url=$(git -C "$project_root" remote get-url origin 2>/dev/null); then
+if ! origin_url=$(git -C "$project_root" config --get remote.origin.url 2>/dev/null); then
   echo "Skipping: $project_root has no origin remote."
   exit 0
 fi

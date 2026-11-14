@@ -5,7 +5,7 @@
 set -euo pipefail
 
 project_root=$(realpath "${MISE_PROJECT_ROOT:-$(pwd)}")
-origin_url=$(git -C "$project_root" remote get-url origin) || {
+origin_url=$(git -C "$project_root" config --get remote.origin.url) || {
   echo "failed to read the origin remote URL for $project_root" >&2
   exit 1
 }
