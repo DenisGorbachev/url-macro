@@ -113,7 +113,9 @@
 
 ## .mise/tasks/git/repo-name.sh
 
+- Must read stored `remote.origin.url`, ignoring URL rewrites.
 - Must derive name from final component of `origin`, removing a trailing slash and `.git`.
+- With `--with-owner`, must output GitHub `owner/repo`, rejecting non-GitHub or malformed URLs.
 - Must use `MISE_PROJECT_ROOT` or current dir and support GitHub, Keybase, equiv URL shapes.
 - If origin is unreadable or result is empty, must fail; else: must output only name.
 
