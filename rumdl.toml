@@ -20,6 +20,7 @@ exclude = [
     "build",
     "target",
     "CHANGELOG.md",
+    "*.local.*",
 ]
 
 # Markdown flavor/dialect
