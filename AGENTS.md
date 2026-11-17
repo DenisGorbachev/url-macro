@@ -40,9 +40,8 @@ Write code that minimizes losses:
 
 #### Development workflow
 
-- Run `mise run fix` before every commit.
-- Don't maintain backward compatibility.
 - Don't add comments.
+- Don't maintain backward compatibility.
 - Don't edit files in `.agents`.
 - Don't run `git diff` or `git status` solely to review your own work at end of a turn.
 - If a later instruction overrides an earlier instruction, follow later instruction.
@@ -67,6 +66,7 @@ Write code that minimizes losses:
   - Then:
     - Evaluate it thoroughly.
     - If you agree, implement it; else: explain why you didn't implement it and brainstorm solutions.
+- Use `fd` and `rg` instead of `find` and `grep`.
 
 #### Review workflow
 
@@ -87,11 +87,6 @@ Write code that minimizes losses:
 #### Subagents
 
 - When spawning a code review subagent: use fresh ctx (not inherited).
-
-#### Cmds
-
-- Use `fd` and `rg` instead of `find` and `grep`.
-- Set cmd-execution tool call’s timeout param and `yield_time_ms` to at least 300000 ms for cmds: `mise run fix`, `cargo build`, `git commit`.
 
 #### Recommended crates
 
@@ -731,6 +726,7 @@ exclude = [
     "shuck.toml",
     "rustfmt.toml",
     "rust-toolchain.toml",
+    "release-plz.toml",
     "skills-lock.json",
     ".yolobox"
 ]
