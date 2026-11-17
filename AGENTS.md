@@ -725,6 +725,7 @@ exclude = [
     "shuck.toml",
     "rustfmt.toml",
     "rust-toolchain.toml",
+    "release-plz.toml",
     "skills-lock.json",
     ".yolobox"
 ]
