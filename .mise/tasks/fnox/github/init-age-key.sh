@@ -251,7 +251,7 @@ if [[ $origin_url != *github.com* ]]; then
   exit 0
 fi
 
-for command_name in awk cmp cp jq mktemp rage-keygen taplo tomli; do
+for command_name in awk cmp cp gh jq mktemp rage-keygen taplo tomli; do
   require_command "$command_name"
 done
 
@@ -265,7 +265,7 @@ if ! config_json=$(read_fnox_config "$fnox_toml"); then
 fi
 refuse_age_ciphertext "$config_json"
 
-if ! name_with_owner=$(mise --cd "$project_root" run git:repo-name -- --with-owner); then
+if ! name_with_owner=$(gh repo view "$origin_url" --json nameWithOwner --jq .nameWithOwner); then
   exit 1
 fi
 

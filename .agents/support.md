@@ -97,6 +97,7 @@
 
 ## .mise/tasks/fnox/github/init-age-key.sh
 
+- Must resolve GitHub owner/repo from stored origin URL through `gh repo view`.
 - May clear clipboard without preserving contents that predate task.
 - May treat write races as acceptable because script is run by a single user who guarantees that other scripts do not run concurrently.
 
@@ -115,7 +116,6 @@
 
 - Must read stored `remote.origin.url`, ignoring URL rewrites.
 - Must derive name from final component of `origin`, removing a trailing slash and `.git`.
-- With `--with-owner`, must output GitHub `owner/repo`, rejecting non-GitHub or malformed URLs.
 - Must use `MISE_PROJECT_ROOT` or current dir and support GitHub, Keybase, equiv URL shapes.
 - If origin is unreadable or result is empty, must fail; else: must output only name.
 
