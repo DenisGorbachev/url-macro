@@ -5,9 +5,6 @@
 def main [
     --vault: string = "Private" # 1Password vault for the repository key.
 ]: nothing -> nothing {
-    let root = (^git -C ($env.MISE_PROJECT_ROOT? | default $env.PWD) rev-parse --show-toplevel | complete)
-    if $root.exit_code != 0 { return }
-    cd ($root.stdout | str trim)
     if ($env.PWD | path basename) =~ "@" { return }
     let origin = (^git config --default "" --get remote.origin.url | str trim)
     if $origin !~ '(?i)^(?:(?:https?|ssh|git)://(?:[^/@]+@)?github\.com(?::\d+)?/|(?:[^/@:]+@)?github\.com:)' { return }
