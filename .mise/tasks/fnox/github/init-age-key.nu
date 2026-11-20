@@ -9,6 +9,7 @@ def main [
     let origin = (^git config --default "" --get remote.origin.url | str trim)
     if $origin !~ '(?i)^(?:(?:https?|ssh|git)://(?:[^/@]+@)?github\.com(?::\d+)?/|(?:[^/@:]+@)?github\.com:)' { return }
 
+    # The caller must ensure fnox.toml is not edited concurrently while this task runs.
     let config = "fnox.toml"
     if ($config | path type) != "file" { fail "Expected a regular fnox.toml file" $config }
     ^./.mise/tasks/fix/fnox.sh
@@ -75,9 +76,6 @@ def update-recipients [config: path, identity: string]: nothing -> nothing {
             }
         }
         migrate-test-secrets $staged $identity
-        if ($config | path type) != "file" or (open --raw $config) != $original {
-            fail "fnox.toml changed during setup. Retry with the updated config." $config
-        }
         if (open --raw $staged) != $original { mv --force $staged $config }
     } finally {
         rm -f $staged
