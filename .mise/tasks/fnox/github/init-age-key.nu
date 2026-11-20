@@ -27,9 +27,7 @@ def main [
 
 def ci-identity [vault: string, repo: record]: nothing -> string {
     let title = $repo.url | str replace --regex '^https://' ""
-    let items = (^op item list --vault $vault --cache=false --format "json" | from json | where {|item|
-        $item.title in [$title $repo.nameWithOwner]
-    })
+    let items = (^op item list --vault $vault --cache=false --format "json" | from json | where title == $title)
     match ($items | length) {
         0 => {
             let secrets = (^gh secret list --repo $repo.url --json "name" | from json)
@@ -54,8 +52,7 @@ def ci-identity [vault: string, repo: record]: nothing -> string {
         }
         1 => {
             let item = $items | first
-            let field = if $item.title == $title { "password" } else { "FNOX_AGE_KEY" }
-            ^op item get $item.id --vault $vault --cache=false --reveal --format "human-readable" --fields $"label=($field)" | str trim
+            ^op item get $item.id --vault $vault --cache=false --reveal --format "human-readable" --fields "label=password" | str trim
         }
         _ => { fail $"Multiple 1Password items match ($title) in ($vault): ($items | get id | str join ', '). Resolve the duplicate titles and retry." $title }
     }
