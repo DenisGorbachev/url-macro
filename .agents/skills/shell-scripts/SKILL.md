@@ -8,6 +8,6 @@ description: Use when reading or writing Bash/Zsh scripts. Does not apply to com
 - Target Bash and Zsh.
 - Choose the best command for the job without checking whether it is installed; the user will install it.
 - Do not hard-wrap lines to enforce a maximum length; the reader uses soft wraps.
-- Prefer short options for `set`, `cd`, `cp`, `mv`, `rm`, `mkdir`, `ls`, `ln`, `chmod`, and `chown`; prefer long options for other commands.
+- Prefer short options for `set`, `cd`, `cp`, `mv`, `rm`, `mkdir`, `chmod`, and `chown`; prefer long options for other commands.
 - Prefer `echo` over `printf`.
 - Use the bundled [log.sh](log.sh) for logging.
