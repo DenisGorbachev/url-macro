@@ -1,46 +1,32 @@
 #!/usr/bin/env -S nu --no-config-file
 #MISE raw=true
-#USAGE flag "--vault <vault>" help="1Password vault for the repository key" default="Private"
 
 def main [
     --vault: string = "Private" # 1Password vault for the repository key.
 ]: nothing -> nothing {
-    if ($env.PWD | path basename) =~ "@" { return }
-    let origin = (^git config --default "" --get remote.origin.url | str trim)
-    if $origin !~ '(?i)^(?:(?:https?|ssh|git)://(?:[^/@]+@)?github\.com(?::\d+)?/|(?:[^/@:]+@)?github\.com:)' { return }
-
-    # The caller must ensure fnox.toml is not edited concurrently while this task runs.
-    let config = "fnox.toml"
-    if ($config | path type) != "file" { fail "Expected a regular fnox.toml file" $config }
-    ^./.mise/tasks/fix/fnox.sh
-    let repo = (^gh repo view $origin --json "nameWithOwner,url" | from json)
-    let identity = (ci-identity $vault $repo.url)
+    let repo_url = ^gh repo view (^git config --get remote.origin.url) --json "url" --jq ".url"
+    let identity = ci-identity $vault $repo_url
     if $identity !~ '^AGE-SECRET-KEY-1[0-9A-Z]+$' {
-        fail "The 1Password field must contain exactly one native age private key." $repo.url
+        fail "The 1Password field must contain exactly one native age private key." $repo_url
     }
-    update-recipients $config $identity
-    $identity | ^gh secret set "FNOX_AGE_KEY" --repo $repo.url
-    print $"Configured FNOX_AGE_KEY for ($repo.nameWithOwner)."
+    update-recipients ("fnox.toml" | path expand --strict) $identity
+    $identity | ^gh secret set "FNOX_AGE_KEY" --repo $repo_url
+    print $"Configured FNOX_AGE_KEY for ($repo_url)."
 }
 
 def ci-identity [vault: string, repo_url: string]: nothing -> string {
     let title = $repo_url | str replace --regex '^https://' ""
-    let ids = (
-        ^op item list --vault $vault --cache=false --format "json"
-        | from json
-        | where title == $title
-        | get id
-    )
+    let ids = ^op item list --vault $vault --cache=false --format "json" | from json | where title == $title | get id
     match $ids {
         [$id] => {
             ^op item get $id --vault $vault --cache=false --reveal --format "human-readable" --fields "label=password" | str trim
         }
         [] => {
-            let names = (^gh secret list --repo $repo_url --json "name" | from json | get name)
+            let names = ^gh secret list --repo $repo_url --json "name" | from json | get name
             if "FNOX_AGE_KEY" in $names {
                 fail $"GitHub already has FNOX_AGE_KEY. Restore its 1Password item in ($vault) before retrying, or explicitly rotate the key." $title
             }
-            let identity = (^rage-keygen | lines | last)
+            let identity = ^rage-keygen | lines | last
             let password = {
                 id: "password"
                 type: "CONCEALED"
@@ -60,10 +46,10 @@ def ci-identity [vault: string, repo_url: string]: nothing -> string {
 }
 
 def update-recipients [config: path, identity: string]: nothing -> nothing {
-    let recipient = $identity | ^rage-keygen -y | str trim
-    let original = (open --raw $config)
+    let recipient = $identity | ^rage-keygen -y
+    let original = open --raw $config
     let settings = $original | from toml
-    let staged = (mktemp --suffix ".local.toml" ".ci-age-XXXXXXXX")
+    let staged = mktemp --tmpdir-path ($config | path dirname) --suffix ".local.toml" ".ci-age-XXXXXXXX"
     try {
         ^cp -p $config $staged
         for provider in ["providers.age.recipients" "profiles.test.providers.age.recipients"] {
@@ -75,49 +61,37 @@ def update-recipients [config: path, identity: string]: nothing -> nothing {
                 } | to toml | ^tomli copy --in-place "recipients" $staged $provider
             }
         }
-        migrate-test-secrets $staged $identity
+        let keys = $settings | pending-keys $identity
+        if ($keys | is-not-empty) {
+            ^fnox --config $staged --profile "test" reencrypt --force --provider "age" -- ...$keys
+            let unreadable = open $staged | pending-keys $identity
+            if ($unreadable | is-not-empty) {
+                fail $"Check the effective test age recipients. The CI key cannot decrypt: ($unreadable | str join ', ')." $config
+            }
+        }
+        # The caller must ensure fnox.toml is not edited concurrently while this task runs.
         if (open --raw $staged) != $original { mv --force $staged $config }
     } finally {
         rm -f $staged
     }
 }
 
-def migrate-test-secrets [staged: path, identity: string]: nothing -> nothing {
-    let settings = (open $staged)
-    let secrets = $settings.profiles?.test?.secrets? | default {}
-    let imports = $settings.import? | default [] | prepend $staged | each { path expand }
-    let scratch = (mktemp --directory)
-    let work = $scratch | path join "migration.toml"
+def pending-keys [identity: string]: record -> list<string> {
+    let entries = $in.profiles?.test?.secrets? | default {} | transpose name secret | where secret.provider? == "age" | where secret.value? != null
+    let ciphertext = mktemp
     try {
-        for entry in ($secrets | transpose name secret) {
-            for field in ["value" "sync.value"] {
-                let binding = if $field == "value" { $entry.secret } else { $entry.secret.sync? }
-                if $binding.provider? != "age" or $binding.value? == null or ($binding.value | can-decrypt $identity $scratch) { continue }
-                let target = $"profiles.test.secrets.($entry.name | to json --raw).($field)"
-                {import: $imports}
-                | insert profiles.test.secrets.CI_AGE_VALUE ($binding | select provider value)
-                | save --force $work
-                try {
-                    ^fnox --config $work --profile "test" --no-defaults --no-daemon reencrypt --force --provider "age" "CI_AGE_VALUE"
-                } catch {|err| fail $"Re-encryption failed for ($target): ($err.msg)" $target }
-                let value = open $work | get profiles.test.secrets.CI_AGE_VALUE.value
-                if not ($value | can-decrypt $identity $scratch) { fail "The CI key cannot decrypt the new ciphertext." $target }
-                ^tomli set --in-place --filepath $staged $target $value
+        $entries | where {|entry|
+            if $entry.secret.sync? != null { return true }
+            $entry.secret.value | decode base64 | save --raw --force $ciphertext
+            try {
+                $identity | ^rage --decrypt --identity "-" $ciphertext out+err> /dev/null
+                false
+            } catch {
+                true
             }
-        }
+        } | get name | collect
     } finally {
-        rm -r $scratch
-    }
-}
-
-def can-decrypt [identity: string, scratch: path]: string -> bool {
-    let ciphertext = $scratch | path join "ciphertext"
-    $in | decode base64 | save --raw --force $ciphertext
-    try {
-        $identity | ^rage --decrypt --identity "-" $ciphertext out+err> /dev/null
-        true
-    } catch {
-        false
+        rm -f $ciphertext
     }
 }
 
