@@ -16,7 +16,7 @@ def main [
     if ($config | path type) != "file" { fail "Expected a regular fnox.toml file" $config }
     ^./.mise/tasks/fix/fnox.sh
     let repo = (^gh repo view $origin --json "nameWithOwner,url" | from json)
-    let identity = (ci-identity $vault $repo)
+    let identity = (ci-identity $vault $repo.url)
     if $identity !~ '^AGE-SECRET-KEY-1[0-9A-Z]+$' {
         fail "The 1Password field must contain exactly one native age private key." $repo.url
     }
@@ -25,36 +25,39 @@ def main [
     print $"Configured FNOX_AGE_KEY for ($repo.nameWithOwner)."
 }
 
-def ci-identity [vault: string, repo: record]: nothing -> string {
-    let title = $repo.url | str replace --regex '^https://' ""
-    let items = (^op item list --vault $vault --cache=false --format "json" | from json | where title == $title)
-    match ($items | length) {
-        0 => {
-            let secrets = (^gh secret list --repo $repo.url --json "name" | from json)
-            if ($secrets | any {|secret| $secret.name == "FNOX_AGE_KEY" }) {
+def ci-identity [vault: string, repo_url: string]: nothing -> string {
+    let title = $repo_url | str replace --regex '^https://' ""
+    let ids = (
+        ^op item list --vault $vault --cache=false --format "json"
+        | from json
+        | where title == $title
+        | get id
+    )
+    match $ids {
+        [$id] => {
+            ^op item get $id --vault $vault --cache=false --reveal --format "human-readable" --fields "label=password" | str trim
+        }
+        [] => {
+            let names = (^gh secret list --repo $repo_url --json "name" | from json | get name)
+            if "FNOX_AGE_KEY" in $names {
                 fail $"GitHub already has FNOX_AGE_KEY. Restore its 1Password item in ($vault) before retrying, or explicitly rotate the key." $title
             }
             let identity = (^rage-keygen | lines | last)
+            let password = {
+                id: "password"
+                type: "CONCEALED"
+                purpose: "PASSWORD"
+                label: "password"
+                value: $identity
+            }
             {
                 title: $title
                 category: "PASSWORD"
-                fields: [
-                    {
-                        id: "password"
-                        type: "CONCEALED"
-                        purpose: "PASSWORD"
-                        label: "password"
-                        value: $identity
-                    }
-                ]
+                fields: [$password]
             } | to json | ^op item create - --vault $vault out> /dev/null
             $identity
         }
-        1 => {
-            let item = $items | first
-            ^op item get $item.id --vault $vault --cache=false --reveal --format "human-readable" --fields "label=password" | str trim
-        }
-        _ => { fail $"Multiple 1Password items match ($title) in ($vault): ($items | get id | str join ', '). Resolve the duplicate titles and retry." $title }
+        _ => { fail $"Multiple 1Password items match ($title) in ($vault): ($ids | str join ', '). Resolve the duplicate titles and retry." $title }
     }
 }
 
@@ -87,12 +90,7 @@ def update-recipients [config: path, identity: string]: nothing -> nothing {
 def migrate-test-secrets [staged: path, identity: string]: nothing -> nothing {
     let settings = (open $staged)
     let secrets = $settings.profiles?.test?.secrets? | default {}
-    let imports = (
-        $settings.import?
-        | default []
-        | each { path expand }
-        | prepend ($staged | path expand)
-    )
+    let imports = $settings.import? | default [] | prepend $staged | each { path expand }
     let scratch = (mktemp --directory)
     let work = $scratch | path join "migration.toml"
     try {
@@ -101,15 +99,9 @@ def migrate-test-secrets [staged: path, identity: string]: nothing -> nothing {
                 let binding = if $field == "value" { $entry.secret } else { $entry.secret.sync? }
                 if $binding.provider? != "age" or $binding.value? == null or ($binding.value | can-decrypt $identity $scratch) { continue }
                 let target = $"profiles.test.secrets.($entry.name | to json --raw).($field)"
-                let secret = {provider: "age", value: $binding.value}
-                {
-                    import: $imports
-                    profiles: {
-                        test: {
-                            secrets: {CI_AGE_VALUE: $secret}
-                        }
-                    }
-                } | to toml | save --force $work
+                {import: $imports}
+                | insert profiles.test.secrets.CI_AGE_VALUE ($binding | select provider value)
+                | save --force $work
                 try {
                     ^fnox --config $work --profile "test" --no-defaults --no-daemon reencrypt --force --provider "age" "CI_AGE_VALUE"
                 } catch {|err| fail $"Re-encryption failed for ($target): ($err.msg)" $target }
