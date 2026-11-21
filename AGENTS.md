@@ -41,7 +41,7 @@ Write code that minimizes losses:
 #### Development workflow
 
 - Don't add comments.
-- Don't maintain backward compatibility.
+- Don't write backwards compatibility code.
 - Don't edit files in `.agents`.
 - Don't run `git diff` or `git status` solely to review your own work at end of a turn.
 - If a later instruction overrides an earlier instruction, follow later instruction.
