@@ -3,41 +3,43 @@
 
 use std/assert
 
+const FNOX_CONFIG = "fnox.toml" | path expand
+
+# Caller must guarantee that 1Password vault items are unique by title
 def main [
     --vault: string = "Repos" # 1Password vault for the repository key.
 ]: nothing -> nothing {
-    let config = "fnox.toml" | path expand --strict
-    require-clean-repo $config
+    require-clean-repo
     let repo_url = ^gh repo view (^git config --get remote.origin.url) --json "url" --jq ".url"
     let identity = ci-identity $vault $repo_url
     assert ($identity =~ '^AGE-SECRET-KEY-1[0-9A-Z]+$') $"Expected one native age private key for ($repo_url)."
-    update-config $config $identity
-    let changed = ^git diff --name-only -- $config
-    if ($changed | is-not-empty) { commit-config $config }
+    update-config $identity
+    let changed = ^git diff --name-only -- $FNOX_CONFIG
+    if ($changed | is-not-empty) { commit-config }
     $identity | ^gh secret set "FNOX_AGE_KEY" --repo $repo_url
     print $"Configured FNOX_AGE_KEY for ($repo_url)."
 }
 
-def require-clean-repo [config: path]: nothing -> nothing {
+def require-clean-repo []: nothing -> nothing {
     let status = ^git status --porcelain=v1 --untracked-files=normal --ignore-submodules=none
     assert ($status | is-empty) $"Commit or stash changes before running this task.\n($status)"
-    let tracked = ^git ls-files -v --error-unmatch -- $config "AGENTS.md" "."
+    let tracked = ^git ls-files -v --error-unmatch -- $FNOX_CONFIG "AGENTS.md" "."
     assert ($tracked !~ '(?m)^[a-zS] ') "Clear assume-unchanged and skip-worktree flags before running this task."
 }
 
-def update-config [config: path, identity: string]: nothing -> nothing {
-    ^git diff --exit-code --name-only HEAD -- $config "AGENTS.md"
+def update-config [identity: string]: nothing -> nothing {
+    ^git diff --exit-code --name-only HEAD -- $FNOX_CONFIG "AGENTS.md"
     try {
-        update-recipients $config $identity
-        reencrypt-test-secrets $config $identity
+        update-recipients $identity
+        reencrypt-test-secrets $identity
     } catch {|err|
-        ^git restore --worktree -- $config
+        ^git restore --worktree -- $FNOX_CONFIG
         error make $err
     }
 }
 
-def commit-config [config: path]: nothing -> nothing {
-    let files = [$config "AGENTS.md"]
+def commit-config []: nothing -> nothing {
+    let files = [$FNOX_CONFIG "AGENTS.md"]
     ^git diff --exit-code --name-only HEAD -- "AGENTS.md"
     try {
         ^mise run gen:agents
@@ -112,45 +114,46 @@ def ci-item [vault: string, title: string]: nothing -> oneof<record, nothing> {
 }
 
 def listed-item [vault: string, title: string]: nothing -> oneof<record, nothing> {
-    let ids = listed-item-ids $vault $title
-    if ($ids | is-not-empty) {
-        ^op item get ($ids | first) --vault $vault --format "json" --reveal | from json
+    let id = listed-item-id $vault $title
+    if $id != null {
+        ^op item get $id --vault $vault --format "json" --reveal | from json
     }
 }
 
-def listed-item-ids [vault: string, title: string]: nothing -> list<string> {
-    let ids = ^op item list --vault $vault --format "json" | from json | where title == $title | get id
-    assert (($ids | length) <= 1) $"Resolve duplicate 1Password items for ($title) in ($vault): ($ids | str join ', ')."
-    $ids
+def listed-item-id [vault: string, title: string]: nothing -> oneof<string, nothing> {
+    ^op item list --vault $vault --format "json" | from json | where title == $title | get --optional 0.id
 }
 
-def update-recipients [config: path, identity: string]: nothing -> nothing {
+def update-recipients [identity: string]: nothing -> nothing {
     let recipient = $identity | ^rage-keygen -y
-    $recipient | add-recipient $config "providers.age.recipients"
-    $recipient | add-recipient $config "profiles.test.providers.age.recipients"
+    let settings = open --raw $FNOX_CONFIG | from toml
+    let test_age = $settings.profiles?.test?.providers?.age?
+    if $test_age == null {
+        $settings.providers?.age?.recipients? | add-recipient $recipient "providers.age.recipients"
+    } else {
+        $test_age.recipients? | add-recipient $recipient "profiles.test.providers.age.recipients"
+    }
 }
 
-def add-recipient [config: path, provider: string]: string -> nothing {
-    let recipient = $in
-    let path = $provider | split row "." | into cell-path
-    let existing = open --raw $config | from toml | get --optional $path
+def add-recipient [recipient: string, field: string]: oneof<list<any>, nothing> -> nothing {
+    let existing = $in
     if $existing != null and $recipient not-in $existing {
         {
             recipients: ($existing | append $recipient)
-        } | to toml | ^tomli copy --in-place "recipients" $config $provider
+        } | to toml | ^tomli copy --in-place "recipients" $FNOX_CONFIG $field
     }
 }
 
-def reencrypt-test-secrets [config: path, identity: string]: nothing -> nothing {
-    let keys = pending-keys $config $identity
+def reencrypt-test-secrets [identity: string]: nothing -> nothing {
+    let keys = pending-keys $identity
     if ($keys | is-empty) { return }
-    ^fnox --config $config --profile "test" reencrypt --force --provider "age" -- ...$keys
-    let unreadable = pending-keys $config $identity
-    assert ($unreadable | is-empty) $"Check the test age recipients in ($config). The CI key cannot decrypt: ($unreadable | str join ', ')."
+    ^fnox --config $FNOX_CONFIG --profile "test" reencrypt --force --provider "age" -- ...$keys
+    let unreadable = pending-keys $identity
+    assert ($unreadable | is-empty) $"Check the test age recipients in ($FNOX_CONFIG). The CI key cannot decrypt: ($unreadable | str join ', ')."
 }
 
-def pending-keys [config: path, identity: string]: nothing -> list<string> {
-    let settings = open --raw $config | from toml
+def pending-keys [identity: string]: nothing -> list<string> {
+    let settings = open --raw $FNOX_CONFIG | from toml
     $settings.profiles?.test?.secrets? | default {} | transpose name secret | where {|entry|
         let secret = $entry.secret
         $secret.provider? == "age" and $secret.value? != null and (
