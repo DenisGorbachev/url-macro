@@ -2,10 +2,12 @@
 #MISE raw=true
 
 def main [
-    --vault: string = "Private" # 1Password vault for the repository key.
+    --vault: string = "Repos" # 1Password vault for the repository key.
 ]: nothing -> nothing {
     let status = ^git status --porcelain=v1 --untracked-files=normal --ignore-submodules=none
-    if ($status | is-not-empty) { fail "Commit or stash changes before running this task." $status }
+    if ($status | is-not-empty) {
+        fail "Commit or stash changes before running this task." $status
+    }
     let config = "fnox.toml" | path expand --strict
     let files = [$config "AGENTS.md"]
     let tracked = ^git ls-files -v --error-unmatch -- ...$files "."
