@@ -3,7 +3,7 @@
 
 use std/assert
 
-const FNOX_CONFIG = "fnox.toml" | path expand
+const FNOX_CONFIG = "./fnox.toml"
 
 # Caller must guarantee that 1Password vault items are unique by title
 def main [
@@ -103,25 +103,15 @@ def create-identity [vault: string, title: string]: nothing -> string {
 
 def ci-item [vault: string, title: string]: nothing -> oneof<record, nothing> {
     let lookup = ^op item get $title --vault $vault --format "json" --reveal | complete
-    try {
-        assert ($lookup.exit_code == 0)
-        let item = $lookup.stdout | from json
-        assert ($item.title == $title)
-        $item
-    } catch {
-        listed-item $vault $title
+    if $lookup.exit_code != 0 {
+        let reason = $lookup.stderr | str trim
+        let missing = $"($title | to json --raw) isn't an item in the ($vault | to json --raw) vault."
+        assert ($lookup.exit_code == 1 and $missing in $reason) $"1Password lookup for ($title) in ($vault) exited with ($lookup.exit_code). ($reason)"
+        return null
     }
-}
-
-def listed-item [vault: string, title: string]: nothing -> oneof<record, nothing> {
-    let id = listed-item-id $vault $title
-    if $id != null {
-        ^op item get $id --vault $vault --format "json" --reveal | from json
-    }
-}
-
-def listed-item-id [vault: string, title: string]: nothing -> oneof<string, nothing> {
-    ^op item list --vault $vault --format "json" | from json | where title == $title | get --optional 0.id
+    let item = $lookup.stdout | from json
+    assert ($item.title == $title) $"1Password returned a different title for ($title) in ($vault)."
+    $item
 }
 
 def update-recipients [identity: string]: nothing -> nothing {
