@@ -4,6 +4,7 @@
 use std/assert
 
 const FNOX_CONFIG = "./fnox.toml"
+const AGENTS_MD = "AGENTS.md"
 
 # Caller must guarantee that 1Password vault items are unique by title
 # The ./ prefix disables fnox's parent-directory search during re-encryption.
@@ -24,12 +25,12 @@ def main [
 def require-clean-repo []: nothing -> nothing {
     let status = ^git status --porcelain=v1 --untracked-files=normal --ignore-submodules=none
     assert ($status | is-empty) $"Commit or stash changes before running this task.\n($status)"
-    let tracked = ^git ls-files -v --error-unmatch -- $FNOX_CONFIG "AGENTS.md" "."
+    let tracked = ^git ls-files -v --error-unmatch -- $FNOX_CONFIG $AGENTS_MD "."
     assert ($tracked !~ '(?m)^[a-zS] ') "Clear assume-unchanged and skip-worktree flags before running this task."
 }
 
 def update-config [identity: string]: nothing -> nothing {
-    ^git diff --exit-code --name-only HEAD -- $FNOX_CONFIG "AGENTS.md"
+    ^git diff --exit-code --name-only HEAD -- $FNOX_CONFIG $AGENTS_MD
     try {
         update-recipients $identity
         reencrypt-test-secrets $identity
@@ -40,8 +41,8 @@ def update-config [identity: string]: nothing -> nothing {
 }
 
 def commit-config []: nothing -> nothing {
-    let files = [$FNOX_CONFIG "AGENTS.md"]
-    ^git diff --exit-code --name-only HEAD -- "AGENTS.md"
+    let files = [$FNOX_CONFIG $AGENTS_MD]
+    ^git diff --exit-code --name-only HEAD -- $AGENTS_MD
     try {
         ^mise run gen:agents
     } catch {|err|
