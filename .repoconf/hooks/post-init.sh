@@ -61,8 +61,7 @@ fnox_toml="$dir/fnox.toml"
   # `cargo update` is necessary because the followup `cargo upgrade` runs `cargo update --offline`, which causes it to fail for Git dependencies
   cargo update
   cargo upgrade --incompatible
-  mise run gen:readme
-  cargo fmt --all
+  mise run fix
   mise run build
   mise run test
 
