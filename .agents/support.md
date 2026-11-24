@@ -59,7 +59,7 @@
 
 ## .mise/tasks/md/gen.nu
 
-- Must set `TMPDIR` for generators and remove their temporary files after completion.
+- Must not override generator env (e.g.: `TMPDIR`) because daemons spawned by generators (e.g.: sccache server) outlive the task.
 - Must lint every output through `lint:docs` before checking freshness or replacing destinations.
 - Must stage all outputs beside their destinations before replacing any destination, then remove remaining temp files.
 - Partial replacement failure is acceptable because the next successful generation repairs outputs.
