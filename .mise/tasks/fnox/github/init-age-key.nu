@@ -10,16 +10,13 @@ const AGENTS_MD = "AGENTS.md"
 # The ./ prefix disables fnox's parent-directory search during re-encryption.
 def main [
     --vault: string = "Repos" # 1Password vault for the repository key.
-]: nothing -> nothing {
+]: nothing -> string {
     require-clean-repo
-    let repo_url = ^gh repo view (^git config --get remote.origin.url) --json "url" --jq ".url"
-    let identity = ci-identity $vault $repo_url
-    assert ($identity =~ '^AGE-SECRET-KEY-1[0-9A-Z]+$') $"Expected one native age private key for ($repo_url)."
-    update-config $identity
-    let changed = ^git diff --name-only -- $FNOX_CONFIG
-    if ($changed | is-not-empty) { commit-config }
-    $identity | ^gh secret set "FNOX_AGE_KEY" --repo $repo_url
-    print $"Configured FNOX_AGE_KEY for ($repo_url)."
+    let repo_url = get-github-origin-url
+    let identity = get-or-create-ci-age-identity $vault $repo_url
+    configure-test-age-encryption $identity
+    commit-fnox-config-if-changed
+    $identity | set-github-actions-age-key $repo_url
 }
 
 def require-clean-repo []: nothing -> nothing {
@@ -29,7 +26,26 @@ def require-clean-repo []: nothing -> nothing {
     assert ($tracked !~ '(?m)^[a-zS] ') "Clear assume-unchanged and skip-worktree flags before running this task."
 }
 
-def update-config [identity: string]: nothing -> nothing {
+def get-github-origin-url []: nothing -> string {
+    let origin = ^git config --get remote.origin.url
+    ^gh repo view $origin --json "url" --jq ".url"
+}
+
+def get-or-create-ci-age-identity [vault: string, repo_url: string]: nothing -> string {
+    let title = $repo_url | str replace --regex '^https://' ""
+    let item = ci-item $vault $title
+    let identity = if $item != null {
+        item-password $item
+    } else {
+        let names = ^gh secret list --repo $repo_url --json "name" | from json | get name
+        assert ("FNOX_AGE_KEY" not-in $names) $"GitHub already has FNOX_AGE_KEY. Restore ($title) in ($vault) before retrying, or explicitly rotate the key."
+        create-identity $vault $title
+    }
+    assert ($identity =~ '^AGE-SECRET-KEY-1[0-9A-Z]+$') $"Expected one native age private key for ($repo_url)."
+    $identity
+}
+
+def configure-test-age-encryption [identity: string]: nothing -> nothing {
     ^git diff --exit-code --name-only HEAD -- $FNOX_CONFIG $AGENTS_MD
     try {
         update-recipients $identity
@@ -40,7 +56,9 @@ def update-config [identity: string]: nothing -> nothing {
     }
 }
 
-def commit-config []: nothing -> nothing {
+def commit-fnox-config-if-changed []: nothing -> nothing {
+    let changed = ^git diff --name-only -- $FNOX_CONFIG
+    if ($changed | is-empty) { return }
     let files = [$FNOX_CONFIG $AGENTS_MD]
     ^git diff --exit-code --name-only HEAD -- $AGENTS_MD
     try {
@@ -50,6 +68,11 @@ def commit-config []: nothing -> nothing {
         error make $err
     }
     commit-generated ...$files
+}
+
+def set-github-actions-age-key [repo_url: string]: string -> string {
+    ^gh secret set "FNOX_AGE_KEY" --repo $repo_url
+    $"Configured FNOX_AGE_KEY for ($repo_url)."
 }
 
 def commit-generated [...files: path]: nothing -> nothing {
@@ -67,17 +90,6 @@ def restore-generated [files: list<path>, generated: string]: nothing -> nothing
     if $current.exit_code == 0 and ($current.stdout | str trim) == $generated {
         ^git restore --worktree -- ...$files
     }
-}
-
-def ci-identity [vault: string, repo_url: string]: nothing -> string {
-    let title = $repo_url | str replace --regex '^https://' ""
-    let item = ci-item $vault $title
-    if $item != null {
-        return (item-password $item)
-    }
-    let names = ^gh secret list --repo $repo_url --json "name" | from json | get name
-    assert ("FNOX_AGE_KEY" not-in $names) $"GitHub already has FNOX_AGE_KEY. Restore ($title) in ($vault) before retrying, or explicitly rotate the key."
-    create-identity $vault $title
 }
 
 def item-password [item: record]: nothing -> string {
