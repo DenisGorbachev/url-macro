@@ -6,6 +6,7 @@ use std/assert
 const FNOX_CONFIG = "./fnox.toml"
 
 # Caller must guarantee that 1Password vault items are unique by title
+# The ./ prefix disables fnox's parent-directory search during re-encryption.
 def main [
     --vault: string = "Repos" # 1Password vault for the repository key.
 ]: nothing -> nothing {
