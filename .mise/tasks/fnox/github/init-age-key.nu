@@ -1,22 +1,29 @@
 #!/usr/bin/env -S nu --no-config-file
 #MISE raw=true
+#MISE quiet=true
 
 use std/assert
 
 const FNOX_CONFIG = "./fnox.toml"
 const AGENTS_MD = "AGENTS.md"
 
+alias set-github-actions-age-key = ^gh secret set "FNOX_AGE_KEY" --repo
+
 # Caller must guarantee that 1Password vault items are unique by title
 # The ./ prefix disables fnox's parent-directory search during re-encryption.
 def main [
     --vault: string = "Repos" # 1Password vault for the repository key.
-]: nothing -> string {
+]: nothing -> nothing {
     require-clean-repo
     let repo_url = get-github-origin-url
     let identity = get-or-create-ci-age-identity $vault $repo_url
     configure-test-age-encryption $identity
     commit-fnox-config-if-changed
-    $identity | set-github-actions-age-key $repo_url
+    $identity | set-github-actions-age-key $repo_url | discard-stdout
+}
+
+def discard-stdout []: any -> nothing {
+    ignore --show-errors
 }
 
 def require-clean-repo []: nothing -> nothing {
@@ -62,7 +69,7 @@ def commit-fnox-config-if-changed []: nothing -> nothing {
     let files = [$FNOX_CONFIG $AGENTS_MD]
     ^git diff --exit-code --name-only HEAD -- $AGENTS_MD
     try {
-        ^mise run gen:agents
+        ^mise run --quiet gen:agents
     } catch {|err|
         ^git restore --worktree -- ...$files
         error make $err
@@ -70,15 +77,10 @@ def commit-fnox-config-if-changed []: nothing -> nothing {
     commit-generated ...$files
 }
 
-def set-github-actions-age-key [repo_url: string]: string -> string {
-    ^gh secret set "FNOX_AGE_KEY" --repo $repo_url
-    $"Configured FNOX_AGE_KEY for ($repo_url)."
-}
-
 def commit-generated [...files: path]: nothing -> nothing {
     let generated = ^git hash-object -- ...$files
     try {
-        ^git commit --only --message "chore: configure CI age key" -- ...$files
+        ^git commit --quiet --only --message "chore: configure CI age key" -- ...$files
     } catch {|err|
         restore-generated $files $generated
         error make $err
@@ -111,7 +113,7 @@ def create-identity [vault: string, title: string]: nothing -> string {
         title: $title
         category: "PASSWORD"
         fields: [$password]
-    } | to json | ^op item create - --vault $vault out> /dev/null
+    } | to json | ^op item create - --vault $vault | discard-stdout
     $identity
 }
 
@@ -151,7 +153,7 @@ def add-recipient [recipient: string, field: string]: oneof<list<any>, nothing> 
 def reencrypt-test-secrets [identity: string]: nothing -> nothing {
     let keys = pending-keys $identity
     if ($keys | is-empty) { return }
-    ^fnox --config $FNOX_CONFIG --profile "test" reencrypt --force --provider "age" -- ...$keys
+    ^fnox --config $FNOX_CONFIG --profile "test" reencrypt --force --provider "age" -- ...$keys | discard-stdout
     let unreadable = pending-keys $identity
     assert ($unreadable | is-empty) $"Check the test age recipients in ($FNOX_CONFIG). The CI key cannot decrypt: ($unreadable | str join ', ')."
 }
