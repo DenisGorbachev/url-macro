@@ -20,10 +20,12 @@ cd "$project_root"
 
 # Invoked indirectly by the EXIT trap in `apply_rename`.
 rollback_transaction() {
-  local backup_root=${1:?} status=${2:?} restored=true
+  local backup_root=${1:?} status=${2:?} committed=${3:?} restored=true
   trap - EXIT
   set +e
-  if [[ $status -ne 0 ]]; then
+  # Bash reports `$?` as 0 in an EXIT trap triggered by a signal (e.g. Ctrl+C), so `committed` decides whether to roll back.
+  if [[ $committed != true ]]; then
+    [[ $status -ne 0 ]] || status=1
     while IFS= read -r -d '' source && IFS= read -r -d '' destination; do
       if [[ -e $source ]]; then
         if [[ -e $destination ]] || ! mv "$source" "$destination"; then
@@ -68,7 +70,8 @@ apply_rename() (
   local -a package_dirs=()
   local -a package_dir_destinations=()
   : >"$directory_rollbacks_file"
-  trap 'rollback_transaction "$backup_root" "$?"' EXIT
+  local committed=false
+  trap 'rollback_transaction "$backup_root" "$?" "$committed"' EXIT
 
   jq --raw-output0 '
     [(.workspace_root + "/Cargo.toml"), .packages[].manifest_path]
@@ -141,6 +144,7 @@ apply_rename() (
   if [[ $name_key == workspace.metadata.details.name ]]; then
     tomli set --filepath "$cargo_toml" --in-place "$name_key" "$name_new"
   fi
+  committed=true
 )
 
 check=false
