@@ -247,9 +247,13 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
       .filter((value) => value.length > 0)
       .join("\n\n")
     const temporaryPath = await Deno.makeTempFile({suffix: ".md"})
-    await Deno.writeTextFile(temporaryPath, `${content}\n`)
-    await $`cargo insert-docs crate-into-readme --allow-dirty --link-to-latest --shrink-headings 0 --manifest-path ${cargoPackage.manifest_path} --package ${name} --readme-path ${temporaryPath}`
-    return {path: destinationPath, content: await Deno.readTextFile(temporaryPath)}
+    try {
+      await Deno.writeTextFile(temporaryPath, `${content}\n`)
+      await $`cargo insert-docs crate-into-readme --allow-dirty --link-to-latest --shrink-headings 0 --manifest-path ${cargoPackage.manifest_path} --package ${name} --readme-path ${temporaryPath}`
+      return {path: destinationPath, content: await Deno.readTextFile(temporaryPath)}
+    } finally {
+      await Deno.remove(temporaryPath)
+    }
   } catch (cause) {
     throw new Error(`Failed to render README.md for package '${name}'`, {cause})
   }
