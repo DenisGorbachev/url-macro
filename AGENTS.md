@@ -291,25 +291,6 @@ Write code that minimizes losses:
     /// Bad: caller may have to call `.into()` when passing input arg.
     pub fn foo(input: String) {}
     ```
-- Provide additional flexibility at call sites by accepting `&impl AsRef` or `&mut impl AsMut` (e.g.: both `PathBuf` and `Config` may implement `AsRef<Path>`). For example:
-  - Good:
-    ```rust
-    pub fn bar(input: &mut impl AsMut<String>) {
-        let input = input.as_mut();
-    }
-
-    pub fn baz(input: &impl AsRef<str>) {
-        let input = input.as_ref();
-    }
-    ```
-  - Bad:
-    ```rust
-    /// Bad: caller may have to call `.as_mut()` when passing input arg.
-    pub fn bar(input: &mut String) {}
-
-    /// Bad: caller may have to call `.as_ref()` when passing input arg.
-    pub fn baz(input: &str) {}
-    ```
 - Prefer `.map()` instead of `match` when you need to modify value in `Option` or `Result`. For example:
   - Good:
     ```rust
@@ -533,6 +514,7 @@ fd = "10.4.2"
 "npm:@commitlint/types" = "19.5.0"
 "npm:skills" = "1.5.24"
 "cargo:https://github.com/DenisGorbachev/cargo-insert-docs" = { version = "rev:9bccf15cc367a50d2652b0eaf5da7faf5929c666", crate = "cargo-insert-docs", locked = true }
+"cargo:https://github.com/DenisGorbachev/repotasks" = { version = "rev:ae4408f4f1a8f90ee184539e1f599f50e90eb43e", locked = true }
 "cargo:cargo-hack" = "0.6.33"
 "cargo:cargo-nextest" = "0.9.145"
 "cargo:cargo-expand" = "1.0.114"

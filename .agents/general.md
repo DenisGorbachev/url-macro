@@ -289,25 +289,6 @@ Write code that minimizes losses:
     /// Bad: caller may have to call `.into()` when passing input arg.
     pub fn foo(input: String) {}
     ```
-- Provide additional flexibility at call sites by accepting `&impl AsRef` or `&mut impl AsMut` (e.g.: both `PathBuf` and `Config` may implement `AsRef<Path>`). For example:
-  - Good:
-    ```rust
-    pub fn bar(input: &mut impl AsMut<String>) {
-        let input = input.as_mut();
-    }
-
-    pub fn baz(input: &impl AsRef<str>) {
-        let input = input.as_ref();
-    }
-    ```
-  - Bad:
-    ```rust
-    /// Bad: caller may have to call `.as_mut()` when passing input arg.
-    pub fn bar(input: &mut String) {}
-
-    /// Bad: caller may have to call `.as_ref()` when passing input arg.
-    pub fn baz(input: &str) {}
-    ```
 - Prefer `.map()` instead of `match` when you need to modify value in `Option` or `Result`. For example:
   - Good:
     ```rust
