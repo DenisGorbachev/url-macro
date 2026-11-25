@@ -18,8 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      # repotasks is private, so CI can't fetch it, and CI doesn't run its tasks
-      MISE_DISABLE_TOOLS: cargo:ssh://git@github.com/DenisGorbachev/repotasks.git
+      # CI doesn't run repotasks, so skip compiling it
+      MISE_DISABLE_TOOLS: cargo:https://github.com/DenisGorbachev/repotasks
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
