@@ -95,12 +95,6 @@
 - Must validate that `providers.keychain.service` equals `git:repo-name`.
 - Must not migrate secrets between old and new idents.
 
-## .mise/tasks/fnox/github/init-age-key.sh
-
-- Must resolve GitHub owner/repo from stored origin URL through `gh repo view`.
-- May clear clipboard without preserving contents that predate task.
-- May treat write races as acceptable because script is run by a single user who guarantees that other scripts do not run concurrently.
-
 ## .mise/tasks/fix/cargo.sh
 
 - Must declare `wait_for=["fix:name"]`.
