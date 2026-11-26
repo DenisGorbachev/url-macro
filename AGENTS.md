@@ -72,10 +72,6 @@ Write code that minimizes losses:
 
 - Improve error handling, so that root cause is clearly visible.
 
-#### Subagents
-
-- When spawning a code review subagent: use fresh ctx (not inherited).
-
 #### Recommended crates
 
 - `errgonomic` for error handling.
