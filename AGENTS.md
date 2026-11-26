@@ -68,25 +68,9 @@ Write code that minimizes losses:
     - If you agree, implement it; else: explain why you didn't implement it and brainstorm solutions.
 - Use `fd` and `rg` instead of `find` and `grep`.
 
-#### Review workflow
-
-- Output a full list of [findings](#finding) (not a shortlist).
-- If there are no findings, start your reply with "No findings".
-- For each item in an ordered reply to your review:
-  - If item is "+", reconsider finding, apply best fix.
-    - Else:
-      - If item matches "+ {number}", apply proposed fix {number}.
-        - Else:
-          - If item is "-", don't apply fixes; else: respond normally (keep `ctid` in your response).
-- If no actionable items remain in thread identified by a specific `ctid`, drop this `ctid` from your response.
-
 #### Debugging workflow
 
 - Improve error handling, so that root cause is clearly visible.
-
-#### Subagents
-
-- When spawning a code review subagent: use fresh ctx (not inherited).
 
 #### Recommended crates
 
@@ -445,44 +429,6 @@ A fn marked with `#[test]` or `#[tokio::test]`.
 #### Code style
 
 - Don't enforce a line len limit when writing code, comments, docs.
-
-#### Chat thread id
-
-- Must be a string.
-- Must contain at least 3 characters.
-- Must contain only uppercase characters.
-
-Examples:
-
-- `RVC`.
-- `AKE`.
-- `LMY`.
-
-Notes:
-
-- Should match thread topic.
-
-#### Chat thread id heading
-
-A level-3 Markdown heading that contains only a [chat thread id](#chat-thread-id).
-
-Examples:
-
-- `### RVC`.
-- `### AKE`.
-- `### LMY`.
-
-#### Finding
-
-- Must be formatted as `### {ctid}\n\n[{priority}] {title}. {body} ({references}). Proposed fixes: {fixes}`.
-  - `ctid` must be a [chat thread id](#chat-thread-id).
-  - `priority` must be one of `P0`, `P1`, `P2`, `P3`.
-  - `references` must be a comma-separated list of `reference` values.
-  - `reference` must be formatted as `{path}:{line}`.
-  - `path` must be a file path relative to your working dir.
-  - `line` must be first line of relevant code or text block.
-  - `fixes` must be one of:
-    - If there is at least one proposed fix, "\n\n" and a nested Markdown list of fixes where each fix must have format `{number}. {description}` (numbers should start from 1 for each list of fixes); else: exact text "none."
 
 #### Publishable pkg
 
