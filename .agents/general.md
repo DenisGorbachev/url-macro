@@ -56,14 +56,18 @@ Write code that minimizes losses:
 - If unexpected behavior impedes progress but is not a blocker (for example: domain is unavailable, program is unavailable, available memory or disk space is too low, cmd runs for an unexpectedly long time or consumes an unexpected amount of resources), mention it in your final msg.
 - If task is technically possible but would result in low-quality code:
   - Then:
-    - If there is a clearly better alternative, implement it; else: explain why requested code should not be written.
+    - If there is a clearly better alternative:
+      - Then: implement it.
+      - Else: explain why requested code should not be written.
   - Examples:
     - A task to write `impl From<Foo> for Bar` where `Foo` can't actually be infallibly converted to `Bar` (conversion would require calling `unwrap`, which is bad) — in this case, you should write `impl TryFrom<Foo> for Bar` and reply with "Foo can't be infallibly converted to Bar, so I implemented a fallible conversion instead".
     - A task to write a trait impl that only returns an error — in this case, you should not write trait impl but reply with "trait X can't be implemented for Foo because ..."
 - If a sentence starts with "Idea: ":
   - Then:
     - Evaluate it thoroughly.
-    - If you agree, implement it; else: explain why you didn't implement it and brainstorm solutions.
+    - If you agree:
+      - Then: implement it.
+      - Else: explain why you didn't implement it and brainstorm solutions.
 - Use `fd` and `rg` instead of `find` and `grep`.
 
 ## Debugging workflow
@@ -170,9 +174,13 @@ Write code that minimizes losses:
   - Use `expect` only in exceptional cases where you can prove that it always succeeds, and provide proof as first arg to `expect` (proof must start with "always succeeds because").
 - Prefer streams and iterators:
   - Guidelines for inputs:
-    - If fn uses methods that are available only for a specific collection type, prefer taking a specific collection type as input; else: prefer taking an `impl Stream` or `impl IntoIterator` as input.
+    - If fn uses methods that are available only for a specific collection type:
+      - Then: prefer taking a specific collection type as input.
+      - Else: prefer taking an `impl Stream` or `impl IntoIterator` as input.
   - Guidelines for outputs:
-    - If fn return type is naturally an iterator (for example: fn returns output of a `map` or `filter`), prefer returning an `impl Iterator` as output (there's no need to collect into `Vec`); else: prefer returning a specific collection type as output.
+    - If fn return type is naturally an iterator (for example: fn returns output of a `map` or `filter`):
+      - Then: prefer returning an `impl Iterator` as output (there's no need to collect into `Vec`).
+      - Else: prefer returning a specific collection type as output.
   - Examples:
     - Good:
       ```rust
@@ -238,7 +246,9 @@ Write code that minimizes losses:
         Ok(out)
     }
     ```
-- If fn has a clear receiver (`self`, `&self`, `&mut self`), implement it as an associated fn; else: implement it as a standalone free fn.
+- If fn has a clear receiver (`self`, `&self`, `&mut self`):
+  - Then: implement it as an associated fn.
+  - Else: implement it as a standalone free fn.
 - Add a local `use` statement for enums to minimize code size. For example:
   - Good:
     ```rust
@@ -389,7 +399,9 @@ A fn marked with `#[test]` or `#[tokio::test]`.
   - Use full paths without a leading `::` for foreign types (e.g.: `std::sync::Arc`), except those in standard prelude.
   - Use `$crate` paths for types defined in this crate (e.g.: `$crate::MyType`).
 - If you see similar code in different places, replace similar code with a shared macro.
-- If last arg of a macro arm is variadic (e.g.: `$($item:ident),*`), add a trailing `$(,)?`; else: don't add a trailing `$(,)?`.
+- If last arg of a macro arm is variadic (e.g.: `$($item:ident),*`):
+  - Then: add a trailing `$(,)?`.
+  - Else: don't add a trailing `$(,)?`.
 
 ## Shell
 

@@ -63,7 +63,7 @@ run = [{ task = "fix:cargo", args = ["--check"] }]
 run = [{ task = "fix:fnox" }]
 
 [tasks."lint:code"]
-run = "cargo clippy --locked --workspace --all-targets --all-features -- -D warnings"
+run = "cargo hack clippy --locked --workspace --all-targets --each-feature -- -D warnings"
 
 [tasks."lint:code:style"]
 run = "cargo fmt --all -- --check"
