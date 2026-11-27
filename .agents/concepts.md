@@ -167,7 +167,9 @@ A Markdown doc that presents a list of [concepts](#concept) with elements:
   - Other fields:
     - Paragraph that is exactly equal to field name with ":" at end.
     - Field value:
-      - If field type has a `to_markdown` method, call it; else: render most direct representation (e.g.: render strings directly).
+      - If field type has a `to_markdown` method:
+        - Then: call it.
+        - Else: render most direct representation (e.g.: render strings directly).
 
 Reqs:
 
@@ -189,7 +191,9 @@ Reqs:
 - Must have methods:
   - `to_markdown`:
     - Reqs:
-      - If value is a list, must output a Markdown list; else: must output a Markdown list where each item is rendered as `{key}: {value}`.
+      - If value is a list:
+        - Then: must output a Markdown list.
+        - Else: must output a Markdown list where each item is rendered as `{key}: {value}`.
 
 Notes:
 
