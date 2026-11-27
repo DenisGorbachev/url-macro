@@ -100,7 +100,9 @@ A struct that contains fields for CLI args.
   - `command`:
     - Must contain at least:
       - `flatten_help = true`.
-- If it is a top-level command, must be attached to `src/lib.rs`; else: must be attached to `src/command.rs`.
+- If it is a top-level command:
+  - Then: must be attached to `src/lib.rs`.
+  - Else: must be attached to `src/command.rs`.
 - For each field:
   - If field has a collection type (e.g.: `Vec`), it must have attr `num_args = 1..`.
 - May contain a `subcommand` field annotated with `#[command(subcommand)]`.

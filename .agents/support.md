@@ -111,7 +111,9 @@
 - Must read stored `remote.origin.url`, ignoring URL rewrites.
 - Must derive name from final component of `origin`, removing a trailing slash and `.git`.
 - Must use `MISE_PROJECT_ROOT` or current dir and support GitHub, Keybase, equiv URL shapes.
-- If origin is unreadable or result is empty, must fail; else: must output only name.
+- If origin is unreadable or result is empty:
+  - Then: must fail.
+  - Else: must output only name.
 
 ## .mise/tasks/git/install-hooks.sh
 
@@ -133,14 +135,18 @@
 
 - Must accept only initialized dir and derive names from `origin` without prompting.
 - Must trust repo and install and reshim mise tools.
-- If origin is GitHub, must read repo name, canonical URL with `gh`; else: must use `git:repo-name` without requiring `gh` or setting a repo URL.
+- If origin is GitHub:
+  - Then: must read repo name, canonical URL with `gh`.
+  - Else: must use `git:repo-name` without requiring `gh` or setting a repo URL.
 - Must remove template license files and run `fix:name`.
 - For each pkg discovered by `cargo metadata`:
   - Empty `package.metadata.details.title`.
   - Remove `package.description`.
   - If no repo URL is available, remove direct `repository` and `homepage`.
 - Must always empty `workspace.metadata.details.title` and remove `workspace.package.description`.
-- If a repo URL is available, must set `workspace.package.{repository,homepage}` to it; else: must remove `workspace.package.{repository,homepage}`.
+- If a repo URL is available:
+  - Then: must set `workspace.package.{repository,homepage}` to it.
+  - Else: must remove `workspace.package.{repository,homepage}`.
 - May rely on template root defining workspace fields it updates.
 - Must update fnox idents, regenerate READMEs, build, test, stage, commit.
 

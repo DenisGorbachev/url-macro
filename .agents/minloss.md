@@ -92,7 +92,9 @@ A [ctor](#ctor-of-type-t) that allows callers to set more fields than other ctor
 
 Reqs:
 
-- If it doesn't produce side effects, must be named `new`; else: must be named `create`.
+- If it doesn't produce side effects:
+  - Then: must be named `new`.
+  - Else: must be named `create`.
 
 ## Producing expr of type T
 
